@@ -6,12 +6,12 @@ import { IoGitCompareOutline } from 'react-icons/io5';
 import { MdZoomOutMap } from 'react-icons/md';
 import Tooltip from '@mui/material/Tooltip';
 
-const ProductItem = ({product, customHeight}) => {
+const ProductItem = ({ product, customHeight }) => {
   return (
     <div className="productItem rounded-md w-[100%] overflow-hidden bg-white text-black shadow-lg relative">
       <div className="group imgWrapper overflow-hidden rounded-none relative">
         <Link to={`/product/${product.name}`}>
-          <div className="img h-[150px] md:h-[250px] overflow-hidden" style={{height: customHeight}}>
+          <div className="img h-[150px] md:h-[250px] overflow-hidden" style={{ height: customHeight }}>
             {/* <img
               src={product.imageUrl}
               className="w-full h-full object-cover"
@@ -20,19 +20,15 @@ const ProductItem = ({product, customHeight}) => {
               src={product.imageUrl}
               className="w-full h-full object-cover absolute top-[0px] left-[0px] opacity-0 transition-all duration-1000 group-hover:opacity-100"
             /> */}
-            {Array.isArray(product.images) && product.images.length > 0 ? (
-              product.images.map((image) => (
-                <>
+            {Array.isArray(product?.images) && product?.images?.length > 0 ? (
+              product.images?.map((index, image) => (
+                <div key={index}>
+                  <img src={image.url} alt={image.publicId} className="w-full h-full object-cover" />
                   <img
                     src={image.url}
-                    alt={image.publicId}
-                    className='w-full h-full object-cover'
+                    className="w-full h-full object-cover absolute top-[0px] left-[0px] opacity-0 transition-all duration-1000 group-hover:opacity-100"
                   />
-                  <img
-                  src={image.url}
-                  className="w-full h-full object-cover absolute top-[0px] left-[0px] opacity-0 transition-all duration-1000 group-hover:opacity-100"
-                  />
-                </>
+                </div>
               ))
             ) : (
               <p>No images available</p>
@@ -58,17 +54,17 @@ const ProductItem = ({product, customHeight}) => {
       <div className="info p-3">
         <h6 className="text-[14px]">
           <Link to="/" className="link transition-all">
-            {product.categoryId.type}
+            {product.categoryId?.type}
           </Link>
         </h6>
         <h3 className="text-[16px] title mt-2 font-[500] mb-2">
-          <Link to={`/product/${product._id}`} className="link transition-all">
-            {product.name}
+          <Link to={`/product/${product?._id}`} className="link transition-all">
+            {product?.name}
           </Link>
         </h3>
 
         <div className="flex items-center gap-4">
-          <span className="newPrice text-black text-[18px]">${product.price}</span>
+          <span className="newPrice text-black text-[18px]">${product?.price}</span>
         </div>
       </div>
     </div>

@@ -1,35 +1,30 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { getUserInfo } from '../apis/authServices'
+import { createContext, useContext, useEffect, useState } from 'react';
+import { getUserInfo } from '../apis/authServices';
 
-export const StoreContext = createContext()
+export const StoreContext = createContext();
 
 export const StoreProvider = ({ children }) => {
-    const [userInfo, setUserInfo] = useState(null)
+  const [userInfo, setUserInfo] = useState(null);
 
-    const getInfo = (data) => {
-        setUserInfo(data)
+  const getInfo = (data) => {
+    setUserInfo(data);
+  };
+
+  const clearInfo = () => {
+    setUserInfo(null);
+  };
+
+  const accesstoken = localStorage.getItem('accesstoken');
+
+  useEffect(() => {
+    if (accesstoken) {
+      getUserInfo(accesstoken).then((response) => {
+        setUserInfo(response);
+      });
     }
+  }, [accesstoken]);
 
-    const clearInfo = () => {
-        setUserInfo(null)
-    }
+  return <StoreContext.Provider value={{ userInfo, getInfo, clearInfo }}>{children}</StoreContext.Provider>;
+};
 
-    const accesstoken = localStorage.getItem('accesstoken')
-    console.log(accesstoken)
-
-    useEffect(() => {
-        if(accesstoken) {
-            getUserInfo(accesstoken).then((response) => {
-                setUserInfo(response)
-             })
-        }
-    }, [accesstoken])
-
-    return (
-        <StoreContext.Provider value={{userInfo, getInfo, clearInfo}}>
-            {children}
-        </StoreContext.Provider>
-    )
-}
-
-export const useStoreProvider = () => useContext(StoreContext)
+export const useStoreProvider = () => useContext(StoreContext);

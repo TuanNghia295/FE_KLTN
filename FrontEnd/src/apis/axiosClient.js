@@ -1,7 +1,7 @@
 import axios from 'axios';
 import queryString from 'querystring';
 
-export const baseURL = "http://localhost:3001";
+export const baseURL = 'http://localhost:3001';
 
 if (!baseURL) {
   console.error('⚠️ VITE_APP_BASE_URL is not defined. Check your .env file.');
@@ -18,7 +18,7 @@ const axiosClient = axios.create({
 
 axiosClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     const role = localStorage.getItem('role');
     if (token && role) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -34,7 +34,7 @@ axiosClient.interceptors.request.use(
 );
 
 axiosClient.interceptors.response.use(
-  (response) => response,
+  (response) => response.data,
   async (error) => {
     if (error.response.status === 401) {
       try {

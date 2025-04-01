@@ -1,153 +1,109 @@
 import React, { useEffect, useState } from 'react';
-import HomeSlider from '../../components/HomeSlider';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import ProductsSlider from '../../components/ProductsSlider';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
-import 'swiper/css/navigation';
 import { Pagination, Autoplay } from 'swiper/modules';
-import BlogItem from '../../components/BlogItem';
-import Banner2 from '../../assets/banner/banner2.jpg';
-import Banner3 from '../../assets/banner/banner3.jpg';
 import { Button } from '@mui/material';
 import { Link } from 'react-router-dom';
-import '../Home/style.css'
-// Call API GET PRODUCTS
-import { getAllProducts } from '../../apis/productsService';
+import HomeSlider from '../../components/HomeSlider';
+import ProductsSlider from '../../components/ProductsSlider';
+import BlogItem from '../../components/BlogItem';
 import TabsHomePage from '../../components/TabsHomePage';
+import LoadingComponent from '../../components/LoadingComponent'; // Import LoadingComponent
+import Banner2 from '../../assets/banner/banner2.jpg';
+import Banner3 from '../../assets/banner/banner3.jpg';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import '../Home/style.css';
+import { getAllProducts } from '../../apis/productsService';
+import { useBanner } from '../../services/BannerServices';
 
-export default function Home() {
-  const [listProducts, setListProducts] = useState([])
-    
-  
+// Tách logic lấy số cột responsive
+const getColumns = () => (window.innerWidth < 768 ? 1 : 4);
+
+const Home = () => {
+  const [listProducts, setListProducts] = useState([]);
+  const [columns, setColumns] = useState(getColumns);
+  const { listBanner } = useBanner(); // Sử dụng hook để lấy danh sách banner
+  // Tải danh sách sản phẩm
   useEffect(() => {
-    setListProducts([]);
-    getAllProducts().then((response) => {
-      setListProducts(response.products)
-    })
-  }, [])
+    const fetchProducts = async () => {
+      try {
+        const response = await getAllProducts();
+        setListProducts(response.products || []);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    };
+    fetchProducts();
+  }, []);
 
-  const [value, setValue] = React.useState(0);
-
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
-
-  const getColumns = () => (window.innerWidth < 768 ? 1 : 4);
-  
-  const [columns, setColumns] = useState(getColumns());
-
+  // Xử lý responsive columns
   useEffect(() => {
     const handleResize = () => setColumns(getColumns());
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);  
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
-    <div className="bg-white">
-      <HomeSlider />
+    <div className="bg-white min-h-screen">
+      {/* HomeSlider với LoadingComponent từ chính component */}
+      <div className="relative !min-h-[800px]">
+        <HomeSlider />
+      </div>
 
       <section className="py-5 bg-white">
         <div className="container">
           <div className="flex flex-col justify-center items-center mt-4 mb-5">
-            <h3 className="font-bold text-[16px]">Sabrina ionescu</h3>
+            <h3 className="font-bold text-[16px]">Sabrina Ionescu</h3>
             <h3 className="text-black text-[48px] font-[800] uppercase">Ride Easy</h3>
             <p className="mb-2">That’s the sound of Sabrina Ionescu changing the game.</p>
-            <Link to='/listing'>
-            <Button variant="contained" className="!bg-black !rounded-full">
-              Shop
-            </Button>
+            <Link to="/listing">
+              <Button variant="contained" className="!bg-black !rounded-full">
+                Shop
+              </Button>
             </Link>
           </div>
-          <Link>
-            <img src={Banner3} alt="running woman"></img>
-          </Link>
+          {Array.isArray(listBanner) && listBanner.length > 0 && (
+            <Link to="/listing">
+              <img src={listBanner[4].url} alt={listBanner[4].alt} className="w-full object-cover" />
+            </Link>
+          )}
         </div>
       </section>
-
-      {/* <HomeCartSlider /> */}
 
       <section className="bg-white py-8">
         <div className="container">
-          <div className="flex items-center justify-around">
-            <div className="leftSec w-[60%]">
-              <h2 className="text-[20px] font-[600]">Popular Products</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-[20px] font-[600]">Popular Products</h2>
+            <div className="ml-auto">
+              <TabsHomePage />
             </div>
-
-            {/* <div className='rightSec w-[40%] overflow-x-scroll no-scrollbar flex'>
-              <span>Fashion</span>
-              <span>Fashion</span>
-              <span>Fashion</span>
-              <span>Fashion</span>
-              <span>Fashion</span>
-              <span>Fashion</span>
-              <span>Fashion</span>
-              <span>Fashion</span>
-              <span>Fashion</span>
-            </div> */}
-            <div className='rightSec !ml-auto'>
-              <TabsHomePage/>
-            </div>
-            {/* <div className="rightSec">
-              <Tabs
-                value={value}
-                onChange={handleChange}
-                variant="standard"
-                scrollButtons="block"
-                aria-label="scrollable auto tabs example"
-              >
-                <Tab label="Fashion" />
-                <Tab label="Bags" />
-                <Tab label="Footwear" />
-                <Tab label="Jewellery" />
-              </Tabs>
-            </div> */}
           </div>
-              <ProductsSlider listProducts={listProducts} />
+          {listProducts.length > 0 ? (
+            <ProductsSlider listProducts={listProducts} />
+          ) : (
+            <div className="flex justify-center items-center min-h-[200px]">
+              <LoadingComponent />
+            </div>
+          )}
         </div>
       </section>
-
-      {/* <section className="py-16 bg-white">
-        <div className="container">
-          <div className="freeshipping w-full p-2 border-2 text-white border-none flex items-center justify-between rounded-md bg-gradient-to-r from-orange-500 via-yellow-500 to-red-500">
-            <div className="col1 flex-1 flex items-center text-center">
-              <LiaShippingFastSolid className="text-[40px]" />
-              <span className="font-[600] pl-4 text-[20px] pt-1">FREE SHIPPING</span>
-            </div>
-            <div className="col2 flex">
-              <p className="mb-0 font-[600]  text-[20px]">FREESHIP HO CHI MINH</p>
-            </div>
-          </div>
-
-          <AdsBannerSlider items={4} />
-        </div>
-      </section> */}
-
-      {/* <section className="py-5 bg-white">
-        <div className="container">
-          <h2 className="text-[20px] font-[600]">Latest</h2>
-
-          <ProductsSlider items={4} />
-
-          <AdsBannerSlider items={4} />
-        </div>
-      </section> */}
 
       <section className="py-5 bg-white">
         <div className="container">
           <h2 className="text-[20px] font-[600] mb-4">Don't Miss</h2>
-          <Link>
-            <img src={Banner2} alt="running woman"></img>
-          </Link>
+          {Array.isArray(listBanner) && listBanner.length > 0 && (
+            <Link to="/listing">
+              <img src={listBanner[3].url} alt={listBanner[3].alt} className="w-full object-cover" />
+            </Link>
+          )}
           <div className="flex flex-col justify-center text-center items-center mt-4">
             <h3 className="font-bold text-[16px]">Women’s Air Jordan 4RM</h3>
             <h3 className="text-black text-[48px] font-[800] uppercase">Ride Easy</h3>
             <p className="mb-2">This new take on a classic comes in a comfortable low profile with iconic style.</p>
-            <Link to='/listing'>
-            <Button variant="contained" className="!bg-black !rounded-full">
-              Shop
-            </Button>
+            <Link to="/listing">
+              <Button variant="contained" className="!bg-black !rounded-full">
+                Shop
+              </Button>
             </Link>
           </div>
         </div>
@@ -159,23 +115,18 @@ export default function Home() {
           <Swiper
             slidesPerView={columns}
             spaceBetween={12}
-            className="blogSlider"
             loop={true}
             pagination={{ clickable: true }}
             autoplay={{ delay: 3000 }}
             modules={[Pagination, Autoplay]}
+            className="blogSlider"
             style={{
               '--swiper-pagination-color': '#fff',
               '--swiper-pagination-left': 'auto',
               '--swiper-pagination-right': '8px',
               '--swiper-pagination-bottom': '8px',
               '--swiper-pagination-top': 'auto',
-              '--swiper-pagination-fraction-color': 'inherit',
-              '--swiper-pagination-progressbar-bg-color': 'rgba(0, 0, 0, 0.25)',
-              '--swiper-pagination-progressbar-size': '4px',
               '--swiper-pagination-bullet-size': '8px',
-              '--swiper-pagination-bullet-width': '8px',
-              '--swiper-pagination-bullet-height': '8px',
               '--swiper-pagination-bullet-inactive-color': '#000',
               '--swiper-pagination-bullet-inactive-opacity': '0.2',
               '--swiper-pagination-bullet-opacity': '1',
@@ -183,28 +134,16 @@ export default function Home() {
               '--swiper-pagination-bullet-vertical-gap': '6px',
             }}
           >
-            <SwiperSlide>
-              <BlogItem />
-            </SwiperSlide>
-
-            <SwiperSlide>
-              <BlogItem />
-            </SwiperSlide>
-
-            <SwiperSlide>
-              <BlogItem />
-            </SwiperSlide>
-
-            <SwiperSlide>
-              <BlogItem />
-            </SwiperSlide>
+            {Array.from({ length: 4 }).map((_, index) => (
+              <SwiperSlide key={index}>
+                <BlogItem />
+              </SwiperSlide>
+            ))}
           </Swiper>
         </div>
       </section>
-
-      <br />
-      <br />
-      <br />
     </div>
   );
-}
+};
+
+export default Home;
