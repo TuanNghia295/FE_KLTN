@@ -22,7 +22,7 @@ export const StoreProvider = ({ children }) => {
         setUserInfo(response);
       });
     }
-  }, [accesstoken]);
+  }, [accesstoken, userInfo]);
 
   return <StoreContext.Provider value={{ userInfo, getInfo, clearInfo }}>{children}</StoreContext.Provider>;
 };

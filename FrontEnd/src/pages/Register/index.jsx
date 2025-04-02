@@ -9,9 +9,9 @@ import '../Register/style.css'
 import Banner1 from '../../assets/log-reg/1.jpg'
 import { SiNike } from "react-icons/si";
 
+//Call API
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
-//Call API
 import { useRegister } from '../../apis/authServices';
 
 const Register = () => {
@@ -44,7 +44,6 @@ const Register = () => {
         }
     })
 
-    console.log(formik.errors)
     return (
         <section className='section py-10 xl:py-0'>
             <div className='container-fuild flex xl:bg-white xl:h-screen'>
