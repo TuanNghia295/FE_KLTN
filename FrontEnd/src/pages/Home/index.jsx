@@ -21,6 +21,7 @@ const getColumns = () => (window.innerWidth < 768 ? 1 : 4);
 
 const Home = () => {
   const [listProducts, setListProducts] = useState([]);
+  console.log(listProducts)
   const [columns, setColumns] = useState(getColumns);
   const { listBanner } = useBanner(); // Sử dụng hook để lấy danh sách banner
   // Tải danh sách sản phẩm

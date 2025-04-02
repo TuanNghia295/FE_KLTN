@@ -1,6 +1,38 @@
 import axiosClient from "./axiosClient";
-import Cookies from 'js-cookie'
-import { useStoreProvider } from '../contexts/StoreProvider'
+import { useMutation } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+export const register = async(values) => {
+  const response = await axiosClient.post(`/auth/register`, values)
+
+  return response
+}
+
+export function useRegister() {
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: register,
+    onMutate: () => {
+      console.log("Đang đăng ký...");
+    },
+    onSuccess: () => {
+      toast.success("Tạo tài khoản thành công", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+      navigate("/");
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "Đăng ký thất bại", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+    }
+  });
+}
 
 export const login = async ({ phone, password }) => {
   const response = await axiosClient.post(`/auth/login`, { phone, password }, {

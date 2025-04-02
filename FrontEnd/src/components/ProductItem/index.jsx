@@ -21,9 +21,9 @@ const ProductItem = ({ product, customHeight }) => {
               className="w-full h-full object-cover absolute top-[0px] left-[0px] opacity-0 transition-all duration-1000 group-hover:opacity-100"
             /> */}
             {Array.isArray(product?.images) && product?.images?.length > 0 ? (
-              product.images?.map((index, image) => (
-                <div key={index}>
-                  <img src={image.url} alt={image.publicId} className="w-full h-full object-cover" />
+              product.images?.map((image) => (
+                <div>
+                  <img src={image.url} className="w-full h-full object-cover" />
                   <img
                     src={image.url}
                     className="w-full h-full object-cover absolute top-[0px] left-[0px] opacity-0 transition-all duration-1000 group-hover:opacity-100"
