@@ -6,10 +6,10 @@ export const login = async ({ phone, password }) => {
   const response = await axiosClient.post(`/auth/login`, { phone, password }, {
     withCredentials: true, // Để gửi cookie
   });
+  console.log(response)
 
-  localStorage.setItem("accesstoken", response.data.accessToken);
-
-  return response.data;
+  localStorage.setItem("accesstoken", response.accessToken);
+  return response;
 };
 
 export const getUserInfo = async (accesstoken) => {
@@ -19,12 +19,12 @@ export const getUserInfo = async (accesstoken) => {
     },
   })
 
-  return response.data
+  return response
 } 
 
 export const logout = async () => {
   const response = await axiosClient.post('/auth/logout')
-  localStorage.removeItem("accesstoken", response.data.accessToken);
+  localStorage.removeItem("accesstoken", response.accessToken);
 
   return response
 }

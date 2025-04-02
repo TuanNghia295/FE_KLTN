@@ -17,6 +17,7 @@
     "@mui/styled-engine-sc": "^6.4.3",
     "@tanstack/react-query": "^5.71.1",
     "axios": "^1.8.2",
+    "formik": "^2.4.6",
     "framer-motion": "^12.4.7",
     "js-cookie": "^3.0.5",
     "prop-types": "^15.8.1",
@@ -31,7 +32,8 @@
     "react-router-dom": "^7.1.5",
     "react-toastify": "^11.0.5",
     "styled-components": "^6.1.15",
-    "swiper": "^11.2.4"
+    "swiper": "^11.2.4",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",

@@ -9,10 +9,31 @@ import '../Register/style.css'
 import Banner1  from '../../assets/log-reg/1.jpg'
 import { SiNike } from "react-icons/si";
 
+import { useFormik } from 'formik'
+import * as Yup from 'yup'
+
 const Register = () => {
 
     const [isShowPassword,setIsShowPassword] = useState(true);
 
+    const formik = useFormik({
+        initialValues: {
+            userName: '',
+            fullName: '',
+            phone: '',
+            email: '',
+            password: '',
+        },
+        validationSchema: Yup.object({
+            email: Yup.string().email('Invalid Email').required('Email is required'),
+            password: Yup.string().min(6, 'Password must be as least 6 characters'),
+        }),
+        onSubmit: (values) => {
+            console.log(values)
+        }
+    })
+
+    console.log(formik.errors)
   return (
     <section className='section py-10 xl:py-0'>
         <div className='container-fuild flex xl:bg-white xl:h-screen'>
@@ -31,17 +52,28 @@ const Register = () => {
                         <Link to="/" className='block xl:hidden text-[30px]'><SiNike/></Link>
                         <h3 className='text-center text-[30px] font-bold text-black'>SIGN UP</h3>
                     </div>
-                    <form className='w-full mt-5'>
+                    <form onSubmit={formik.handleSubmit} className='w-full mt-5'>
                         <div className='form-group w-full mb-5'>
-                            <TextField type="text" className='w-full' id="name" label="Full Name" variant="outlined" />
+                            <TextField type="text" className='w-full' id="userName" label="Username" variant="outlined" onBlur={formik.handleBlur} onChange={formik.handleChange} value={formik.values.userName}/>
                         </div>
 
                         <div className='form-group w-full mb-5'>
-                            <TextField type="text" className='w-full' id="phone" label="Phone" variant="outlined" />
+                            <TextField type="text" className='w-full' id="fullName" label="Full Name" variant="outlined" onBlur={formik.handleBlur} onChange={formik.handleChange} value={formik.values.fullName}/>
+                        </div>
+
+                        <div className='form-group w-full mb-5'>
+                            <TextField type="text" className='w-full' id="phone" label="Phone" variant="outlined" onBlur={formik.handleBlur} onChange={formik.handleChange} value={formik.values.phone}/>
+                        </div>
+
+                        <div className='form-group w-full mb-5'>
+                            <TextField type="email" className='w-full' id="email" label="Email" variant="outlined" onBlur={formik.handleBlur} onChange={formik.handleChange} value={formik.values.email}/>
+                        {formik.errors.email && formik.touched.email && (
+                            <div className="text-red-500">{formik.errors.email}</div>
+                        )}
                         </div>
 
                         <div className='form-group w-full relative mb-5'>
-                            <TextField className='w-full' id="password" label="Password" variant="outlined" 
+                            <TextField className='w-full' id="password" label="Password" variant="outlined" onBlur={formik.handleBlur} onChange={formik.handleChange} value={formik.values.password} 
                                 type={
                                     isShowPassword === true ? 'password' : ''
                                 }
@@ -71,7 +103,7 @@ const Register = () => {
                         </div>
 
                         <div className='flex items-center mt-5'>
-                                <Button className='btn-Login w-full'>Register</Button>
+                                <Button type='submit' className='btn-Login w-full'>Register</Button>
                         </div>
                             
                         <div className='flex w-full items-center mt-5'>
