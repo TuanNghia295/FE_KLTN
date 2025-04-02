@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay } from 'swiper/modules';
 import { Button } from '@mui/material';
@@ -8,8 +8,6 @@ import ProductsSlider from '../../components/ProductsSlider';
 import BlogItem from '../../components/BlogItem';
 import TabsHomePage from '../../components/TabsHomePage';
 import LoadingComponent from '../../components/LoadingComponent'; // Import LoadingComponent
-import Banner2 from '../../assets/banner/banner2.jpg';
-import Banner3 from '../../assets/banner/banner3.jpg';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import '../Home/style.css';
