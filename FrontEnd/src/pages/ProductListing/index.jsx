@@ -13,21 +13,18 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { FaAngleDown } from 'react-icons/fa';
 import Pagination from '@mui/material/Pagination';
+// import { getAllProducts } from '../../apis/productsService';
 // Call Api Get Product
-import { getAllProducts } from '../../apis/productsService';
-
 
 const ProductListing = () => {
-  
-  const [listProducts, setListProducts] = useState([])
-  
+  const [listProducts, setListProducts] = useState([]);
 
-  useEffect(() => {
-    setListProducts([]);
-    getAllProducts().then((response) => {
-        setListProducts(response.products)
-    })
-  }, [])
+  // useEffect(() => {
+  //   setListProducts([]);
+  //   getAllProducts().then((response) => {
+  //     setListProducts(response.products);
+  //   });
+  // }, []);
 
   const [itemView, setItemView] = useState('grid');
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -40,7 +37,7 @@ const ProductListing = () => {
   };
 
   return (
-    <section className='pt-5'>
+    <section className="pt-5">
       <div className="container !text-center">
         <Breadcrumbs className="flex w-full justify-center" aria-label="breadcrumb">
           <Link underline="hover" color="inherit" to="/">
@@ -115,13 +112,11 @@ const ProductListing = () => {
             <div className={`grid ${itemView === 'grid' ? 'grid-cols-2 xl:grid-cols-4' : 'grid-cols-1'} gap-4`}>
               {itemView === 'grid' ? (
                 <>
-                    {listProducts.length === 0 ? (
-                      <p>Không có sản phẩm nào.</p>
-                    ) : (
-                      listProducts.map((product) => (
-                        <ProductItem key={product._id} product={product} />
-                      ))
-                    )}
+                  {listProducts.length === 0 ? (
+                    <p>Không có sản phẩm nào.</p>
+                  ) : (
+                    listProducts.map((product) => <ProductItem key={product._id} product={product} />)
+                  )}
                 </>
               ) : (
                 <>

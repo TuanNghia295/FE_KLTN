@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'; // Import thư viện prop-types
 import '../ProductItem/style.css';
 import { Link } from 'react-router-dom';
 import { Button } from '@mui/material';
@@ -5,28 +6,22 @@ import { FaRegHeart } from 'react-icons/fa';
 import { IoGitCompareOutline } from 'react-icons/io5';
 import { MdZoomOutMap } from 'react-icons/md';
 import Tooltip from '@mui/material/Tooltip';
+import { formatCash } from '../../hook/formatCash';
 
 const ProductItem = ({ product, customHeight }) => {
   return (
     <div className="productItem rounded-md w-[100%] overflow-hidden bg-white text-black shadow-lg relative">
       <div className="group imgWrapper overflow-hidden rounded-none relative">
-        <Link to={`/product/${product.name}`}>
+        <Link to={`/products/${product._id}`}>
           <div className="img h-[150px] md:h-[250px] overflow-hidden" style={{ height: customHeight }}>
-            {/* <img
-              src={product.imageUrl}
-              className="w-full h-full object-cover"
-            />
-            <img
-              src={product.imageUrl}
-              className="w-full h-full object-cover absolute top-[0px] left-[0px] opacity-0 transition-all duration-1000 group-hover:opacity-100"
-            /> */}
             {Array.isArray(product?.images) && product?.images?.length > 0 ? (
-              product.images?.map((image) => (
-                <div>
-                  <img src={image.url} className="w-full h-full object-cover" />
+              product.images.map((image, index) => (
+                <div key={index}>
+                  <img src={image.url} className="w-full h-full object-cover" alt={product.name} />
                   <img
                     src={image.url}
                     className="w-full h-full object-cover absolute top-[0px] left-[0px] opacity-0 transition-all duration-1000 group-hover:opacity-100"
+                    alt={product.name}
                   />
                 </div>
               ))
@@ -52,23 +47,41 @@ const ProductItem = ({ product, customHeight }) => {
       </div>
 
       <div className="info p-3">
-        <h6 className="text-[14px]">
-          <Link to="/" className="link transition-all">
-            {product.categoryId?.type}
-          </Link>
-        </h6>
         <h3 className="text-[16px] title mt-2 font-[500] mb-2">
-          <Link to={`/product/${product?._id}`} className="link transition-all">
+          <Link to={`/products/${product?._id}`} className="link transition-all">
             {product?.name}
           </Link>
         </h3>
 
         <div className="flex items-center gap-4">
-          <span className="newPrice text-black text-[18px]">${product?.price}</span>
+          <span className="newPrice text-black text-[18px]">{formatCash(product?.price)}</span>
         </div>
       </div>
     </div>
   );
+};
+
+// Định nghĩa kiểu dữ liệu cho props
+ProductItem.propTypes = {
+  product: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    images: PropTypes.arrayOf(
+      PropTypes.shape({
+        url: PropTypes.string.isRequired,
+      })
+    ),
+    categoryId: PropTypes.shape({
+      type: PropTypes.string,
+    }),
+    _id: PropTypes.string.isRequired,
+    price: PropTypes.number.isRequired,
+  }).isRequired,
+  customHeight: PropTypes.string,
+};
+
+// Giá trị mặc định cho props
+ProductItem.defaultProps = {
+  customHeight: '250px',
 };
 
 export default ProductItem;

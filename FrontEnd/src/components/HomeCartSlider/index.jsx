@@ -7,100 +7,63 @@ import './style.css'; // Import tệp CSS tùy chỉnh
 
 import { Link } from 'react-router-dom';
 import { Navigation } from 'swiper/modules';
+import { formatCash } from '../../hook/formatCash';
+import PropTypes from 'prop-types'; // Import PropTypes để xác thực props
 
-const HomeCartSlider = ({ slidesPerView }) => {
+const HomeCartSlider = ({ slidesPerView, data }) => {
   return (
     <div className="home-cart-slider mt-5 mb-5">
       <div className="container">
         <Swiper
           slidesPerView={slidesPerView}
-          spaceBetween={0}
+          spaceBetween={10}
           navigation={true}
           modules={[Navigation]}
           className="mySwiper"
           loop={true}
         >
-          <SwiperSlide>
-            <Link to={`/product/1`}>
-              <div className="item py-7 px-3 bg-white rounded-sm flex text-center items-center justify-center flex-col">
-                <img
-                  src="https://static.nike.com/a/images/q_auto:eco/t_product_v1/f_auto/dpr_1.3/h_451,c_limit/981757c4-1988-4410-a0fb-fecd783fe41d/air-jordan-1-mid-shoes-SQf7DM.png"
-                  alt="Air Jordan 1 Mid"
-                  className="transition-all duration-300 ease-in-out transform hover:scale-105"
-                />
-                <h3 className="text-[16px] font-[500] mt-2">Air Jordan 1 Mid</h3>
-              </div>
-            </Link>
-          </SwiperSlide>
+          {data?.map((item) => {
+            const { _id, name, price, images } = item;
+            const primaryImage = images?.find((image) => image.isPrimary)?.url || images?.[0]?.url;
 
-          <SwiperSlide>
-            <Link to={`/product/1`}>
-              <div className="item py-7 px-3 bg-white rounded-sm flex text-center items-center justify-center flex-col">
-                <img
-                  src="https://static.nike.com/a/images/q_auto:eco/t_product_v1/f_auto/dpr_1.3/h_451,c_limit/981757c4-1988-4410-a0fb-fecd783fe41d/air-jordan-1-mid-shoes-SQf7DM.png"
-                  alt="Air Jordan 1 Mid"
-                  className="transition-all duration-300 ease-in-out transform hover:scale-105"
-                />
-                <h3 className="text-[16px] font-[500] mt-2">Air Jordan 1 Mid</h3>
-              </div>
-            </Link>
-          </SwiperSlide>
-
-          <SwiperSlide>
-            <Link to={`/product/1`}>
-              <div className="item py-7 px-3 bg-white rounded-sm flex text-center items-center justify-center flex-col">
-                <img
-                  src="https://static.nike.com/a/images/q_auto:eco/t_product_v1/f_auto/dpr_1.3/h_451,c_limit/981757c4-1988-4410-a0fb-fecd783fe41d/air-jordan-1-mid-shoes-SQf7DM.png"
-                  alt="Air Jordan 1 Mid"
-                  className="transition-all duration-300 ease-in-out transform hover:scale-105"
-                />
-                <h3 className="text-[16px] font-[500] mt-2">Air Jordan 1 Mid</h3>
-              </div>
-            </Link>
-          </SwiperSlide>
-
-          <SwiperSlide>
-            <Link to={`/product/1`}>
-              <div className="item py-7 px-3 bg-white rounded-sm flex text-center items-center justify-center flex-col">
-                <img
-                  src="https://static.nike.com/a/images/q_auto:eco/t_product_v1/f_auto/dpr_1.3/h_451,c_limit/981757c4-1988-4410-a0fb-fecd783fe41d/air-jordan-1-mid-shoes-SQf7DM.png"
-                  alt="Air Jordan 1 Mid"
-                  className="transition-all duration-300 ease-in-out transform hover:scale-105"
-                />
-                <h3 className="text-[16px] font-[500] mt-2">Air Jordan 1 Mid</h3>
-              </div>
-            </Link>
-          </SwiperSlide>
-
-          <SwiperSlide>
-            <Link to={`/product/1`}>
-              <div className="item py-7 px-3 bg-white rounded-sm flex text-center items-center justify-center flex-col">
-                <img
-                  src="https://static.nike.com/a/images/q_auto:eco/t_product_v1/f_auto/dpr_1.3/h_451,c_limit/981757c4-1988-4410-a0fb-fecd783fe41d/air-jordan-1-mid-shoes-SQf7DM.png"
-                  alt="Air Jordan 1 Mid"
-                  className="transition-all duration-300 ease-in-out transform hover:scale-105"
-                />
-                <h3 className="text-[16px] font-[500] mt-2">Air Jordan 1 Mid</h3>
-              </div>
-            </Link>
-          </SwiperSlide>
-
-          <SwiperSlide>
-            <Link to={`/product/1`}>
-              <div className="item py-7 px-3 bg-white rounded-sm flex text-center items-center justify-center flex-col">
-                <img
-                  src="https://static.nike.com/a/images/q_auto:eco/t_product_v1/f_auto/dpr_1.3/h_451,c_limit/981757c4-1988-4410-a0fb-fecd783fe41d/air-jordan-1-mid-shoes-SQf7DM.png"
-                  alt="Air Jordan 1 Mid"
-                  className="transition-all duration-300 ease-in-out transform hover:scale-105"
-                />
-                <h3 className="text-[16px] font-[500] mt-2">Air Jordan 1 Mid</h3>
-              </div>
-            </Link>
-          </SwiperSlide>
+            return (
+              <SwiperSlide key={_id}>
+                <Link to={`/products/${_id}`}>
+                  <div className="item py-7 px-3 bg-white rounded-sm flex text-center items-center justify-center flex-col shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <img
+                      src={primaryImage}
+                      alt={name}
+                      className="transition-all duration-300 ease-in-out transform hover:scale-105 object-contain"
+                    />
+                    <h3 className="text-[16px] font-[500] mt-2">{name}</h3>
+                    <p className="text-[14px] text-gray-500 mt-1">{formatCash(price)}</p>
+                  </div>
+                </Link>
+              </SwiperSlide>
+            );
+          })}
         </Swiper>
       </div>
     </div>
   );
+};
+
+// Định nghĩa kiểu dữ liệu cho props
+HomeCartSlider.propTypes = {
+  slidesPerView: PropTypes.number.isRequired, // slidesPerView là số và bắt buộc
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      _id: PropTypes.string.isRequired, // Mỗi sản phẩm cần có `_id` duy nhất
+      name: PropTypes.string.isRequired, // Tên sản phẩm
+      price: PropTypes.number.isRequired, // Giá sản phẩm
+      images: PropTypes.arrayOf(
+        PropTypes.shape({
+          url: PropTypes.string.isRequired, // URL của hình ảnh
+          isPrimary: PropTypes.bool, // Hình ảnh chính
+        })
+      ).isRequired,
+    })
+  ).isRequired, // data là một mảng các object và bắt buộc
 };
 
 export default HomeCartSlider;

@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import { useState, useEffect } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 // Import Swiper styles
 import 'swiper/css';
@@ -7,11 +7,13 @@ import 'swiper/css/navigation';
 import { Navigation } from 'swiper/modules';
 import ProductItem from '../ProductItem';
 import '../ProductsSlider/style.css';
-import { useState, useEffect } from 'react';
+
 const ProductsSlider = ({ listProducts }) => {
   const getColumns = () => (window.innerWidth < 768 ? 1 : 4);
 
   const [columns, setColumns] = useState(getColumns());
+
+  const listProductLimited = listProducts?.slice(0, 8); // Giới hạn số lượng sản phẩm hiển thị
 
   useEffect(() => {
     const handleResize = () => setColumns(getColumns());
@@ -30,12 +32,12 @@ const ProductsSlider = ({ listProducts }) => {
           className="productSlide"
           loop={true}
         >
-          {listProducts?.length === 0 ? (
+          {listProductLimited?.length === 0 ? (
             <p>Không có sản phẩm nào.</p>
           ) : (
-            listProducts?.map((product, index) => (
-              <SwiperSlide key={index}>
-                <ProductItem key={product._id} product={product} customHeight="300px" />
+            listProductLimited?.map((product) => (
+              <SwiperSlide key={product._id}>
+                <ProductItem product={product} customHeight="300px" />
               </SwiperSlide>
             ))
           )}
