@@ -1,105 +1,224 @@
-import React, { useState } from 'react'
-import TextField from '@mui/material/TextField';
-import { Button } from '@mui/material';
-import { IoMdEye } from 'react-icons/io'
-import { IoMdEyeOff } from 'react-icons/io'
-import { FcGoogle } from "react-icons/fc";
-import { Link, Links } from 'react-router-dom';
-import '../Login/style.css'
-import Banner1 from '../../assets/log-reg/1.jpg'
-import { SiNike } from "react-icons/si";
-//Call API Login
-import { useFormik } from 'formik'
-import * as Yup from 'yup'
-import { useLogin } from '../../apis/authServices';
-
+import React, { useState } from 'react';
+import { TextField, Button, Box, Typography, CircularProgress } from '@mui/material';
+import { IoMdEye, IoMdEyeOff } from 'react-icons/io';
+import { FcGoogle } from 'react-icons/fc';
+import { SiNike } from 'react-icons/si';
+import { Link } from 'react-router-dom';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import { useLogin } from '../../services/authServices';
+import Banner1 from '../../assets/log-reg/1.jpg';
 
 const Login = () => {
-    const [isShowPassword, setIsShowPassword] = useState(true);
+  const [isShowPassword, setIsShowPassword] = useState(false);
+  const { mutate: login, isLoading, isError } = useLogin();
 
-    const { mutate, isPending } = useLogin();
+  const formik = useFormik({
+    initialValues: {
+      phone: '',
+      password: '',
+    },
+    validationSchema: Yup.object({
+      phone: Yup.string().required('Vui lòng nhập số điện thoại'),
+      password: Yup.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự').required('Vui lòng nhập mật khẩu'),
+    }),
+    onSubmit: (values) => {
+      login(values); // Gọi mutation để thực hiện đăng nhập
+    },
+  });
 
-    const formik = useFormik({
-        initialValues: {
-            phone: '',
-            password: '',
-        },
-        validationSchema: Yup.object({
-            phone: Yup.string().required('Phone is required'),
-            password: Yup.string().required('Password is required'),
-        }),
-        onSubmit: (values) => {
-            mutate(values);
-        }
-    })
+  const togglePasswordVisibility = () => {
+    setIsShowPassword(!isShowPassword);
+  };
 
-    console.log(formik)
+  return (
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: { xs: 'grey.100', xl: 'white' } }}>
+      {/* Cột Banner */}
+      <Box
+        sx={{
+          display: { xs: 'none', xl: 'block' },
+          width: '50%',
+          position: 'relative',
+          '& img': {
+            position: 'absolute',
+            height: '100%',
+            width: '100%',
+            objectFit: 'cover',
+          },
+          '& .overlay': {
+            position: 'absolute',
+            inset: 0,
+            bgcolor: 'rgba(0, 0, 0, 0.7)',
+          },
+          '& .content': {
+            position: 'relative',
+            zIndex: 1,
+            color: 'white',
+            p: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            height: '100%',
+          },
+        }}
+      >
+        <img src={Banner1} alt="Nike Banner" />
+        <div className="overlay" />
+        <div className="content">
+          <Link to="/">
+            <SiNike style={{ fontSize: 100, marginBottom: 20 }} />
+          </Link>
+          <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
+            Welcome Back!
+          </Typography>
+          <Typography variant="body1" sx={{ maxWidth: '80%', textAlign: 'justify', color: 'grey.300' }}>
+            Sign in to access your account, track orders, and enjoy a seamless shopping experience with Nike.
+          </Typography>
+        </div>
+      </Box>
 
-    return (
-        <section className='section py-10 xl:py-0'>
-            <div className='container-fuild flex xl:bg-white xl:h-screen'>
-                <div className='hidden xl:block relative'>
-                    <img className='h-screen' src={Banner1} />
-                    <div className='absolute bg-black opacity-90 w-full h-full top-[0px]'>
-                    </div>
-                    <div className='absolute top-[20%] p-10'>
-                        <Link to="/"><SiNike className='text-white text-[100px]' /></Link>
-                        <h1 className=' text-white text-[50px]'>Hi, everyone !</h1>
-                        <p className='text-[#f1f1f1] mt-5 w-[80%] text-justify'>Nike is a global sportswear brand known for its athletic shoes, apparel, and equipment. Founded in 1964, it is famous for its innovation, iconic "Swoosh" logo, and "Just Do It" slogan.</p>
-                    </div>
-                </div>
-                <div className='card  p-4 w-[90%] md:w-[55%] xl:w-[35%] m-auto bg-white'>
-                    <div className='flex justify-between xl:justify-center items-center'>
-                        <Link to="/" className='block xl:hidden text-[30px]'><SiNike /></Link>
-                        <h3 className='text-center text-[30px] font-bold text-black'>SIGN IN</h3>
-                    </div>
-                    <form className='w-full mt-5' onSubmit={formik.handleSubmit} >
-                        <div className='form-group w-full mb-5'>
-                            <TextField type="phone" className='w-full' name="phone" label="Phone" variant="outlined" onBlur={formik.handleBlur} onChange={formik.handleChange} value={formik.values.phone} />
-                        </div>
+      {/* Cột Form */}
+      <Box
+        sx={{
+          width: { xs: '100%', xl: '50%' },
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: { xs: 2, md: 4 },
+        }}
+      >
+        <Box
+          sx={{
+            bgcolor: 'white',
+            p: { xs: 3, md: 5 },
+            borderRadius: 2,
+            boxShadow: { xs: 3, xl: 'none' },
+            width: '100%',
+            maxWidth: '450px',
+          }}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Link to="/" style={{ display: { xs: 'block', xl: 'none' }, color: 'black' }}>
+              <SiNike size={30} />
+            </Link>
+            <Typography
+              variant="h4"
+              component="h3"
+              sx={{ fontWeight: 'bold', textAlign: { xs: 'right', xl: 'center' }, width: '100%' }}
+            >
+              SIGN IN
+            </Typography>
+          </Box>
 
-                        <div className='form-group w-full relative'>
-                            <TextField className='w-full' id="password" label="Password" variant="outlined" onBlur={formik.handleBlur} onChange={formik.handleChange} value={formik.values.password}
-                                type={
-                                    isShowPassword === true ? 'password' : ''
-                                }
-                            />
-                            <Button className='!absolute !text-black !text-[20px] top-[3px] right-[5px] z-50 !w-[50px] !h-[50px] !min-w-[35px]'
-                                onClick={() => setIsShowPassword(!isShowPassword)}
-                            >
-                                {
-                                    isShowPassword === true ? <IoMdEye /> : <IoMdEyeOff />
-                                }
-                            </Button>
-                        </div>
+          <form onSubmit={formik.handleSubmit} noValidate>
+            {/* Phone Input */}
+            <TextField
+              fullWidth
+              margin="normal"
+              id="phone"
+              name="phone"
+              label="Số điện thoại"
+              variant="outlined"
+              value={formik.values.phone}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.phone && Boolean(formik.errors.phone)}
+              helperText={formik.touched.phone && formik.errors.phone}
+            />
 
-                        <div className='flex items-center mt-5'>
-                            <Button className={`btn-Login w-full ${isPending ? " !text-[#fff]" : ""}`} type="submit">{isPending ? "Loading..." : "Login"}</Button>
-                        </div>
+            {/* Password Input */}
+            <TextField
+              fullWidth
+              margin="normal"
+              id="password"
+              name="password"
+              label="Mật khẩu"
+              variant="outlined"
+              type={isShowPassword ? 'text' : 'password'}
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.password && Boolean(formik.errors.password)}
+              helperText={formik.touched.password && formik.errors.password}
+              InputProps={{
+                endAdornment: (
+                  <Button
+                    aria-label={isShowPassword ? 'Hide password' : 'Show password'}
+                    onClick={togglePasswordVisibility}
+                    sx={{ minWidth: 'auto', padding: '5px', color: 'text.secondary' }}
+                  >
+                    {isShowPassword ? <IoMdEyeOff size={20} /> : <IoMdEye size={20} />}
+                  </Button>
+                ),
+              }}
+            />
 
-                        <div className='flex w-full items-center mt-5'>
-                            <div>
-                                <Link to='/'>Forgot Password ?</Link>
-                            </div>
-                            <div className='ml-auto text-[#ff2f2f] font-[600]'>
-                                <Link to='/register'>Sign Up</Link>
-                            </div>
-                        </div>
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              disabled={isLoading}
+              sx={{
+                mt: 3,
+                py: 1.5,
+                bgcolor: 'black',
+                '&:hover': { bgcolor: 'grey.800' },
+                '&.Mui-disabled': { bgcolor: 'grey.500', color: 'white' },
+              }}
+            >
+              {isLoading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Sign In'}
+            </Button>
 
-                        <div className="flex items-center w-full mt-5">
-                            <div className="flex-grow border-t border-gray-400"></div>
-                            <span className="px-4 text-gray-600">Or continute with social account</span>
-                            <div className="flex-grow border-t border-gray-400"></div>
-                        </div>
+            {/* Hiển thị lỗi nếu có */}
+            {isError && (
+              <Typography variant="body2" color="error" sx={{ mt: 2, textAlign: 'center' }}>
+                Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.
+              </Typography>
+            )}
 
-                        <div className='flex items-center mt-5'>
-                            <Button className='btn-LoginGoogle !bg-[#f1f1f1] w-full '><FcGoogle className='!text-[30px]' /> &nbsp; | &nbsp;Login with Google</Button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </section>
-    )
-}
+            {/* Links Forgot Password / Sign Up */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, fontSize: '0.9rem' }}>
+              <Link to="/forgot-password" style={{ color: 'inherit', textDecoration: 'underline' }}>
+                Forgot Password?
+              </Link>
+              <Link to="/register" style={{ color: 'red', fontWeight: 600, textDecoration: 'underline' }}>
+                Sign Up
+              </Link>
+            </Box>
 
-export default Login
+            {/* Divider */}
+            <Box sx={{ display: 'flex', alignItems: 'center', my: 3 }}>
+              <Box sx={{ flexGrow: 1, height: '1px', bgcolor: 'grey.300' }} />
+              <Typography variant="body2" sx={{ px: 2, color: 'text.secondary' }}>
+                Or continue with
+              </Typography>
+              <Box sx={{ flexGrow: 1, height: '1px', bgcolor: 'grey.300' }} />
+            </Box>
+
+            {/* Google Login Button */}
+            <Button
+              fullWidth
+              variant="outlined"
+              startIcon={<FcGoogle size={24} />}
+              sx={{
+                py: 1.5,
+                borderColor: 'grey.400',
+                color: 'text.primary',
+                textTransform: 'none',
+                '&:hover': {
+                  bgcolor: 'grey.100',
+                  borderColor: 'grey.500',
+                },
+              }}
+            >
+              Sign In with Google
+            </Button>
+          </form>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+export default Login;

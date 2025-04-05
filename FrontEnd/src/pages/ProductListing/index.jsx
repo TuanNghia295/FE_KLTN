@@ -13,19 +13,10 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { FaAngleDown } from 'react-icons/fa';
 import Pagination from '@mui/material/Pagination';
-// import { getAllProducts } from '../../apis/productsService';
-// Call Api Get Product
+import { useProducts } from '../../services/productsService';
 
 const ProductListing = () => {
-  const [listProducts, setListProducts] = useState([]);
-
-  // useEffect(() => {
-  //   setListProducts([]);
-  //   getAllProducts().then((response) => {
-  //     setListProducts(response.products);
-  //   });
-  // }, []);
-
+  const { productList } = useProducts();
   const [itemView, setItemView] = useState('grid');
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -112,10 +103,10 @@ const ProductListing = () => {
             <div className={`grid ${itemView === 'grid' ? 'grid-cols-2 xl:grid-cols-4' : 'grid-cols-1'} gap-4`}>
               {itemView === 'grid' ? (
                 <>
-                  {listProducts.length === 0 ? (
+                  {Array.isArray(productList) && productList.length === 0 ? (
                     <p>Không có sản phẩm nào.</p>
                   ) : (
-                    listProducts.map((product) => <ProductItem key={product._id} product={product} />)
+                    productList.map((product) => <ProductItem key={product._id} product={product} />)
                   )}
                 </>
               ) : (
