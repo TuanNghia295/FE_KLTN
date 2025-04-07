@@ -21,7 +21,6 @@ import OrderDetails from './pages/OrderDetails/index.jsx';
 import ScrollToTop from './components/Scroll/ScrollToTop.jsx';
 import useStore from './store/useStore.jsx';
 
-
 export const MainLayout = ({ children }) => (
   <>
     <Header />

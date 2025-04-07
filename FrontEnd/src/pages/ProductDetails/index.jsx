@@ -23,11 +23,12 @@ const formatCurrency = (value) => {
 
 const ProductDetails = () => {
   //Call Api
-  const { mutate: addToCart, isLoading : loadingAddToCart } = useAddToCart(); 
+  const { mutate: addToCart, isLoading: loadingAddToCart } = useAddToCart();
 
   const { id } = useParams();
-   //Lấy ra thông tin người dùng ở useStore Zustand
-  const userInfo = useStore((state) => state.userInfo)
+  //Lấy ra thông tin người dùng ở useStore Zustand
+  const userInfo = useStore((state) => state.userInfo);
+  console.log('User Info:', userInfo); // Kiểm tra thông tin người dùng
 
   //Lấy thông tin sản phẩm
   const { productDetail, isLoading, error } = useProductDetail(id); // Giả sử hook trả về cả trạng thái loading và error
@@ -39,8 +40,8 @@ const ProductDetails = () => {
   const relativeProductList =
     Array.isArray(productList) && productList.length > 0
       ? productList.filter(
-        (product) => product?.categoryId?._id === productDetail?.categoryId?._id && product._id !== id
-      )
+          (product) => product?.categoryId?._id === productDetail?.categoryId?._id && product._id !== id
+        )
       : []; // Lọc sản phẩm liên quan
 
   const [selectedSize, setSelectedSize] = useState(null); // State lưu size đã chọn
@@ -88,14 +89,13 @@ const ProductDetails = () => {
     );
   }
 
-  const data = { 
-    userId: userInfo?._id, 
-    productId: productDetail?.productId, 
-    size : selectedSize,
-    color : selectedColor,
-    quantity : 1
-   }
-   console.log(userInfo)
+  const data = {
+    userId: userInfo?._id,
+    productId: productDetail?.productId,
+    size: selectedSize,
+    color: selectedColor,
+    quantity: 1,
+  };
 
   // ---- Render khi có dữ liệu ----
   return (
@@ -147,13 +147,14 @@ const ProductDetails = () => {
                       <button
                         // Không cần class 'size-button' nữa vì dùng Tailwind hết
                         className={`border min-w-14 text-center px-4 py-2 rounded transition duration-300
-                                    ${selectedSize === variation.size
-                            ? 'bg-black text-white border-black' // Style khi được chọn
-                            : 'bg-white text-black border-gray-300 hover:border-black' // Style mặc định
-                          }`}
+                                    ${
+                                      selectedSize === variation.size
+                                        ? 'bg-black text-white border-black' // Style khi được chọn
+                                        : 'bg-white text-black border-gray-300 hover:border-black' // Style mặc định
+                                    }`}
                         onClick={() => {
-                          setSelectedSize(variation.size)
-                          setSelectedColor(variation.color)
+                          setSelectedSize(variation.size);
+                          setSelectedColor(variation.color);
                         }}
                       >
                         {variation.size}
@@ -175,7 +176,7 @@ const ProductDetails = () => {
                 className="!bg-[#f1f1f1] !text-black !w-full !py-3 !mb-3 !shadow-none hover:!bg-gray-300"
                 disabled={!selectedSize} // Vô hiệu hóa nếu chưa chọn size
                 onClick={() => {
-                  addToCart(data)
+                  addToCart(data);
                 }} // Thêm logic ở đây
               >
                 Add to Cart
