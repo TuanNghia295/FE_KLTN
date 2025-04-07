@@ -55,7 +55,7 @@ export function useLogin() {
     mutationFn: login,
     onSuccess: (data) => {
       getInfo(data); // Cập nhật thông tin người dùng trong Zustand
-      toast.success('Đăng nhập thành công', {
+      toast.success('Sign in successfully !', {
         position: 'top-center',
         autoClose: 3000,
         hideProgressBar: false,
@@ -69,7 +69,7 @@ export function useLogin() {
     onError: (error) => {
       console.log('error', error);
 
-      toast.error(error.response?.data?.message || '❌ Đăng nhập thất bại!', {
+      toast.error(error.response?.data?.message || 'Sign in unsuccessfully !', {
         position: 'top-center',
         autoClose: 3000,
         hideProgressBar: false,

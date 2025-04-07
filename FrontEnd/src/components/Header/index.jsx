@@ -107,7 +107,7 @@ export default function Header() {
                 )}
                 {/* Sub Menu */}
                 <ul
-                  className={`submenuProfile mt-2 shadow-xl bg-[#fff] p-2 border border-[#00000094] rounded-xl absolute z-50 text-[14px] flex flex-col text-center gap-1
+                  className={`submenuProfile right-10 mt-2 shadow-2xl bg-[#fff] p-2 border border-[#00000094] rounded-xl absolute z-50 text-[14px] flex flex-col text-center gap-1
                   ${!openMobileMenu ? 'hidden' : 'block'}`}
                   onClick={() => setOpenMobileMenu(false)}
                 >
@@ -147,7 +147,7 @@ export default function Header() {
               </li>
 
               {/* Wishlist */}
-              <li>
+              {/* <li>
                 <StyledEngineProvider injectFirst>
                   <CustomTooltip title="Danh sách yêu thích">
                     <IconButton aria-label="wishlist">
@@ -155,7 +155,7 @@ export default function Header() {
                     </IconButton>
                   </CustomTooltip>
                 </StyledEngineProvider>
-              </li>
+              </li> */}
             </ul>
           </div>
         </div>

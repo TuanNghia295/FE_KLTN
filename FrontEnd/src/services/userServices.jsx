@@ -4,13 +4,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import axiosClient from '../apis/axiosClient';
 
 export const updateUser = async (values) => {
-  const accesstoken = localStorage.getItem('accesstoken');
-  console.log(accesstoken);
-  const response = await axiosClient.patch('/users/updateUser', values, {
-    headers: {
-      Authorization: `Bearer ${accesstoken}`, // Gửi token trong header
-    },
-  });
+  const response = await axiosClient.patch('/users/updateUser', values);
 
   return response;
 };

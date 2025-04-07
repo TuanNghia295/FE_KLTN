@@ -18,7 +18,7 @@ const AccountSlidebar = () => {
   const menuItems = [
     { path: '/my-account', label: 'My Profile', icon: <CgProfile /> },
     { path: '/my-address', label: 'My Address', icon: <FaMapLocationDot /> },
-    { path: '/my-list', label: 'My List', icon: <MdFavorite /> },
+    // { path: '/my-list', label: 'My List', icon: <MdFavorite /> },
     { path: '/my-orders', label: 'My Orders', icon: <FaClipboardList /> },
   ];
 

@@ -5,9 +5,13 @@ const ProductZoom = ({ img }) => {
   return (
     <>
       <div className="whitespace-nowrap xl:flex xl:flex-col gap-4 w-full">
-        <InnerImageZoom
+        {/* <InnerImageZoom
           zoomType="hover"
           zoomScales={10}
+          src={img}
+          className="min-w-full min-h-full max-w-full max-h-screen object-contain"
+        /> */}
+        <img
           src={img}
           className="min-w-full min-h-full max-w-full max-h-screen object-contain"
         />

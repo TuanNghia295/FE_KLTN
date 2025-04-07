@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { TextField, Button, Box, Typography, CircularProgress } from '@mui/material';
 import { IoMdEye, IoMdEyeOff } from 'react-icons/io';
 import { FcGoogle } from 'react-icons/fc';
@@ -167,7 +167,7 @@ const Login = () => {
                 '&.Mui-disabled': { bgcolor: 'grey.500', color: 'white' },
               }}
             >
-              {isLoading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Sign In'}
+              {isLoading ? (<Fragment><CircularProgress size={24} sx={{ color: 'white' }} /></Fragment>) : ('Sign In')}
             </Button>
 
             {/* Hiển thị lỗi nếu có */}

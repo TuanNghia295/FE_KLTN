@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 export default function BlogItem({ url, alt }) {
   return (
-    <Link to={`/${alt}`} className="w-full">
+    <Link to={`/listing/${alt}`} className="w-full">
       <div className="blogItem group">
         <div className="imgWrapper overflow-hidden relative">
           <img

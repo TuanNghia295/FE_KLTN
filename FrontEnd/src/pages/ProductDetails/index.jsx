@@ -86,7 +86,7 @@ const ProductDetails = () => {
           <RouterLink to="/" className="hover:underline text-inherit">
             {' '}
             {/* Sử dụng RouterLink */}
-            Trang chủ
+            Home Page
           </RouterLink>
           {/* Bạn có thể thêm link Category ở đây nếu có */}
           {/* <RouterLink to={`/category/${productDetail.categoryId?._id}`} className="hover:underline text-inherit">
@@ -114,7 +114,7 @@ const ProductDetails = () => {
               <p className="text-2xl font-semibold text-red-600 mb-4">{formatCurrency(productDetail.price)}</p>
 
               {/* Size component logic */}
-              <h2 className="text-lg font-medium mb-2 text-black">Chọn Size</h2>
+              <h2 className="text-lg font-medium mb-2 text-black">Choose Size</h2>
               <div className="flex flex-wrap gap-3 mb-5">
                 {' '}
                 {/* flex-wrap để xuống dòng nếu nhiều size */}
@@ -141,7 +141,7 @@ const ProductDetails = () => {
                     </div>
                   ))
                 ) : (
-                  <p className="text-gray-500">Không có thông tin size.</p>
+                  <p className="text-gray-500">Size not found !</p>
                 )}
               </div>
 
@@ -152,7 +152,7 @@ const ProductDetails = () => {
                 disabled={!selectedSize} // Vô hiệu hóa nếu chưa chọn size
                 onClick={() => console.log('Add to cart:', productDetail._id, selectedSize)} // Thêm logic ở đây
               >
-                Thêm vào giỏ hàng
+                Add to Cart
               </Button>
               <Button
                 variant="contained"
@@ -160,12 +160,12 @@ const ProductDetails = () => {
                 disabled={!selectedSize} // Vô hiệu hóa nếu chưa chọn size
                 onClick={() => console.log('Buy now:', productDetail._id, selectedSize)} // Thêm logic ở đây
               >
-                Mua ngay
+                Buy Now
               </Button>
 
               {/* Mô tả sản phẩm */}
               <div className="mt-6 border-t pt-4">
-                <h3 className="text-lg font-medium mb-2 text-black">Mô tả sản phẩm</h3>
+                <h3 className="text-lg font-medium mb-2 text-black">Description</h3>
                 <p className="text-gray-700 leading-relaxed">{productDetail.description}</p>
               </div>
             </div>
