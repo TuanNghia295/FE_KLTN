@@ -7,13 +7,18 @@ import { Button } from '@mui/material';
 import useStore from '../../store/useStore';
 import ChooseSizeList from '../ChooseSizeList';
 import ChooseQuantity from '../ChooseQuantity';
+import { useUpdateCartByUserID } from '../../services/cartServices';
 
 const CartPanel = () => {
   // Lấy các trạng thái và hàm từ Zustand store
   const cartItems = useStore((state) => state.cartItems);
-  console.log(cartItems)
+  // console.log(cartItems)
   const removeItemFromCart = useStore((state) => state.removeItemFromCart);
   const setOpenCartPanel = useStore((state) => state.setOpenCartPanel);
+
+  //Call API Update Cart By User ID
+  const userId = useStore((state) => state.userInfo?._id);
+  const {mutate: updateCart} = useUpdateCartByUserID()
 
   // Tính toán tổng giá trị (subtotal, shipping, total)
   const subtotal = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
@@ -67,6 +72,17 @@ const CartPanel = () => {
                           const newSize = e.target.value;
                           // Giả sử bạn có một hàm cập nhật trong store để thay đổi size
                           useStore.getState().updateItemSize(item._id, newSize);
+                          // Size Update To Backend
+                          const data = {
+                            userId : userId,
+                            data : {
+                              userId : userId,
+                              productId : item.productId,
+                              size : newSize,
+                            }
+                          }
+                          // console.log(data)
+                          updateCart(data)
                         }} />
                       </Fragment>
                     ) : ('Null')}
@@ -87,7 +103,7 @@ const CartPanel = () => {
           )}
         </div>
 
-        <div className="bottomInfo absolute bottom-0 font-[300] py-3 px-3 w-full border-t border-[#f1f1f1] items-center justify-between">
+        <div className="bottomInfo bg-white absolute bottom-0 font-[300] py-3 px-3 w-full border-t border-[#f1f1f1] items-center justify-between">
           <div className="flex">
             <span>Sub: </span>
             <span className="ml-auto">{formatCurrency(subtotal)}</span>

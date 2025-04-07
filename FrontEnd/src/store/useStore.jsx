@@ -38,6 +38,7 @@ const useStore = create((set) => ({
       cartItems: [...state.cartItems, item],
     })),
 
+  // Update Cart Item Size
   updateItemSize: (id, newSize) => {
     set((state) => ({
       cartItems: state.cartItems.map((item) =>

@@ -97,18 +97,18 @@ export const logout = async () => {
 
 // Hook đăng xuất
 export function useLogout() {
-  const navigate = useNavigate();
   const clearInfo = useStore((state) => state.clearInfo); // Lấy hàm xóa thông tin từ Zustand
+  const clearCart = useStore((state) => state.clearCart); // Clear cart user
 
   return useMutation({
     mutationFn: logout,
     onSuccess: () => {
       clearInfo(); // Xóa thông tin người dùng trong Zustand
+      clearCart();
       toast.success('Đăng xuất thành công', {
         position: 'top-center',
         autoClose: 3000,
       });
-      navigate('/login'); // Chuyển hướng sau khi đăng xuất
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Đăng xuất thất bại', {

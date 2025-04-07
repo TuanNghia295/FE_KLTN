@@ -12,7 +12,7 @@ import { useState } from 'react';
 import { Button } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import '../Header/style.css';
-import { logout } from '../../services/authServices.jsx';
+import { useLogout } from '../../services/authServices.jsx';
 import useStore from '../../store/useStore.jsx';
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
@@ -34,14 +34,14 @@ const CustomTooltip = styled(({ className, ...props }) => <Tooltip {...props} cl
 export default function Header() {
   // Lấy trạng thái và hàm từ Zustand store
   const userInfo = useStore((state) => state.userInfo);
-  const clearInfo = useStore((state) => state.clearInfo);
   const cartItems = useStore((state) => state.cartItems);
   const setOpenCartPanel = useStore((state) => state.setOpenCartPanel);
+
+  const {mutate: logout} = useLogout();
 
   // Handle Logout
   const handleLogout = async () => {
     await logout();
-    clearInfo();
   };
 
   const [openMobileMenu, setOpenMobileMenu] = useState(false);

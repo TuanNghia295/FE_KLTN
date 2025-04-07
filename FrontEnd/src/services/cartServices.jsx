@@ -48,3 +48,33 @@ export const useGetCartByUserID = (_id) => {
 
   return { listCart, loadingCart}
 }
+
+//Call API Update Cart by User ID
+const updateCartByUserID = async ({userId,data}) => {
+  try {
+    const response = await axiosClient.put(`/cart/update/${userId}`, data);
+    return response;
+  } catch (error) {
+    console.error('Error while updating cart:', error);
+    throw error; // Đảm bảo rằng lỗi sẽ được truyền ra ngoài để onError có thể xử lý
+  }
+};
+
+//Hook Add To Cart
+export function useUpdateCartByUserID () {
+  return useMutation({
+    mutationFn: updateCartByUserID,
+    onSuccess: () => {
+      toast.success('Update cart successfully !', {
+        position: 'top-center',
+        autoClose: 3000,
+      });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Update cart unsuccessfully !', {
+        position: 'top-center',
+        autoClose: 3000,
+      });
+    },
+  });
+}
