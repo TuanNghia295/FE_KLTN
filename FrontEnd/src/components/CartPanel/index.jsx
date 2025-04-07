@@ -9,13 +9,20 @@ import useStore from '../../store/useStore';
 const CartPanel = () => {
   // Lấy các trạng thái và hàm từ Zustand store
   const cartItems = useStore((state) => state.cartItems);
+  console.log(cartItems)
   const removeItemFromCart = useStore((state) => state.removeItemFromCart);
   const setOpenCartPanel = useStore((state) => state.setOpenCartPanel);
 
   // Tính toán tổng giá trị (subtotal, shipping, total)
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price || 0), 0);
+  const subtotal = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
   const shipping = 800; // Giả sử shipping cố định là 800$
   const total = subtotal + shipping;
+
+  // Hàm định dạng tiền tệ (Ví dụ)
+  const formatCurrency = (value) => {
+    if (value === undefined || value === null) return '';
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+  };
 
   return (
     <>
@@ -25,34 +32,41 @@ const CartPanel = () => {
       </div>
 
       <div>
-        <div className="scroll custom-scrollbar w-full max-h-[430px] overflow-y-scroll overflow-x-hidden py-3 px-4">
+        <div className="scroll custom-scrollbar w-full max-h-[660px] overflow-y-scroll overflow-x-hidden py-3 px-4">
           {cartItems.length === 0 ? (
             <p className="text-center text-gray-500">Your cart is empty</p>
           ) : (
             cartItems.map((item) => (
-              <div key={item.id} className="cartItem w-full flex items-center gap-4 mb-5">
+              <div key={item._id} className="cartItem w-full flex items-center gap-4 mb-5">
                 <div className="img w-[30%]">
                   <img
                     className="w-full"
                     src={
-                      item.image ||
-                      'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/598c8584-652e-4167-a659-86a043523c57/M+VAPOR+LITE+3+HC+C.png'
+                      Array.isArray(item.product.images) && item.product.images.length > 0 
+                      ? item.product.images[0].url
+                      : ""
                     }
                     alt={item.name}
                   />
                 </div>
                 <div className="info w-[60%]">
                   <h4 className="text-black font-[500]">
-                    <Link to={`/product/${item.id}`}>{item.name || 'Nike Dunk 2025'}</Link>
+                    <Link to={`/products/${item.product._id}`}>{item.product.name || 'Nike Dunk 2025'}</Link>
                   </h4>
-                  <p className="font-[300]">
-                    <span>Price: {item.price ? `${item.price}$` : '200$'}</span>
+                  <p className="font-[400]">
+                    <span>{item.product.price ? `${formatCurrency(item.product.price)}` : 'Null'}</span>
+                  </p>
+                  <p className="font-[400]">
+                    <span>Size: {item.size ? `${item.size}` : 'Null'}</span>
+                  </p>
+                  <p className="font-[400]">
+                    <span>Quantity: {item.quantity ? `${item.quantity}` : 'Null'}</span>
                   </p>
                 </div>
                 <div className="cursor-pointer">
                   <MdDelete
                     className="text-[30px] text-[#f1f1f1] hover:text-red-300 mr-4"
-                    onClick={() => removeItemFromCart(item.id)}
+                    onClick={() => removeItemFromCart(item._id)}
                   />
                 </div>
               </div>
@@ -63,15 +77,15 @@ const CartPanel = () => {
         <div className="bottomInfo absolute bottom-0 font-[300] py-3 px-3 w-full border-t border-[#f1f1f1] items-center justify-between">
           <div className="flex">
             <span>Sub: </span>
-            <span className="ml-auto">{subtotal}$</span>
+            <span className="ml-auto">{formatCurrency(subtotal)}</span>
           </div>
           <div className="flex">
             <span>Shipping: </span>
-            <span className="ml-auto">{shipping}$</span>
+            <span className="ml-auto">{formatCurrency(shipping)}</span>
           </div>
           <div className="flex">
             <span>Total: </span>
-            <span className="ml-auto">{total}$</span>
+            <span className="ml-auto">{formatCurrency(total)}</span>
           </div>
           <div className="flex flex-col w-full justify-center mt-4">
             <Link to="/checkout">

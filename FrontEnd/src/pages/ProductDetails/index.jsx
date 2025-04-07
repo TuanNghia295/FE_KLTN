@@ -28,7 +28,7 @@ const ProductDetails = () => {
   const { id } = useParams();
   //Lấy ra thông tin người dùng ở useStore Zustand
   const userInfo = useStore((state) => state.userInfo);
-  console.log('User Info:', userInfo); // Kiểm tra thông tin người dùng
+  // console.log('User Info:', userInfo); // Kiểm tra thông tin người dùng
 
   //Lấy thông tin sản phẩm
   const { productDetail, isLoading, error } = useProductDetail(id); // Giả sử hook trả về cả trạng thái loading và error

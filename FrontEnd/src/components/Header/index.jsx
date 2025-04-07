@@ -137,7 +137,9 @@ export default function Header() {
               <li>
                 <StyledEngineProvider injectFirst>
                   <CustomTooltip title="Giỏ hàng">
-                    <IconButton aria-label="cart" onClick={() => setOpenCartPanel(true)}>
+                    <IconButton aria-label="cart" onClick={() => {
+                      setOpenCartPanel(true)
+                      }}>
                       <StyledBadge badgeContent={cartItems.length} color="error">
                         <ShoppingCartIcon style={{ color: '#000' }} />
                       </StyledBadge>

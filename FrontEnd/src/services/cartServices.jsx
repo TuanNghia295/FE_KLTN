@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axiosClient from '../apis/axiosClient';
@@ -28,4 +28,23 @@ export function useAddToCart() {
       });
     },
   });
+}
+
+//Call API Get Cart by User ID
+const getCartByUserID = async ({ queryKey }) => {
+  const [_key, _id] = queryKey;
+  const response = await axiosClient.get(`/cart/cartInfo/${_id}`)
+  return response.items
+}
+
+//Hook Get Cart by User ID
+export const useGetCartByUserID = (_id) => {
+  const { data: listCart, isLoading: loadingCart } = useQuery({
+    queryKey: ['cart', _id],
+    queryFn: getCartByUserID,
+    enabled: !!_id, // chỉ gọi khi có _id
+    refetchOnWindowFocus: false,
+  });
+
+  return { listCart, loadingCart}
 }

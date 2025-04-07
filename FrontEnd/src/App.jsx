@@ -20,6 +20,7 @@ import { ToastContainer } from 'react-toastify';
 import OrderDetails from './pages/OrderDetails/index.jsx';
 import ScrollToTop from './components/Scroll/ScrollToTop.jsx';
 import useStore from './store/useStore.jsx';
+import { useGetCartByUserID } from '../src/services/cartServices.jsx';
 
 export const MainLayout = ({ children }) => (
   <>
@@ -34,10 +35,24 @@ export default function App() {
   const openCartPanel = useStore((state) => state.openCartPanel);
   const setOpenCartPanel = useStore((state) => state.setOpenCartPanel);
   const fetchUserInfo = useStore((state) => state.fetchUserInfo);
+  const userInfo = useStore((state) => state.userInfo);
+  const { listCart } = useGetCartByUserID(userInfo?._id);
+  const addItemToCart = useStore((state) => state.addItemToCart);
+  const clearCart = useStore((state) => state.clearCart);
 
   useEffect(() => {
     fetchUserInfo(); // Lấy thông tin người dùng khi ứng dụng khởi chạy
   }, [fetchUserInfo]);
+
+  useEffect(() => {
+    if (Array.isArray(listCart) && listCart.length > 0) {
+      clearCart(); // 🔄 clear trước khi thêm mới (optional)
+      listCart.forEach((item) => {
+        addItemToCart(item);
+      });
+    }
+  }, [listCart]);
+
 
   const toggleCartPanel = (newOpen) => () => {
     setOpenCartPanel(newOpen);

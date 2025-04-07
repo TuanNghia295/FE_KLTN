@@ -39,9 +39,9 @@ const useStore = create((set) => ({
     })),
 
   // Hàm để xóa sản phẩm khỏi giỏ hàng
-  removeItemFromCart: (id) =>
+  removeItemFromCart: (_id) =>
     set((state) => ({
-      cartItems: state.cartItems.filter((item) => item.id !== id),
+      cartItems: state.cartItems.filter((item) => item._id !== _id),
     })),
 
   // Hàm để xóa toàn bộ giỏ hàng

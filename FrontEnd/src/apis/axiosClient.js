@@ -45,7 +45,7 @@ axiosClient.interceptors.response.use(
         return axiosClient(error.config);
       } catch (refreshError) {
         localStorage.removeItem('accessToken');
-        window.location.href = '/'; // Chuyển hướng đến trang đăng nhập
+        // window.location.href = '/'; // Chuyển hướng đến trang đăng nhập
       }
     }
     return Promise.reject(error);
