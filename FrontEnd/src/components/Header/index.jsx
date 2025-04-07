@@ -95,8 +95,34 @@ export default function Header() {
               {/* User Login/Logout */}
               <li className="list-none block">
                 {userInfo ? (
-                  <div className="flex items-center text-[16px] gap-2" onClick={toggleMobileMenu}>
+                  <div className="relative" onClick={toggleMobileMenu}>
                     <Avatar alt={userInfo.fullName} src="/static/images/avatar/1.jpg" />
+                    {/* Sub Menu */}
+                    <ul
+                      className={`submenuProfile w-[200px] mt-2 right-0 shadow-2xl bg-[#fff] p-2 border border-[#00000094] rounded-xl absolute z-[100] text-[14px] flex flex-col text-center gap-1
+                  ${!openMobileMenu ? 'hidden' : 'block'}`}
+                      onClick={() => setOpenMobileMenu(false)}
+                    >
+                      <div className="infoUser flex flex-col border-b-2 border-[#f3f3f3]">
+                        {userInfo ? (
+                          <>
+                            <p className="font-[600]">{userInfo.fullName}</p>
+                            <p className="font-[300]">{userInfo.phone}</p>
+                          </>
+                        ) : (
+                          <p className="font-[600]">Guest</p>
+                        )}
+                      </div>
+                      <li className="hover:bg-[#f1f1f1] px-5 xl:px-10 py-2 rounded-md cursor-pointer">
+                        <Link to="/my-account">My Account</Link>
+                      </li>
+                      <li
+                        className="hover:bg-[#f1f1f1] px-5 xl:px-10 py-2 rounded-md cursor-pointer"
+                        onClick={handleLogout}
+                      >
+                        Log Out
+                      </li>
+                    </ul>
                   </div>
                 ) : (
                   <div>
@@ -105,32 +131,6 @@ export default function Header() {
                     </Link>
                   </div>
                 )}
-                {/* Sub Menu */}
-                <ul
-                  className={`submenuProfile right-10 mt-2 shadow-2xl bg-[#fff] p-2 border border-[#00000094] rounded-xl absolute z-50 text-[14px] flex flex-col text-center gap-1
-                  ${!openMobileMenu ? 'hidden' : 'block'}`}
-                  onClick={() => setOpenMobileMenu(false)}
-                >
-                  <div className="infoUser flex flex-col border-b-2 border-[#f3f3f3]">
-                    {userInfo ? (
-                      <>
-                        <p className="font-[600]">{userInfo.fullName}</p>
-                        <p className="font-[300]">{userInfo.phone}</p>
-                      </>
-                    ) : (
-                      <p className="font-[600]">Guest</p>
-                    )}
-                  </div>
-                  <li className="hover:bg-[#f1f1f1] px-5 xl:px-10 py-2 rounded-md cursor-pointer">
-                    <Link to="/my-account">My Account</Link>
-                  </li>
-                  <li
-                    className="hover:bg-[#f1f1f1] px-5 xl:px-10 py-2 rounded-md cursor-pointer"
-                    onClick={handleLogout}
-                  >
-                    Log Out
-                  </li>
-                </ul>
               </li>
 
               {/* Cart */}

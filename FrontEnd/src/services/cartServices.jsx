@@ -1,5 +1,7 @@
-import { useMutation } from "@tanstack/react-query"
-import axiosClient from "../apis/axiosClient"
+import { useMutation } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import axiosClient from '../apis/axiosClient';
 
 //Call API Add To Cart
 const addToCart = async (data) => {

@@ -83,13 +83,8 @@ export function useLogin() {
 }
 
 // API lấy thông tin người dùng
-export const getUserInfo = async (accesstoken) => {
-  const response = await axiosClient.get('/users/userInfo', {
-    headers: {
-      Authorization: `Bearer ${accesstoken}`, // Gửi token trong header
-    },
-  });
-
+export const getUserInfo = async () => {
+  const response = await axiosClient.get('/users/userInfo');
   return response.data;
 };
 

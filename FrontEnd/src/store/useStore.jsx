@@ -17,10 +17,10 @@ const useStore = create((set) => ({
 
   // Hàm để lấy thông tin người dùng từ API
   fetchUserInfo: async () => {
-    const accesstoken = localStorage.getItem('accesstoken');
-    if (accesstoken) {
+    const state = useStore.getState(); // Lấy toàn bộ state
+    if (state.userInfo === null && state.accesstoken) {
       try {
-        const response = await getUserInfo(accesstoken);
+        const response = await getUserInfo();
         set({ userInfo: response });
       } catch (error) {
         console.error('Failed to fetch user info:', error);

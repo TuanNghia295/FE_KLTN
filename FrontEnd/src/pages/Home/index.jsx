@@ -18,6 +18,7 @@ import 'swiper/css/pagination';
 import '../Home/style.css'; // Đảm bảo file này được tối ưu hoặc tree-shaking tốt
 import { useBanner } from '../../services/BannerServices';
 import { useProducts } from '../../services/productsService';
+import { getUserInfo } from '../../services/authServices'
 
 // Tách logic lấy số cột responsive
 const getColumns = () => (window.innerWidth < 768 ? 1 : window.innerWidth < 1024 ? 2 : 4); // Cập nhật logic responsive nếu cần
@@ -26,6 +27,10 @@ const Home = () => {
   const [columns, setColumns] = useState(getColumns);
   const { listBanner } = useBanner();
   const { productList, loadingProductList } = useProducts();
+
+  useEffect(() => {
+    getUserInfo()
+  }, [])
 
   // Xử lý responsive columns
   useEffect(() => {

@@ -11,6 +11,10 @@ import { useProductDetail, useProducts } from '../../services/productsService'; 
 
 import '../ProductDetails/style.css'; // <<<--- DÒNG NÀY ĐÃ BỊ XÓA
 
+//Call API Add To Cart (Setup & Tich Hop)
+import useStore from '../../store/useStore'; //Gọi Zustand useStore (Lưu trữ thông tin người dùng)
+import { useAddToCart } from '../../services/cartServices';
+
 // Hàm định dạng tiền tệ (Ví dụ)
 const formatCurrency = (value) => {
   if (value === undefined || value === null) return '';
@@ -18,20 +22,29 @@ const formatCurrency = (value) => {
 };
 
 const ProductDetails = () => {
+  //Call Api
+  const { mutate: addToCart, isLoading : loadingAddToCart } = useAddToCart(); 
+
   const { id } = useParams();
+   //Lấy ra thông tin người dùng ở useStore Zustand
+  const userInfo = useStore((state) => state.userInfo)
+
+  //Lấy thông tin sản phẩm
   const { productDetail, isLoading, error } = useProductDetail(id); // Giả sử hook trả về cả trạng thái loading và error
   const { productList, loadingProductList } = useProducts();
 
+  // console.log('Product Detail', productDetail)
   // console.log('Product List:', productList);
 
   const relativeProductList =
     Array.isArray(productList) && productList.length > 0
       ? productList.filter(
-          (product) => product?.categoryId?._id === productDetail?.categoryId?._id && product._id !== id
-        )
+        (product) => product?.categoryId?._id === productDetail?.categoryId?._id && product._id !== id
+      )
       : []; // Lọc sản phẩm liên quan
 
   const [selectedSize, setSelectedSize] = useState(null); // State lưu size đã chọn
+  const [selectedColor, setSelectedColor] = useState(null); // State lưu color đã chọn
 
   // Lấy ra tỉ lệ màn hình hiện tại để xác định số lượng slide hiển thị
   const [slidesPerView, setSlidesPerView] = useState(() => {
@@ -74,6 +87,15 @@ const ProductDetails = () => {
       </Box>
     );
   }
+
+  const data = { 
+    userId: userInfo?._id, 
+    productId: productDetail?.productId, 
+    size : selectedSize,
+    color : selectedColor,
+    quantity : 1
+   }
+   console.log(userInfo)
 
   // ---- Render khi có dữ liệu ----
   return (
@@ -125,12 +147,14 @@ const ProductDetails = () => {
                       <button
                         // Không cần class 'size-button' nữa vì dùng Tailwind hết
                         className={`border min-w-14 text-center px-4 py-2 rounded transition duration-300
-                                    ${
-                                      selectedSize === variation.size
-                                        ? 'bg-black text-white border-black' // Style khi được chọn
-                                        : 'bg-white text-black border-gray-300 hover:border-black' // Style mặc định
-                                    }`}
-                        onClick={() => setSelectedSize(variation.size)}
+                                    ${selectedSize === variation.size
+                            ? 'bg-black text-white border-black' // Style khi được chọn
+                            : 'bg-white text-black border-gray-300 hover:border-black' // Style mặc định
+                          }`}
+                        onClick={() => {
+                          setSelectedSize(variation.size)
+                          setSelectedColor(variation.color)
+                        }}
                       >
                         {variation.size}
                       </button>
@@ -150,7 +174,9 @@ const ProductDetails = () => {
                 variant="contained" // Sử dụng variant của MUI cho rõ ràng
                 className="!bg-[#f1f1f1] !text-black !w-full !py-3 !mb-3 !shadow-none hover:!bg-gray-300"
                 disabled={!selectedSize} // Vô hiệu hóa nếu chưa chọn size
-                onClick={() => console.log('Add to cart:', productDetail._id, selectedSize)} // Thêm logic ở đây
+                onClick={() => {
+                  addToCart(data)
+                }} // Thêm logic ở đây
               >
                 Add to Cart
               </Button>
