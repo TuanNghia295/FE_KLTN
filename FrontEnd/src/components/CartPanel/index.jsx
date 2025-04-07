@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { Fragment, useState } from 'react';
 import { IoCloseSharp } from 'react-icons/io5';
 import { MdDelete } from 'react-icons/md';
 import '../CartPanel/style.css';
 import { Link } from 'react-router-dom';
 import { Button } from '@mui/material';
 import useStore from '../../store/useStore';
+import ChooseSizeList from '../ChooseSizeList';
+import ChooseQuantity from '../ChooseQuantity';
 
 const CartPanel = () => {
   // Lấy các trạng thái và hàm từ Zustand store
@@ -42,9 +44,9 @@ const CartPanel = () => {
                   <img
                     className="w-full"
                     src={
-                      Array.isArray(item.product.images) && item.product.images.length > 0 
-                      ? item.product.images[0].url
-                      : ""
+                      Array.isArray(item.product.images) && item.product.images.length > 0
+                        ? item.product.images[0].url
+                        : ""
                     }
                     alt={item.name}
                   />
@@ -56,12 +58,23 @@ const CartPanel = () => {
                   <p className="font-[400]">
                     <span>{item.product.price ? `${formatCurrency(item.product.price)}` : 'Null'}</span>
                   </p>
-                  <p className="font-[400]">
-                    <span>Size: {item.size ? `${item.size}` : 'Null'}</span>
-                  </p>
-                  <p className="font-[400]">
+                  <div className="font-[400]">
+                    {item.size ? (
+                      <Fragment>
+                        Size:
+                        <ChooseSizeList sizeDefault={item.size} sizeChoose={item.product.variations} onChange={(e) => {
+                          // Cập nhật size cho sản phẩm khi người dùng thay đổi
+                          const newSize = e.target.value;
+                          // Giả sử bạn có một hàm cập nhật trong store để thay đổi size
+                          useStore.getState().updateItemSize(item._id, newSize);
+                        }} />
+                      </Fragment>
+                    ) : ('Null')}
+                  </div>
+                  <div className="font-[400]">
                     <span>Quantity: {item.quantity ? `${item.quantity}` : 'Null'}</span>
-                  </p>
+                    <ChooseQuantity quantity={item.quantity} />
+                  </div>
                 </div>
                 <div className="cursor-pointer">
                   <MdDelete

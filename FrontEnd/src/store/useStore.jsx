@@ -38,6 +38,14 @@ const useStore = create((set) => ({
       cartItems: [...state.cartItems, item],
     })),
 
+  updateItemSize: (id, newSize) => {
+    set((state) => ({
+      cartItems: state.cartItems.map((item) =>
+        item._id === id ? { ...item, size: newSize } : item
+      ),
+    }));
+  },
+
   // Hàm để xóa sản phẩm khỏi giỏ hàng
   removeItemFromCart: (_id) =>
     set((state) => ({
