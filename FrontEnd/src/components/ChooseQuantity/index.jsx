@@ -1,34 +1,69 @@
 import React, { useState } from 'react';
+import { Button, TextField, Box } from '@mui/material';
 
-const ChooseQuantity = ({ quantity}) => {
-  const [newQuantity, setNewQuantity] = useState(quantity)
+const ChooseQuantity = ({ quantity }) => {
+  const [newQuantity, setNewQuantity] = useState(quantity);
 
   const increase = () => {
-    if (newQuantity < 200 ) setNewQuantity(newQuantity + 1);
+    if (newQuantity < 200) setNewQuantity(newQuantity + 1);
   };
 
   const decrease = () => {
-    if (newQuantity >= 1 ) setNewQuantity(newQuantity - 1);
+    if (newQuantity > 1) setNewQuantity(newQuantity - 1);
   };
 
   const handleChange = (e) => {
-    const value = parseInt(e.target.value, 10);
-    if (!isNaN(value)) {
-      setNewQuantity(value);
+    const value = e.target.value;
+
+    // Cho phép giá trị trống hoặc số hợp lệ
+    if (value === '' || (/^\d+$/.test(value) && parseInt(value, 10) >= 1 && parseInt(value, 10) <= 200)) {
+      setNewQuantity(value === '' ? '' : parseInt(value, 10));
+    }
+  };
+
+  const handleBlur = () => {
+    // Đặt giá trị mặc định nếu người dùng để trống hoặc nhập sai
+    if (newQuantity === '' || isNaN(newQuantity) || newQuantity < 1) {
+      setNewQuantity(1);
+    } else if (newQuantity > 200) {
+      setNewQuantity(200);
     }
   };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <button onClick={decrease}>-</button>
-      <input
-        type="number"
+    <Box display="flex" alignItems="center" gap={1}>
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={decrease}
+        disabled={newQuantity <= 1}
+        sx={{ minWidth: '36px', padding: 0 }}
+      >
+        -
+      </Button>
+      <TextField
+        type="text"
         value={newQuantity}
         onChange={handleChange}
-        style={{ width: 50, textAlign: 'center' }}
+        onBlur={handleBlur}
+        inputProps={{
+          min: 1,
+          max: 200,
+          style: { textAlign: 'center' },
+        }}
+        size="small"
+        sx={{ width: '60px' }}
       />
-      <button onClick={increase}>+</button>
-    </div>
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={increase}
+        disabled={newQuantity >= 200}
+        sx={{ minWidth: '36px', padding: 0 }}
+      >
+        +
+      </Button>
+    </Box>
   );
 };
 

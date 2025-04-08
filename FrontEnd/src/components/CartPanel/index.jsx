@@ -18,10 +18,10 @@ const CartPanel = () => {
 
   //Call API Update Cart By User ID
   const userId = useStore((state) => state.userInfo?._id);
-  const {mutate: updateCart} = useUpdateCartByUserID()
+  const { mutate: updateCart } = useUpdateCartByUserID();
 
   // Tính toán tổng giá trị (subtotal, shipping, total)
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  const subtotal = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const shipping = 800; // Giả sử shipping cố định là 800$
   const total = subtotal + shipping;
 
@@ -44,58 +44,66 @@ const CartPanel = () => {
             <p className="text-center text-gray-500">Your cart is empty</p>
           ) : (
             cartItems.map((item) => (
-              <div key={item._id} className="cartItem w-full flex items-center gap-4 mb-5">
+              <div key={item._id} className="cartItem flex items-center gap-4 mb-5 border-b pb-4">
+                {/* Hình ảnh sản phẩm */}
                 <div className="img w-[30%]">
                   <img
-                    className="w-full"
+                    className="w-full rounded-md object-cover"
                     src={
                       Array.isArray(item.product.images) && item.product.images.length > 0
-                        ? item.product.images[0].url
-                        : ""
+                        ? item.product?.images[0]?.url
+                        : ''
                     }
-                    alt={item.name}
+                    alt={item?.name}
                   />
                 </div>
-                <div className="info w-[60%]">
-                  <h4 className="text-black font-[500]">
-                    <Link to={`/products/${item.product._id}`}>{item.product.name || 'Nike Dunk 2025'}</Link>
+
+                {/* Thông tin sản phẩm */}
+                <div className="info w-[70%] flex flex-col gap-2">
+                  <h4 className="text-black font-semibold text-[16px] leading-tight">
+                    <Link to={`/products/${item.product._id}`} className="hover:underline">
+                      {item.product?.name || 'Nike Dunk 2025'}
+                    </Link>
                   </h4>
-                  <p className="font-[400]">
-                    <span>{item.product.price ? `${formatCurrency(item.product.price)}` : 'Null'}</span>
+                  <p className="text-gray-600 text-[14px]">
+                    {item.product.price ? `${formatCurrency(item.product.price)}` : 'Null'}
                   </p>
-                  <div className="font-[400]">
+
+                  {console.log('item', item)}
+
+                  {/* Chọn size */}
+                  <div className="text-gray-700 text-[14px] flex items-center gap-2">
+                    <span className="font-medium">Size:</span>
                     {item.size ? (
-                      <Fragment>
-                        Size:
-                        <ChooseSizeList sizeDefault={item.size} sizeChoose={item.product.variations} onChange={(e) => {
-                          // Cập nhật size cho sản phẩm khi người dùng thay đổi
-                          const newSize = e.target.value;
-                          // Giả sử bạn có một hàm cập nhật trong store để thay đổi size
-                          useStore.getState().updateItemSize(item._id, newSize);
-                          // Size Update To Backend
-                          const data = {
-                            userId : userId,
-                            productId : item.productId,
-                            size : newSize,
-                            color : item.color,
-                            quantity : 5
-                          }
-                          console.log(data)
-                          updateCart(data)
-                        }} />
-                      </Fragment>
-                    ) : ('Null')}
+                      <ChooseSizeList
+                        sizeDefault={item.size}
+                        sizeChoose={item.product.variations}
+                        onChange={(selectedVariation) => {
+                          // Gọi API để cập nhật size
+                          updateCart({
+                            userId: userId,
+                            productId: item.product?.productId,
+                            size: selectedVariation?.size,
+                            color: selectedVariation?.color, // Nếu biến thể có thuộc tính color
+                            quantity: item?.quantity, // Giữ nguyên số lượng hiện tại
+                          });
+                        }}
+                      />
+                    ) : (
+                      <span className="text-gray-500">Null</span>
+                    )}
                   </div>
-                  <div className="font-[400]">
-                    <span>Quantity: {item.quantity ? `${item.quantity}` : 'Null'}</span>
-                    <ChooseQuantity quantity={item.quantity} />
+
+                  {/* Chọn số lượng */}
+                  <div className="text-gray-700 text-[14px] flex items-center gap-2">
+                    <span className="font-medium">Quantity:</span>
+                    <ChooseQuantity quantity={item?.quantity} />
                   </div>
                 </div>
-                <div className="cursor-pointer">
-                  <MdDelete
-                    className="text-[30px] text-[#f1f1f1] hover:text-red-300 mr-4"
-                    onClick={() => removeItemFromCart(item._id)}
-                  />
+
+                {/* Nút xóa */}
+                <div className="cursor-pointer text-gray-400 hover:text-red-500">
+                  <MdDelete className="text-[24px]" onClick={() => removeItemFromCart(item?._id)} />
                 </div>
               </div>
             ))
