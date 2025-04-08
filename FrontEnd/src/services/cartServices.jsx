@@ -39,56 +39,51 @@ export function useAddToCart() {
 //Call API Get Cart by User ID
 const getCartByUserID = async ({ queryKey }) => {
   const [_key, _id] = queryKey;
-  const response = await axiosClient.get(`/cart/cartInfo/${_id}`)
-  return response.items
-}
+  const response = await axiosClient.get(`/cart/cartInfo/${_id}`);
+  return response.items;
+};
 
 //Hook Get Cart by User ID
 export const useGetCartByUserID = (_id) => {
-  const { data: listCart, isLoading: loadingCart, refetch : refetchCart } = useQuery({
+  const {
+    data: listCart,
+    isLoading: loadingCart,
+    refetch: refetchCart,
+  } = useQuery({
     queryKey: ['cart', _id],
     queryFn: getCartByUserID,
     enabled: !!_id, // chỉ gọi khi có _id
     refetchOnWindowFocus: false,
   });
 
-  return { listCart, loadingCart, refetchCart }
-}
+  return { listCart, loadingCart, refetchCart };
+};
 
 //Call API Update Cart by User ID
-// const updateCartByUserID = async ({userId,data}) => {
-//   try {
-//     const response = await axiosClient.put(`/cart/update/${userId}`, data);
-//     return response;
-//   } catch (error) {
-//     console.error('Error while updating cart:', error);
-//     throw error; // Đảm bảo rằng lỗi sẽ được truyền ra ngoài để onError có thể xử lý
-//   }
-// };
-
 const updateCartByUserID = async ({ userId, productId, size, color, quantity }) => {
   const searchParams = new URLSearchParams({
     productId,
     size,
     color,
-    quantity
+    quantity,
   }).toString();
   const response = await axiosClient.put(`/cart/update/${userId}?${searchParams}`);
-  return response;
+  return response.data; // Ensure the response data is returned
 };
 
 //Hook Update Cart
 export function useUpdateCartByUserID() {
   return useMutation({
     mutationFn: updateCartByUserID,
-    onSuccess: () => {
-      toast.success('Update cart successfully !', {
+    onSuccess: (updatedCart) => {
+      toast.success('Cart updated successfully!', {
         position: 'top-center',
         autoClose: 3000,
       });
+      console.log('Updated cart:', updatedCart); // Log the updated cart for debugging
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Update cart unsuccessfully !', {
+      toast.error(error.response?.data?.message || 'Failed to update cart!', {
         position: 'top-center',
         autoClose: 3000,
       });

@@ -12,7 +12,7 @@ import { useUpdateCartByUserID } from '../../services/cartServices';
 const CartPanel = () => {
   // Lấy các trạng thái và hàm từ Zustand store
   const cartItems = useStore((state) => state.cartItems);
-  // console.log(cartItems)
+  const setCartItems = useStore((state) => state.setCartItems);
   const removeItemFromCart = useStore((state) => state.removeItemFromCart);
   const setOpenCartPanel = useStore((state) => state.setOpenCartPanel);
 
@@ -29,6 +29,23 @@ const CartPanel = () => {
   const formatCurrency = (value) => {
     if (value === undefined || value === null) return '';
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+  };
+
+  const handleQuantityZero = (itemId) => {
+    const itemToRemove = cartItems.find((item) => item._id === itemId);
+    if (!itemToRemove) return;
+
+    const updatedCartItems = cartItems.filter((item) => item._id !== itemId);
+    setCartItems(updatedCartItems);
+
+    // Call updateCartByUserID to update the server with quantity 0 (or remove it)
+    updateCart({
+      userId: userId,
+      productId: itemToRemove.productId,
+      size: itemToRemove.size,
+      color: itemToRemove.color,
+      quantity: 0, // Indicate removal or update
+    });
   };
 
   return (
@@ -97,7 +114,26 @@ const CartPanel = () => {
                   {/* Chọn số lượng */}
                   <div className="text-gray-700 text-[14px] flex items-center gap-2">
                     <span className="font-medium">Quantity:</span>
-                    <ChooseQuantity quantity={item?.quantity} />
+                    <ChooseQuantity
+                      quantity={item?.quantity}
+                      onQuantityZero={() => handleQuantityZero(item._id)}
+                      onUpdateQuantity={(newQuantity) => {
+                        // Cập nhật số lượng trong Zustand
+                        const updatedCartItems = cartItems.map((cartItem) =>
+                          cartItem._id === item._id ? { ...cartItem, quantity: newQuantity } : cartItem
+                        );
+                        setCartItems(updatedCartItems);
+
+                        // Gọi API để cập nhật giỏ hàng mới
+                        updateCart({
+                          userId: userId,
+                          productId: item.product?.productId,
+                          size: item.size,
+                          color: item.color,
+                          quantity: newQuantity, // Cập nhật số lượng mới
+                        });
+                      }}
+                    />
                   </div>
                 </div>
 

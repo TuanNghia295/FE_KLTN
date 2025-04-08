@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, TextField, Box } from '@mui/material';
 
-const ChooseQuantity = ({ quantity }) => {
+const ChooseQuantity = ({ quantity, onQuantityZero, onUpdateQuantity }) => {
   const [newQuantity, setNewQuantity] = useState(quantity);
 
   const increase = () => {
@@ -9,26 +9,43 @@ const ChooseQuantity = ({ quantity }) => {
   };
 
   const decrease = () => {
-    if (newQuantity > 1) setNewQuantity(newQuantity - 1);
+    if (newQuantity > 0) setNewQuantity(newQuantity - 1);
   };
 
   const handleChange = (e) => {
     const value = e.target.value;
 
     // Cho phép giá trị trống hoặc số hợp lệ
-    if (value === '' || (/^\d+$/.test(value) && parseInt(value, 10) >= 1 && parseInt(value, 10) <= 200)) {
+    if (value === '' || (/^\d+$/.test(value) && parseInt(value, 10) >= 0 && parseInt(value, 10) <= 200)) {
       setNewQuantity(value === '' ? '' : parseInt(value, 10));
     }
   };
 
   const handleBlur = () => {
     // Đặt giá trị mặc định nếu người dùng để trống hoặc nhập sai
-    if (newQuantity === '' || isNaN(newQuantity) || newQuantity < 1) {
-      setNewQuantity(1);
+    if (newQuantity === '' || isNaN(newQuantity) || newQuantity < 0) {
+      setNewQuantity(0);
     } else if (newQuantity > 200) {
       setNewQuantity(200);
     }
+
+    // Nếu số lượng về 0, gọi hàm cập nhật giỏ hàng và xóa sản phẩm
+    if (newQuantity === 0) {
+      onQuantityZero(); // Gọi hàm khi số lượng về 0
+    } else {
+      // Gọi useUpdateCart để cập nhật số lượng mới
+      onUpdateQuantity(newQuantity);
+    }
   };
+
+  useEffect(() => {
+    if (newQuantity === 0) {
+      onQuantityZero(); // Gọi hàm xóa sản phẩm khỏi giỏ hàng khi số lượng về 0
+    }
+    if (newQuantity > 0) {
+      onUpdateQuantity(newQuantity); // Gọi hàm cập nhật số lượng mới
+    }
+  }, [newQuantity]);
 
   return (
     <Box display="flex" alignItems="center" gap={1}>
@@ -36,7 +53,7 @@ const ChooseQuantity = ({ quantity }) => {
         variant="outlined"
         size="small"
         onClick={decrease}
-        disabled={newQuantity <= 1}
+        disabled={newQuantity <= 0}
         sx={{ minWidth: '36px', padding: 0 }}
       >
         -
@@ -47,7 +64,7 @@ const ChooseQuantity = ({ quantity }) => {
         onChange={handleChange}
         onBlur={handleBlur}
         inputProps={{
-          min: 1,
+          min: 0,
           max: 200,
           style: { textAlign: 'center' },
         }}
