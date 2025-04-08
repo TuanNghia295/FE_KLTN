@@ -106,7 +106,7 @@ const ProductListing = () => {
                   {Array.isArray(productList) && productList.length === 0 ? (
                     <p>Không có sản phẩm nào.</p>
                   ) : (
-                    productList.map((product) => <ProductItem key={product._id} product={product} />)
+                    productList?.map((product) => <ProductItem key={product._id} product={product} />)
                   )}
                 </>
               ) : (

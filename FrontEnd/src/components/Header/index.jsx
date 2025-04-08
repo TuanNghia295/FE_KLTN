@@ -140,7 +140,7 @@ export default function Header() {
                     <IconButton aria-label="cart" onClick={() => {
                       setOpenCartPanel(true)
                       }}>
-                      <StyledBadge badgeContent={cartItems.length} color="error">
+                      <StyledBadge badgeContent={cartItems?.length} color="error">
                         <ShoppingCartIcon style={{ color: '#000' }} />
                       </StyledBadge>
                     </IconButton>

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { getUserInfo } from '../services/authServices.jsx';
+import { useGetCartByUserID } from '../services/cartServices.jsx';
 
 const useStore = create((set) => ({
   // Trạng thái người dùng
@@ -17,7 +18,7 @@ const useStore = create((set) => ({
 
   // Hàm để lấy thông tin người dùng từ API
   fetchUserInfo: async () => {
-    const state = useStore.getState(); // Lấy toàn bộ state
+    const state = useStore.getState();
     if (state.userInfo === null && state.accesstoken) {
       try {
         const response = await getUserInfo();
@@ -31,6 +32,9 @@ const useStore = create((set) => ({
 
   // Trạng thái giỏ hàng
   cartItems: [],
+
+  // Hàm để get sản phẩm từ database
+  setCartItems: (item) => set({ cartItems: item }),
 
   // Hàm để thêm sản phẩm vào giỏ hàng
   addItemToCart: (item) =>

@@ -21,7 +21,7 @@ const CartPanel = () => {
   const { mutate: updateCart } = useUpdateCartByUserID();
 
   // Tính toán tổng giá trị (subtotal, shipping, total)
-  const subtotal = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const subtotal = cartItems?.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const shipping = 800; // Giả sử shipping cố định là 800$
   const total = subtotal + shipping;
 
@@ -34,16 +34,16 @@ const CartPanel = () => {
   return (
     <>
       <div className="flex items-center justify-between py-3 px-4 border-b border-[#f1f1f1]">
-        <h1 className="font-[300] text-[18px]">Shopping Cart ({cartItems.length})</h1>
+        <h1 className="font-[300] text-[18px]">Shopping Cart ({cartItems?.length})</h1>
         <IoCloseSharp className="text-[20px] cursor-pointer" onClick={() => setOpenCartPanel(false)} />
       </div>
 
       <div>
         <div className="scroll custom-scrollbar w-full max-h-[660px] overflow-y-scroll overflow-x-hidden py-3 px-4">
-          {cartItems.length === 0 ? (
+          {cartItems?.length === 0 ? (
             <p className="text-center text-gray-500">Your cart is empty</p>
           ) : (
-            cartItems.map((item) => (
+            cartItems?.map((item) => (
               <div key={item._id} className="cartItem flex items-center gap-4 mb-5 border-b pb-4">
                 {/* Hình ảnh sản phẩm */}
                 <div className="img w-[30%]">
@@ -69,7 +69,7 @@ const CartPanel = () => {
                     {item.product.price ? `${formatCurrency(item.product.price)}` : 'Null'}
                   </p>
 
-                  {console.log('item', item)}
+                  {/* {console.log('item', item)} */}
 
                   {/* Chọn size */}
                   <div className="text-gray-700 text-[14px] flex items-center gap-2">

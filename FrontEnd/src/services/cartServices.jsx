@@ -2,18 +2,24 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axiosClient from '../apis/axiosClient';
+import useStore from '../store/useStore'; //Gọi Zustand useStore (Lưu trữ thông tin gio hang)
 
 //Call API Add To Cart
 const addToCart = async (data) => {
   const response = await axiosClient.post('/cart/add', data);
-  return response;
+  return response.items;
 };
 
 //Hook Add To Cart
 export function useAddToCart() {
+  const setCartItems = useStore((state) => state.setCartItems);
+  const userId = useStore((state) => state.userInfo?._id);
+  const { listCart, refetchCart } = useGetCartByUserID(userId);
+
   return useMutation({
     mutationFn: addToCart,
-    onSuccess: () => {
+    onSuccess: async () => {
+      await refetchCart();
       toast.success('Add product to cart successfully !', {
         position: 'top-center',
         autoClose: 3000,
@@ -39,14 +45,14 @@ const getCartByUserID = async ({ queryKey }) => {
 
 //Hook Get Cart by User ID
 export const useGetCartByUserID = (_id) => {
-  const { data: listCart, isLoading: loadingCart } = useQuery({
+  const { data: listCart, isLoading: loadingCart, refetch : refetchCart } = useQuery({
     queryKey: ['cart', _id],
     queryFn: getCartByUserID,
     enabled: !!_id, // chỉ gọi khi có _id
     refetchOnWindowFocus: false,
   });
 
-  return { listCart, loadingCart}
+  return { listCart, loadingCart, refetchCart }
 }
 
 //Call API Update Cart by User ID
@@ -71,8 +77,8 @@ const updateCartByUserID = async ({ userId, productId, size, color, quantity }) 
   return response;
 };
 
-//Hook Add To Cart
-export function useUpdateCartByUserID () {
+//Hook Update Cart
+export function useUpdateCartByUserID() {
   return useMutation({
     mutationFn: updateCartByUserID,
     onSuccess: () => {

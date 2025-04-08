@@ -44,7 +44,7 @@ axiosClient.interceptors.response.use(
         error.config.headers.Authorization = `Bearer ${newAccessToken}`;
         return axiosClient(error.config);
       } catch (refreshError) {
-        localStorage.removeItem('accessToken');
+        localStorage.removeItem('accesstoken');
         // window.location.href = '/'; // Chuyển hướng đến trang đăng nhập
       }
     }

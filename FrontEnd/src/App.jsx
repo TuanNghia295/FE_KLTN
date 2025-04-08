@@ -35,23 +35,29 @@ export default function App() {
   const openCartPanel = useStore((state) => state.openCartPanel);
   const setOpenCartPanel = useStore((state) => state.setOpenCartPanel);
   const fetchUserInfo = useStore((state) => state.fetchUserInfo);
-  const userInfo = useStore((state) => state.userInfo);
-  const { listCart } = useGetCartByUserID(userInfo?._id);
-  const addItemToCart = useStore((state) => state.addItemToCart);
-  const clearCart = useStore((state) => state.clearCart);
+  // Lấy thông tin giỏ hàng từ database (React Query vào Zustand)
+  const userInfo = useStore((state) => state.userInfo); // Lấy ra user id từ fetchUserInfo ở Zustand
+  const { listCart } = useGetCartByUserID(userInfo?._id); // List ra danh sách bằng user id
+  const setCartItems = useStore((state) => state.setCartItems); // Dùng useEffect để bỏ sản phẩm từ database lưu trữ vào Zustand
 
   useEffect(() => {
-    fetchUserInfo(); // Lấy thông tin người dùng khi ứng dụng khởi chạy
+    fetchUserInfo();
   }, [fetchUserInfo]);
 
   useEffect(() => {
-    if (Array.isArray(listCart) && listCart.length > 0) {
-      clearCart(); // 🔄 clear trước khi thêm mới (optional)
-      listCart.forEach((item) => {
-        addItemToCart(item);
-      });
+    if (listCart && listCart.length > 0) {
+      setCartItems(listCart)
     }
   }, [listCart]);
+
+  // useEffect(() => {
+  //   if (Array.isArray(listCart) && listCart.length > 0) {
+  //     clearCart(); // 🔄 clear trước khi thêm mới (optional)
+  //     listCart.forEach((item) => {
+  //       addItemToCart(item);
+  //     });
+  //   }
+  // }, [listCart]);
 
 
   const toggleCartPanel = (newOpen) => () => {

@@ -23,8 +23,8 @@ const formatCurrency = (value) => {
 
 const ProductDetails = () => {
   //Call Api
-  const { mutate: addToCart, isLoading: loadingAddToCart } = useAddToCart();
-
+  const { mutate: handleAddToCart, isPending: loadingAddToCart } = useAddToCart();
+  
   const { id } = useParams();
   //Lấy ra thông tin người dùng ở useStore Zustand
   const userInfo = useStore((state) => state.userInfo);
@@ -176,10 +176,10 @@ const ProductDetails = () => {
                 className="!bg-[#f1f1f1] !text-black !w-full !py-3 !mb-3 !shadow-none hover:!bg-gray-300"
                 disabled={!selectedSize} // Vô hiệu hóa nếu chưa chọn size
                 onClick={() => {
-                  addToCart(data);
+                  handleAddToCart(data);
                 }} // Thêm logic ở đây
               >
-                Add to Cart
+                {loadingAddToCart ? "Loading..." : "Add To Cart"}
               </Button>
               <Button
                 variant="contained"
