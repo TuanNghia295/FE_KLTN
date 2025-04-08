@@ -50,14 +50,25 @@ export const useGetCartByUserID = (_id) => {
 }
 
 //Call API Update Cart by User ID
-const updateCartByUserID = async ({userId,data}) => {
-  try {
-    const response = await axiosClient.put(`/cart/update/${userId}`, data);
-    return response;
-  } catch (error) {
-    console.error('Error while updating cart:', error);
-    throw error; // Đảm bảo rằng lỗi sẽ được truyền ra ngoài để onError có thể xử lý
-  }
+// const updateCartByUserID = async ({userId,data}) => {
+//   try {
+//     const response = await axiosClient.put(`/cart/update/${userId}`, data);
+//     return response;
+//   } catch (error) {
+//     console.error('Error while updating cart:', error);
+//     throw error; // Đảm bảo rằng lỗi sẽ được truyền ra ngoài để onError có thể xử lý
+//   }
+// };
+
+const updateCartByUserID = async ({ userId, productId, size, color, quantity }) => {
+  const searchParams = new URLSearchParams({
+    productId,
+    size,
+    color,
+    quantity
+  }).toString();
+  const response = await axiosClient.put(`/cart/update/${userId}?${searchParams}`);
+  return response;
 };
 
 //Hook Add To Cart

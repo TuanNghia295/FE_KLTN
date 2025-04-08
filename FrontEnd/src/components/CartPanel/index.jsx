@@ -75,13 +75,12 @@ const CartPanel = () => {
                           // Size Update To Backend
                           const data = {
                             userId : userId,
-                            data : {
-                              userId : userId,
-                              productId : item.productId,
-                              size : newSize,
-                            }
+                            productId : item.productId,
+                            size : newSize,
+                            color : item.color,
+                            quantity : 5
                           }
-                          // console.log(data)
+                          console.log(data)
                           updateCart(data)
                         }} />
                       </Fragment>
