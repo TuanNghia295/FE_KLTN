@@ -22,7 +22,7 @@ const CartPanel = () => {
     isLoading: isLoadingShippingFee,
     isError: isErrorShippingFee,
     error: shippingError,
-  } = useShippingFee(userInfo?.address || ''); // Truyền giá trị mặc định nếu address undefined
+  } = useShippingFee(userInfo?.address[0] || ''); // Truyền giá trị mặc định nếu address undefined
 
   //Call API Update Cart By User ID
   const userId = useStore((state) => state.userInfo?._id);

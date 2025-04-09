@@ -25,6 +25,7 @@ const CheckOut = () => {
   const productItems = cartItems; // Thay thế productItems bằng cartItems
 
   const userInfo = useStore((state) => state.userInfo);
+  console.log('userInfo', userInfo);
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cash'); // 'cash' hoặc 'bank_transfer' theo backend
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' }); // State cho thông báo
@@ -40,7 +41,7 @@ const CheckOut = () => {
     isLoading: isLoadingShippingFee,
     isError: isErrorShippingFee,
     error: shippingError,
-  } = useShippingFee(userInfo?.address || ''); // Truyền giá trị mặc định nếu address undefined
+  } = useShippingFee(userInfo?.address[0] || ''); // Truyền giá trị mặc định nếu address undefined
 
   // --- Gọi API Tạo Đơn Hàng (Mutation) ---
   const {
@@ -190,7 +191,7 @@ const CheckOut = () => {
                 <TextField
                   fullWidth
                   label="Address"
-                  value={userInfo?.address || ''}
+                  value={userInfo?.address[0] || ''}
                   variant="outlined"
                   size="small"
                   multiline
