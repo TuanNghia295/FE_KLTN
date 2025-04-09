@@ -37,7 +37,6 @@ const ProductListing = () => {
           <Link underline="hover" color="inherit" to="/productListing">
             ProductListing
           </Link>
-          <Typography sx={{ color: 'text.primary' }}>Breadcrumbs</Typography>
         </Breadcrumbs>
         <h3 className="font-bold text-black text-[30px] mt-4">ALL COLLECTION</h3>
       </div>

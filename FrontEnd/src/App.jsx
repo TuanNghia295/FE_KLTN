@@ -9,7 +9,6 @@ import Register from './pages/Register/index.jsx';
 import Drawer from '@mui/material/Drawer';
 import { useEffect } from 'react';
 import CartPanel from './components/CartPanel/index.jsx';
-import Cart from './pages/Cart/index.jsx';
 import CheckOut from './pages/CheckOut/index.jsx';
 import MyAccount from './pages/MyAccount/index.jsx';
 import Orders from './pages/Orders/index.jsx';
@@ -46,7 +45,7 @@ export default function App() {
 
   useEffect(() => {
     if (listCart && listCart.length > 0) {
-      setCartItems(listCart)
+      setCartItems(listCart);
     }
   }, [listCart]);
 
@@ -58,7 +57,6 @@ export default function App() {
   //     });
   //   }
   // }, [listCart]);
-
 
   const toggleCartPanel = (newOpen) => () => {
     setOpenCartPanel(newOpen);
@@ -91,15 +89,7 @@ export default function App() {
           <Route path={'/login'} exact={true} element={<Login />} />
           <Route path={'/register'} exact={true} element={<Register />} />
           <Route path={'/verify'} exact={true} element={<VerifyAccount />} />
-          <Route
-            path={'/cart'}
-            exact={true}
-            element={
-              <MainLayout>
-                <Cart />
-              </MainLayout>
-            }
-          />
+
           <Route
             path={'/checkout'}
             exact={true}

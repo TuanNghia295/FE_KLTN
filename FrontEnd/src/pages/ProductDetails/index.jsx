@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
-import { Link as RouterLink, useParams } from 'react-router-dom'; // Import Link as RouterLink
-import { Button, CircularProgress, Box } from '@mui/material'; // Import CircularProgress for loading
+import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'; // Import Link as RouterLink
+import { Button, CircularProgress, Box, Snackbar, Alert } from '@mui/material'; // Import CircularProgress for loading and Snackbar for notifications
 
 // Giả sử Gallery là component hiển thị ảnh (có thể có zoom tích hợp)
 import Gallery from '../../components/gallery';
@@ -24,7 +24,7 @@ const formatCurrency = (value) => {
 const ProductDetails = () => {
   //Call Api
   const { mutate: handleAddToCart, isPending: loadingAddToCart } = useAddToCart();
-  
+  const navigate = useNavigate(); // Sử dụng useNavigate để điều hướng
   const { id } = useParams();
   //Lấy ra thông tin người dùng ở useStore Zustand
   const userInfo = useStore((state) => state.userInfo);
@@ -63,6 +63,8 @@ const ProductDetails = () => {
     return () => window.removeEventListener('resize', handleResize); // Cleanup listener
   }, []);
 
+  const [showSnackbar, setShowSnackbar] = useState(false); // State for Snackbar
+
   // ---- Xử lý trạng thái Loading và Error ----
   if (isLoading) {
     return (
@@ -95,6 +97,14 @@ const ProductDetails = () => {
     size: selectedSize,
     color: selectedColor,
     quantity: 1,
+  };
+
+  const handleBuyNow = async (data) => {
+    Promise.all([
+      handleAddToCart(data), // Thêm vào giỏ hàng
+    ]).then(() => {
+      navigate('/checkout'); // Chuyển hướng đến thanh toán
+    });
   };
 
   // ---- Render khi có dữ liệu ----
@@ -179,16 +189,33 @@ const ProductDetails = () => {
                   handleAddToCart(data);
                 }} // Thêm logic ở đây
               >
-                {loadingAddToCart ? "Loading..." : "Add To Cart"}
+                {loadingAddToCart ? 'Loading...' : 'Add To Cart'}
               </Button>
               <Button
                 variant="contained"
                 className="!bg-black !text-white !w-full !py-3 !shadow-md hover:!bg-gray-800"
-                disabled={!selectedSize} // Vô hiệu hóa nếu chưa chọn size
-                onClick={() => console.log('Buy now:', productDetail._id, selectedSize)} // Thêm logic ở đây
+                onClick={() => {
+                  if (!selectedSize) {
+                    setShowSnackbar(true);
+                  } else {
+                    handleBuyNow(data);
+                  }
+                }}
               >
                 Buy Now
               </Button>
+
+              {/* Snackbar */}
+              <Snackbar
+                open={showSnackbar}
+                autoHideDuration={3000}
+                onClose={() => setShowSnackbar(false)}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+              >
+                <Alert onClose={() => setShowSnackbar(false)} severity="warning" sx={{ width: '100%' }}>
+                  Xin hãy chọn size trước khi mua hàng!
+                </Alert>
+              </Snackbar>
 
               {/* Mô tả sản phẩm */}
               <div className="mt-6 border-t pt-4">

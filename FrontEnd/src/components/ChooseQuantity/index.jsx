@@ -39,13 +39,14 @@ const ChooseQuantity = ({ quantity, onQuantityZero, onUpdateQuantity }) => {
   };
 
   useEffect(() => {
-    if (newQuantity === 0) {
-      onQuantityZero(); // Gọi hàm xóa sản phẩm khỏi giỏ hàng khi số lượng về 0
+    if (newQuantity !== quantity) {
+      if (newQuantity === 0) {
+        onQuantityZero();
+      } else if (newQuantity > 0) {
+        onUpdateQuantity(newQuantity);
+      }
     }
-    if (newQuantity > 0) {
-      onUpdateQuantity(newQuantity); // Gọi hàm cập nhật số lượng mới
-    }
-  }, [newQuantity]);
+  }, [newQuantity, quantity]);
 
   return (
     <Box display="flex" alignItems="center" gap={1}>
