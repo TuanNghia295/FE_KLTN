@@ -14,6 +14,11 @@ import Avatar from '@mui/material/Avatar';
 import '../Header/style.css';
 import { useLogout } from '../../services/authServices.jsx';
 import useStore from '../../store/useStore.jsx';
+import { motion, AnimatePresence  } from "framer-motion";
+
+//Icon Next, Prev
+import { GrFormNext } from "react-icons/gr";
+import { GrFormPrevious } from "react-icons/gr";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   '& .MuiBadge-badge': {
@@ -37,7 +42,7 @@ export default function Header() {
   const cartItems = useStore((state) => state.cartItems);
   const setOpenCartPanel = useStore((state) => state.setOpenCartPanel);
 
-  const {mutate: logout} = useLogout();
+  const { mutate: logout } = useLogout();
 
   // Handle Logout
   const handleLogout = async () => {
@@ -48,31 +53,41 @@ export default function Header() {
 
   const toggleMobileMenu = () => setOpenMobileMenu(!openMobileMenu);
 
+  //Banner Text
+  const [bannerText, setBannerText] = useState(0)
+
+  const notes = [
+    "Get up to 50% off for the new season.",
+    "FREESHIPPING FOR ALL ORDER OVER 1.000.000đ",
+  ];
+
+  const handleNext = () => {
+    setBannerText((prev) => (prev + 1) % notes.length);
+  }
+
+  const handlePrev = () => {
+    setBannerText((prev) => (prev + 1) % notes.length);
+  }
+
   return (
     <header className="bg-white">
       {/* Top strip */}
-      <div className="top-strip py-2 border-t-[1px] border-b-[1px] border-gray-250">
-        <div className="container">
-          <div className="flex items-center justify-between">
-            <div className="col1 w-[50%]">
-              <p className="text-[14px] font-[400]">Get up to 50% off for the new season.</p>
-            </div>
-            <div className="col2 flex items-center justify-end">
-              <ul className="flex items-center gap-2">
-                <li className="list-none">
-                  <Link to={'/help-center'} className="text-[13px] link font-[500] transition">
-                    Help
-                  </Link>
-                </li>
-                <li className="list-none">
-                  <Link to={'/order-tracking'} className="text-[13px] link font-[500] transition">
-                    Order Tracking
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
+      <div className="top-strip py-2 px-4 border-t-[1px] border-b-[1px] border-gray-250 flex items-center justify-center">
+        <button onClick={handlePrev} className='text-[30px]'><GrFormPrevious /></button>
+        <h className="w-[90%] xl:w-[50%] px-5 text-center">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={bannerText}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {notes[bannerText]}
+            </motion.div>
+          </AnimatePresence>
+        </h>
+        <button onClick={handleNext} className='text-[30px]'><GrFormNext /></button>
       </div>
 
       {/* Header */}
@@ -113,9 +128,11 @@ export default function Header() {
                           <p className="font-[600]">Guest</p>
                         )}
                       </div>
+                      <Link to="/my-account">
                       <li className="hover:bg-[#f1f1f1] px-5 xl:px-10 py-2 rounded-md cursor-pointer">
-                        <Link to="/my-account">My Account</Link>
+                        My Account
                       </li>
+                      </Link>
                       <li
                         className="hover:bg-[#f1f1f1] px-5 xl:px-10 py-2 rounded-md cursor-pointer"
                         onClick={handleLogout}
@@ -139,7 +156,7 @@ export default function Header() {
                   <CustomTooltip title="Giỏ hàng">
                     <IconButton aria-label="cart" onClick={() => {
                       setOpenCartPanel(true)
-                      }}>
+                    }}>
                       <StyledBadge badgeContent={cartItems?.length} color="error">
                         <ShoppingCartIcon style={{ color: '#000' }} />
                       </StyledBadge>

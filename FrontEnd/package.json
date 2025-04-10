@@ -20,6 +20,7 @@
     "formik": "^2.4.6",
     "framer-motion": "^12.4.7",
     "js-cookie": "^3.0.5",
+    "motion": "^12.6.3",
     "prop-types": "^15.8.1",
     "react": "19.0.0",
     "react-collapse": "^5.1.1",

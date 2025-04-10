@@ -8,6 +8,8 @@ import useStore from '../../store/useStore';
 import { toast } from 'react-toastify';
 import { useUpdateUser } from '../../services/userServices';
 
+import Page404 from '../Page404/index'
+
 const MyAccount = () => {
   // Sử dụng selector để chỉ lấy các trạng thái cần thiết
   const userInfo = useStore((state) => state.userInfo);
@@ -47,7 +49,7 @@ const MyAccount = () => {
           </div>
           <div className="col2 w-full xl:w-[80%]">
             <div className="card bg-white p-5 rounded-md">
-              <div>Loading...</div>
+              <Page404/>
             </div>
           </div>
         </div>

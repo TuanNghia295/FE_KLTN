@@ -61,134 +61,132 @@ const CartPanel = () => {
   };
 
   return (
-    <>
+    <Fragment className="relative">
       <div className="flex items-center justify-between py-3 px-4 border-b border-[#f1f1f1]">
         <h1 className="font-[300] text-[18px]">Shopping Cart ({cartItems?.length})</h1>
         <IoCloseSharp className="text-[20px] cursor-pointer" onClick={() => setOpenCartPanel(false)} />
       </div>
+      {/* Phần giỏ hàng */}
+      <div className="scroll custom-scrollbar w-full max-h-[70%] overflow-y-scroll overflow-x-hidden py-3 px-4">
+        {cartItems?.length === 0 ? (
+          <p className="text-center text-gray-500">Your cart is empty</p>
+        ) : (
+          cartItems?.map((item) => (
+            <div key={item._id} className="cartItem flex items-center gap-4 mb-5 border-b pb-4">
+              {/* Hình ảnh sản phẩm */}
+              <div className="img w-[30%]">
+                <img
+                  className="w-full rounded-md object-cover"
+                  src={
+                    Array.isArray(item.product.images) && item.product.images.length > 0
+                      ? item.product?.images[0]?.url
+                      : ''
+                  }
+                  alt={item?.name}
+                />
+              </div>
 
-      <div>
-        <div className="scroll custom-scrollbar w-full max-h-[660px] overflow-y-scroll overflow-x-hidden py-3 px-4">
-          {cartItems?.length === 0 ? (
-            <p className="text-center text-gray-500">Your cart is empty</p>
-          ) : (
-            cartItems?.map((item) => (
-              <div key={item._id} className="cartItem flex items-center gap-4 mb-5 border-b pb-4">
-                {/* Hình ảnh sản phẩm */}
-                <div className="img w-[30%]">
-                  <img
-                    className="w-full rounded-md object-cover"
-                    src={
-                      Array.isArray(item.product.images) && item.product.images.length > 0
-                        ? item.product?.images[0]?.url
-                        : ''
-                    }
-                    alt={item?.name}
-                  />
-                </div>
+              {/* Thông tin sản phẩm */}
+              <div className="info w-[70%] flex flex-col gap-2">
+                <h4 className="text-black font-semibold text-[16px] leading-tight">
+                  <Link to={`/products/${item.product._id}`} className="hover:underline">
+                    {item.product?.name || 'Nike Dunk 2025'}
+                  </Link>
+                </h4>
+                <p className="text-gray-600 text-[14px]">
+                  {item.product.price ? `${formatCurrency(item.product.price)}` : 'Null'}
+                </p>
 
-                {/* Thông tin sản phẩm */}
-                <div className="info w-[70%] flex flex-col gap-2">
-                  <h4 className="text-black font-semibold text-[16px] leading-tight">
-                    <Link to={`/products/${item.product._id}`} className="hover:underline">
-                      {item.product?.name || 'Nike Dunk 2025'}
-                    </Link>
-                  </h4>
-                  <p className="text-gray-600 text-[14px]">
-                    {item.product.price ? `${formatCurrency(item.product.price)}` : 'Null'}
-                  </p>
+                {/* {console.log('item', item)} */}
 
-                  {/* {console.log('item', item)} */}
-
-                  {/* Chọn size */}
-                  <div className="text-gray-700 text-[14px] flex items-center gap-2">
-                    <span className="font-medium">Size:</span>
-                    {item.size ? (
-                      <ChooseSizeList
-                        sizeDefault={item.size}
-                        sizeChoose={item.product.variations}
-                        onChange={(selectedVariation) => {
-                          // Gọi API để cập nhật size
-                          updateCart({
-                            userId: userId,
-                            productId: item.product?.productId,
-                            size: selectedVariation?.size,
-                            color: selectedVariation?.color, // Nếu biến thể có thuộc tính color
-                            quantity: item?.quantity, // Giữ nguyên số lượng hiện tại
-                          });
-                        }}
-                      />
-                    ) : (
-                      <span className="text-gray-500">Null</span>
-                    )}
-                  </div>
-
-                  {/* Chọn số lượng */}
-                  <div className="text-gray-700 text-[14px] flex items-center gap-2">
-                    <span className="font-medium">Quantity:</span>
-                    <ChooseQuantity
-                      quantity={item?.quantity}
-                      onQuantityZero={() => handleQuantityZero(item._id)}
-                      onUpdateQuantity={(newQuantity) => {
-                        // Cập nhật số lượng trong Zustand
-                        const updatedCartItems = cartItems.map((cartItem) =>
-                          cartItem._id === item._id ? { ...cartItem, quantity: newQuantity } : cartItem
-                        );
-                        setCartItems(updatedCartItems);
-
-                        // Gọi API để cập nhật giỏ hàng mới
+                {/* Chọn size */}
+                <div className="text-gray-700 text-[14px] flex items-center gap-2">
+                  <span className="font-medium">Size:</span>
+                  {item.size ? (
+                    <ChooseSizeList
+                      sizeDefault={item.size}
+                      sizeChoose={item.product.variations}
+                      onChange={(selectedVariation) => {
+                        // Gọi API để cập nhật size
                         updateCart({
                           userId: userId,
                           productId: item.product?.productId,
-                          size: item.size,
-                          color: item.color,
-                          quantity: newQuantity, // Cập nhật số lượng mới
+                          size: selectedVariation?.size,
+                          color: selectedVariation?.color, // Nếu biến thể có thuộc tính color
+                          quantity: item?.quantity, // Giữ nguyên số lượng hiện tại
                         });
                       }}
                     />
-                  </div>
+                  ) : (
+                    <span className="text-gray-500">Null</span>
+                  )}
+                </div>
+
+                {/* Chọn số lượng */}
+                <div className="text-gray-700 text-[14px] flex items-center gap-2">
+                  <span className="font-medium">Quantity:</span>
+                  <ChooseQuantity
+                    quantity={item?.quantity}
+                    onQuantityZero={() => handleQuantityZero(item._id)}
+                    onUpdateQuantity={(newQuantity) => {
+                      // Cập nhật số lượng trong Zustand
+                      const updatedCartItems = cartItems.map((cartItem) =>
+                        cartItem._id === item._id ? { ...cartItem, quantity: newQuantity } : cartItem
+                      );
+                      setCartItems(updatedCartItems);
+
+                      // Gọi API để cập nhật giỏ hàng mới
+                      updateCart({
+                        userId: userId,
+                        productId: item.product?.productId,
+                        size: item.size,
+                        color: item.color,
+                        quantity: newQuantity, // Cập nhật số lượng mới
+                      });
+                    }}
+                  />
                 </div>
               </div>
-            ))
-          )}
+            </div>
+          ))
+        )}
+      </div>
+      {/* Phần tính tiền */}
+      <div className="bottomInfo bg-white absolute bottom-0 font-[300] py-3 px-3 w-full border-t border-[#f1f1f1] items-center justify-between">
+        <div className="flex">
+          <span>Sub: </span>
+          <span className="ml-auto">{formatCurrency(subtotal)}</span>
         </div>
-
-        <div className="bottomInfo bg-white absolute bottom-0 font-[300] py-3 px-3 w-full border-t border-[#f1f1f1] items-center justify-between">
-          <div className="flex">
-            <span>Sub: </span>
-            <span className="ml-auto">{formatCurrency(subtotal)}</span>
-          </div>
-          <div className="flex">
-            <span>Shipping: </span>
-            <span className="ml-auto">
-              {isLoadingShippingFee ? (
-                <CircularProgress size={16} />
-              ) : isErrorShippingFee ? (
-                <Tooltip title={shippingError?.message || 'Error'} placement="top">
-                  <span className="text-red-500 cursor-help">Error</span>
-                </Tooltip>
-              ) : (
-                <p className="text-gray-800">{formatCurrency(shipping)}</p>
-              )}
-            </span>
-          </div>
-          <div className="flex">
-            <span className="font-medium">Total: </span>
-            <span className="ml-auto font-medium">{formatCurrency(total)}</span>
-          </div>
-          <div className="flex flex-col w-full justify-center mt-4">
-            <Link to="/checkout">
-              <Button
-                className="w-full !bg-black !rounded-none !text-white !py-3"
-                onClick={() => setOpenCartPanel(false)}
-              >
-                Checkout
-              </Button>
-            </Link>
-          </div>
+        <div className="flex">
+          <span>Shipping: </span>
+          <span className="ml-auto">
+            {isLoadingShippingFee ? (
+              <CircularProgress size={16} />
+            ) : isErrorShippingFee ? (
+              <Tooltip title={shippingError?.message || 'Error'} placement="top">
+                <span className="text-red-500 cursor-help">Error</span>
+              </Tooltip>
+            ) : (
+              <p className="text-gray-800">{formatCurrency(shipping)}</p>
+            )}
+          </span>
+        </div>
+        <div className="flex">
+          <span className="font-medium">Total: </span>
+          <span className="ml-auto font-medium">{formatCurrency(total)}</span>
+        </div>
+        <div className="flex flex-col w-full justify-center mt-4">
+          <Link to="/checkout">
+            <Button
+              className="w-full !bg-black !rounded-none !text-white !py-3"
+              onClick={() => setOpenCartPanel(false)}
+            >
+              Checkout
+            </Button>
+          </Link>
         </div>
       </div>
-    </>
+    </Fragment>
   );
 };
 
