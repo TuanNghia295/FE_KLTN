@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, TextField, Box } from '@mui/material';
+import { FaCirclePlus } from "react-icons/fa6";
+import { FaCircleMinus } from "react-icons/fa6";
 
 const ChooseQuantity = ({ quantity, onQuantityZero, onUpdateQuantity }) => {
   const [newQuantity, setNewQuantity] = useState(quantity);
@@ -49,38 +51,29 @@ const ChooseQuantity = ({ quantity, onQuantityZero, onUpdateQuantity }) => {
   }, [newQuantity, quantity]);
 
   return (
-    <Box display="flex" alignItems="center" gap={1}>
-      <Button
-        variant="outlined"
-        size="small"
+    <Box display="flex" alignItems="center" gap={1} className="items-center">
+      <button
+        className='text-[20px] hover:text-red-400'
         onClick={decrease}
         disabled={newQuantity <= 0}
-        sx={{ minWidth: '36px', padding: 0 }}
       >
-        -
-      </Button>
+        <FaCircleMinus />
+      </button>
       <TextField
         type="text"
         value={newQuantity}
         onChange={handleChange}
         onBlur={handleBlur}
-        inputProps={{
-          min: 0,
-          max: 200,
-          style: { textAlign: 'center' },
-        }}
         size="small"
-        sx={{ width: '60px' }}
+        className='w-[40px]'
       />
-      <Button
-        variant="outlined"
-        size="small"
+      <button
+        className='text-[20px] hover:text-red-400'
         onClick={increase}
         disabled={newQuantity >= 200}
-        sx={{ minWidth: '36px', padding: 0 }}
       >
-        +
-      </Button>
+        <FaCirclePlus />
+      </button>
     </Box>
   );
 };

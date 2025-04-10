@@ -7,6 +7,7 @@ const ChooseSizeList = ({ sizeDefault, sizeChoose, onChange }) => {
   return (
     <div className="w-full">
       <Select
+        size="small"
         value={selectedSize}
         onChange={(e) => {
           const selectedVariation = sizeChoose.find((variation) => variation.size === e.target.value);

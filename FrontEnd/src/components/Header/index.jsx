@@ -74,7 +74,7 @@ export default function Header() {
       {/* Top strip */}
       <div className="top-strip py-2 px-4 border-t-[1px] border-b-[1px] border-gray-250 flex items-center justify-center">
         <button onClick={handlePrev} className='text-[30px]'><GrFormPrevious /></button>
-        <h className="w-[90%] xl:w-[50%] px-5 text-center">
+        <div className="w-[90%] xl:w-[50%] px-5 text-center">
           <AnimatePresence mode="wait">
             <motion.div
               key={bannerText}
@@ -86,7 +86,7 @@ export default function Header() {
               {notes[bannerText]}
             </motion.div>
           </AnimatePresence>
-        </h>
+        </div>
         <button onClick={handleNext} className='text-[30px]'><GrFormNext /></button>
       </div>
 

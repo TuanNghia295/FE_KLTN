@@ -61,7 +61,7 @@ const CartPanel = () => {
   };
 
   return (
-    <Fragment className="relative">
+    <>
       <div className="flex items-center justify-between py-3 px-4 border-b border-[#f1f1f1]">
         <h1 className="font-[300] text-[18px]">Shopping Cart ({cartItems?.length})</h1>
         <IoCloseSharp className="text-[20px] cursor-pointer" onClick={() => setOpenCartPanel(false)} />
@@ -72,9 +72,9 @@ const CartPanel = () => {
           <p className="text-center text-gray-500">Your cart is empty</p>
         ) : (
           cartItems?.map((item) => (
-            <div key={item._id} className="cartItem flex items-center gap-4 mb-5 border-b pb-4">
+            <div key={item._id} className="cartItem flex items-center gap-4 mb-4 border-b pb-4">
               {/* Hình ảnh sản phẩm */}
-              <div className="img w-[30%]">
+              <div className="img w-[25%]">
                 <img
                   className="w-full rounded-md object-cover"
                   src={
@@ -88,63 +88,67 @@ const CartPanel = () => {
 
               {/* Thông tin sản phẩm */}
               <div className="info w-[70%] flex flex-col gap-2">
-                <h4 className="text-black font-semibold text-[16px] leading-tight">
-                  <Link to={`/products/${item.product._id}`} className="hover:underline">
-                    {item.product?.name || 'Nike Dunk 2025'}
-                  </Link>
-                </h4>
-                <p className="text-gray-600 text-[14px]">
-                  {item.product.price ? `${formatCurrency(item.product.price)}` : 'Null'}
-                </p>
+                <div className='flex justify-between'>
+                  <h4 className="text-black font-semibold text-[16px] leading-tight">
+                    <Link to={`/products/${item.product._id}`} className="hover:underline">
+                      {item.product?.name || 'Nike Dunk 2025'}
+                    </Link>
+                  </h4>
+                  <p className="text-gray-600 text-[14px]">
+                    {item.product.price ? `${formatCurrency(item.product.price)}` : 'Null'}
+                  </p>
+                </div>
 
                 {/* {console.log('item', item)} */}
 
-                {/* Chọn size */}
-                <div className="text-gray-700 text-[14px] flex items-center gap-2">
-                  <span className="font-medium">Size:</span>
-                  {item.size ? (
-                    <ChooseSizeList
-                      sizeDefault={item.size}
-                      sizeChoose={item.product.variations}
-                      onChange={(selectedVariation) => {
-                        // Gọi API để cập nhật size
+                <div className='flex items-center justify-between border border-[#ccc] py-2 px-3 rounded-md'>
+                  {/* Chọn size */}
+                  <div className="text-gray-700 text-[14px] flex items-center gap-2">
+                    <span className="font-medium">Size:</span>
+                    {item.size ? (
+                      <ChooseSizeList
+                        sizeDefault={item.size}
+                        sizeChoose={item.product.variations}
+                        onChange={(selectedVariation) => {
+                          // Gọi API để cập nhật size
+                          updateCart({
+                            userId: userId,
+                            productId: item.product?.productId,
+                            size: selectedVariation?.size,
+                            color: selectedVariation?.color, // Nếu biến thể có thuộc tính color
+                            quantity: item?.quantity, // Giữ nguyên số lượng hiện tại
+                          });
+                        }}
+                      />
+                    ) : (
+                      <span className="text-gray-500">Null</span>
+                    )}
+                  </div>
+
+                  {/* Chọn số lượng */}
+                  <div className="text-gray-700 text-[14px] flex items-center gap-2">
+                    <span className="font-medium">Quantity:</span>
+                    <ChooseQuantity
+                      quantity={item?.quantity}
+                      onQuantityZero={() => handleQuantityZero(item._id)}
+                      onUpdateQuantity={(newQuantity) => {
+                        // Cập nhật số lượng trong Zustand
+                        const updatedCartItems = cartItems.map((cartItem) =>
+                          cartItem._id === item._id ? { ...cartItem, quantity: newQuantity } : cartItem
+                        );
+                        setCartItems(updatedCartItems);
+
+                        // Gọi API để cập nhật giỏ hàng mới
                         updateCart({
                           userId: userId,
                           productId: item.product?.productId,
-                          size: selectedVariation?.size,
-                          color: selectedVariation?.color, // Nếu biến thể có thuộc tính color
-                          quantity: item?.quantity, // Giữ nguyên số lượng hiện tại
+                          size: item.size,
+                          color: item.color,
+                          quantity: newQuantity, // Cập nhật số lượng mới
                         });
                       }}
                     />
-                  ) : (
-                    <span className="text-gray-500">Null</span>
-                  )}
-                </div>
-
-                {/* Chọn số lượng */}
-                <div className="text-gray-700 text-[14px] flex items-center gap-2">
-                  <span className="font-medium">Quantity:</span>
-                  <ChooseQuantity
-                    quantity={item?.quantity}
-                    onQuantityZero={() => handleQuantityZero(item._id)}
-                    onUpdateQuantity={(newQuantity) => {
-                      // Cập nhật số lượng trong Zustand
-                      const updatedCartItems = cartItems.map((cartItem) =>
-                        cartItem._id === item._id ? { ...cartItem, quantity: newQuantity } : cartItem
-                      );
-                      setCartItems(updatedCartItems);
-
-                      // Gọi API để cập nhật giỏ hàng mới
-                      updateCart({
-                        userId: userId,
-                        productId: item.product?.productId,
-                        size: item.size,
-                        color: item.color,
-                        quantity: newQuantity, // Cập nhật số lượng mới
-                      });
-                    }}
-                  />
+                  </div>
                 </div>
               </div>
             </div>
@@ -186,7 +190,7 @@ const CartPanel = () => {
           </Link>
         </div>
       </div>
-    </Fragment>
+    </>
   );
 };
 
