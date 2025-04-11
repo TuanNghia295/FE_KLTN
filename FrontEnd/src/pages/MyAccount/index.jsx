@@ -5,7 +5,6 @@ import AccountSlidebar from '../../components/AccountSlidebar';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import useStore from '../../store/useStore';
-import { toast } from 'react-toastify';
 import { useUpdateUser } from '../../services/userServices';
 
 import Page404 from '../Page404/index'
@@ -49,7 +48,7 @@ const MyAccount = () => {
           </div>
           <div className="col2 w-full xl:w-[80%]">
             <div className="card bg-white p-5 rounded-md">
-              <Page404/>
+              <Page404 />
             </div>
           </div>
         </div>
@@ -66,7 +65,7 @@ const MyAccount = () => {
 
         <div className="col2 w-full xl:w-[80%]">
           <div className="card bg-white p-5 rounded-md">
-            <h1 className="text-[22px] font-[600]">My Profile</h1>
+            <h1 className="font-[600] bg-[#f1f1f1] p-3 mb-4 rounded-md text-center text-black">My Profile</h1>
             <form className="mt-5" onSubmit={formik.handleSubmit}>
               <div className="flex items-center gap-5 my-4">
                 <div className="w-[50%]">

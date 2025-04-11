@@ -1,45 +1,55 @@
 import axios from "axios";
 import { useQuery } from '@tanstack/react-query';
 
-// API lấy danh sách thành phố
-const getThanhPho = async () => {
+// API lấy danh sách thành phố, tỉnh
+const getProvinces = async () => {
     const response = await axios.get('https://provinces.open-api.vn/api/?depth=2');
     return response.data; // Trả về danh sách thành phố
 };
 
-// API lấy danh sách quận huyện theo id của thành phố
-const getQuanHuyen = async (provinceId) => {
-    if (!provinceId) return []; // Nếu không có id tỉnh thành, trả về danh sách quận huyện rỗng
-    const response = await axios.get(`https://provinces.open-api.vn/api/d/${provinceId}?depth=2`);
-    const districtArray = Object.values(response);
-    return districtArray; // Trả về danh sách quận huyện cho tỉnh thành tương ứng
-};
+// API lấy danh sách phường / xã
+const getWards = async ({ queryKey }) => {
+    const [_key, districtCode] = queryKey;
+    if (!districtCode) return [];
+    const response = await axios.get(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
+    return response.data.wards // Trả về danh sách đường theo tỉnh, quận
+}
 
 // Hook: Lấy danh sách thành phố
-export const useAPIThanhPho = () => {
-    const { data: listThanhPho, error: errorThanhPho, isLoading: loadingThanhPho } = useQuery({
-        queryKey: ['listThanhPho'],
-        queryFn: getThanhPho,
+export const useProvinces = () => {
+    const { data: listProvinces, error: errorProvinces, isLoading: loadingProvinces } = useQuery({
+        queryKey: ['listProvinces'],
+        queryFn: getProvinces,
     });
 
+    const getProvinceByCode = (codeProvinces) =>
+        listProvinces?.find(p => p.code === Number(codeProvinces));
+
+    const getDistrictsByProvince = (provinceCode) =>
+        getProvinceByCode(provinceCode)?.districts || [];
+
+    const getDistrictByCode = (provinceCode, districtCode) =>
+        getDistrictsByProvince(provinceCode).find(d => d.code === Number(districtCode));
+
     return {
-        listThanhPho,
-        errorThanhPho,
-        loadingThanhPho
+        listProvinces,
+        getProvinceByCode,
+        getDistrictsByProvince,
+        getDistrictByCode,
+        errorProvinces,
+        loadingProvinces
     };
 };
 
-// Hook: Lấy danh sách quận huyện theo thành phố (provinceId)
-export const useAPIQuanHuyen = (provinceId) => {
-    const { data: listQuanHuyen, error: errorQuanHuyen, isLoading: loadingQuanHuyen } = useQuery({
-        queryKey: ['listQuanHuyen', provinceId],
-        queryFn: () => getQuanHuyen(provinceId),
-        enabled: !!provinceId, // Chỉ thực hiện gọi API khi có provinceId
-    });
+// Hook: Lấy danh sách phường xã
+export const useWards = (districtCode) => {
+    const {data : listWards } = useQuery({
+        queryKey: ['listWards', districtCode],
+        queryFn: getWards,
+        enabled: !!districtCode, // Chỉ gọi khi có quận
+    })
 
     return {
-        listQuanHuyen,
-        errorQuanHuyen,
-        loadingQuanHuyen
-    };
-};
+        listWards
+    }
+}

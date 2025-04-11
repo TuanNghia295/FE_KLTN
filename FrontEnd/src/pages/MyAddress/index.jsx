@@ -9,11 +9,18 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 // Zustand
 import useStore from '../../store/useStore';
-import FormChonThanhPhoQuanHuyen from '../../components/FormAddress';
+import ChooseProvinces from '../../components/ChooseProvinces';
 
 const MyAddress = () => {
     //Lấy userInfo từ Zustand
     const userInfo = useStore((state) => state.userInfo);
+    const getInfo = useStore((state) => state.getInfo);
+    
+    //Lấy mảng address User
+    const addressArray = userInfo?.address
+
+    //Set old address
+    const [oldAddress, setOldAddress] = React.useState('')
 
     //Modal Address
     const [open, setOpen] = React.useState(false);
@@ -36,21 +43,29 @@ const MyAddress = () => {
                     <div className='col2 w-full xl:w-[80%]'>
                         <div className='card bg-white p-5 rounded-md'>
                             <div className='addressDefault mb-5'>
-                                <TextField
-                                    className="w-full"
-                                    id="address"
-                                    name="address"
-                                    label="Address Default"
-                                    variant="outlined"
-                                    value={userInfo?.address}
-                                    disabled
-                                />
+                                {Array.isArray(addressArray) && addressArray.length > 0
+                                    ? addressArray.map((address, index) => (
+                                        <React.Fragment key={index}>
+                                            <div className='mb-4'>
+                                                <TextField
+                                                    className="w-full"
+                                                    id="address"
+                                                    name="address"
+                                                    label={`Address ${index + 1}`}
+                                                    variant="outlined"
+                                                    value={address || ''}
+                                                    disabled
+                                                />
+                                                {/* <button onClick={()=>setOldAddress(address)}>Get</button> */}
+                                            </div>
+                                        </React.Fragment>
+                                    ))
+                                    : "Not found address"}
                             </div>
-                            <Button variant="outlined" className='!w-full !p-5 !border-[#000] !rounded-none !text-black' onClick={handleClickOpen}>
+                            {/* <Button variant="outlined" className='!w-full !p-5 !border-[#000] !rounded-none !text-black' onClick={handleClickOpen}>
                                 Add Address
-                            </Button>
-
-                            <FormChonThanhPhoQuanHuyen/>
+                            </Button> */}
+                            <ChooseProvinces userInfo={userInfo} getInfo={getInfo} oldAddress={oldAddress} />
                         </div>
                     </div>
                 </div>
