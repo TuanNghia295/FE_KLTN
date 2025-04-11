@@ -7,6 +7,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import Page404 from '../Page404/index'
 // Zustand
 import useStore from '../../store/useStore';
 import ChooseProvinces from '../../components/ChooseProvinces';
@@ -32,15 +33,15 @@ const MyAddress = () => {
     };
     const handleSetDefault = (index) => {
         if (index === 0) return; // Đã là mặc định rồi
-    
+
         const updatedAddressList = [...addressArray];
         const [selectedAddress] = updatedAddressList.splice(index, 1); // Xoá địa chỉ tại index
         updatedAddressList.unshift(selectedAddress); // Thêm lên đầu danh sách
-    
+
         updateUserInfo({ address: updatedAddressList });
         getInfo({ ...userInfo, address: updatedAddressList });
     };
-    
+
 
     //Modal Address
     const [open, setOpen] = React.useState(false);
@@ -52,6 +53,24 @@ const MyAddress = () => {
     const handleClose = () => {
         setOpen(false);
     };
+
+    if (!userInfo) {
+        return (
+            <>
+                <section className='py-10 w-full'>
+                    <div className='container flex flex-col xl:flex-row gap-5'>
+                        <div className='col1 w-full xl:w-[20%]'>
+                            <AccountSlidebar />
+                        </div>
+
+                        <div className='col2 w-full xl:w-[80%]'>
+                            <Page404 />
+                        </div>
+                    </div>
+                </section>
+            </>
+        )
+    }
     return (
         <>
             <section className='py-10 w-full'>
@@ -62,6 +81,7 @@ const MyAddress = () => {
 
                     <div className='col2 w-full xl:w-[80%]'>
                         <div className='card bg-white p-5 rounded-md'>
+                            <h1 className="font-[600] bg-[#f1f1f1] p-3 mb-4 rounded-md text-center text-black">My Address</h1>
                             <div className='addressDefault mb-5'>
                                 {Array.isArray(addressArray) && addressArray.length > 0
                                     ? addressArray.map((address, index) => (

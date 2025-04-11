@@ -47,9 +47,7 @@ const MyAccount = () => {
             <AccountSlidebar />
           </div>
           <div className="col2 w-full xl:w-[80%]">
-            <div className="card bg-white p-5 rounded-md">
               <Page404 />
-            </div>
           </div>
         </div>
       </section>
@@ -121,7 +119,7 @@ const MyAccount = () => {
                     name="address"
                     label="Address Default"
                     variant="outlined"
-                    value={userInfo.address[0]}
+                    value={userInfo?.address[0] || 'None'}
                     disabled
                   />
                 </div>
