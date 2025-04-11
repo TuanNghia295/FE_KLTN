@@ -10,17 +10,37 @@ import DialogTitle from '@mui/material/DialogTitle';
 // Zustand
 import useStore from '../../store/useStore';
 import ChooseProvinces from '../../components/ChooseProvinces';
+import { useUpdateUser } from '../../services/userServices';
 
 const MyAddress = () => {
     //Lấy userInfo từ Zustand
     const userInfo = useStore((state) => state.userInfo);
     const getInfo = useStore((state) => state.getInfo);
-    
+    const { mutate: updateUserInfo, isPending } = useUpdateUser(); // Sử dụng hook để cập nhật thông tin người dùng
+
     //Lấy mảng address User
     const addressArray = userInfo?.address
 
-    //Set old address
-    const [oldAddress, setOldAddress] = React.useState('')
+    // Quản lý trạng thái chỉnh sửa địa chỉ
+    const [editAddressIndex, setEditAddressIndex] = React.useState(null);
+    const handleDeleteAddress = (index) => {
+        const updatedAddressList = [...(userInfo?.address || [])];
+        updatedAddressList.splice(index, 1); // Xóa địa chỉ ở vị trí index
+
+        updateUserInfo({ address: updatedAddressList }); // Cập nhật lên server
+        getInfo({ ...userInfo, address: updatedAddressList }); // Cập nhật Zustand
+    };
+    const handleSetDefault = (index) => {
+        if (index === 0) return; // Đã là mặc định rồi
+    
+        const updatedAddressList = [...addressArray];
+        const [selectedAddress] = updatedAddressList.splice(index, 1); // Xoá địa chỉ tại index
+        updatedAddressList.unshift(selectedAddress); // Thêm lên đầu danh sách
+    
+        updateUserInfo({ address: updatedAddressList });
+        getInfo({ ...userInfo, address: updatedAddressList });
+    };
+    
 
     //Modal Address
     const [open, setOpen] = React.useState(false);
@@ -46,7 +66,7 @@ const MyAddress = () => {
                                 {Array.isArray(addressArray) && addressArray.length > 0
                                     ? addressArray.map((address, index) => (
                                         <React.Fragment key={index}>
-                                            <div className='mb-4'>
+                                            <div className='mb-4 flex gap-3'>
                                                 <TextField
                                                     className="w-full"
                                                     id="address"
@@ -56,7 +76,30 @@ const MyAddress = () => {
                                                     value={address || ''}
                                                     disabled
                                                 />
-                                                {/* <button onClick={()=>setOldAddress(address)}>Get</button> */}
+                                                <Button
+                                                    variant="outlined"
+                                                    size='small'
+                                                    onClick={() => setEditAddressIndex(index)}
+                                                >
+                                                    Edit
+                                                </Button>
+                                                <Button
+                                                    variant="outlined"
+                                                    size='small'
+                                                    color="error"
+                                                    onClick={() => handleDeleteAddress(index)}
+                                                >
+                                                    Xoá
+                                                </Button>
+                                                <Button
+                                                    variant="outlined"
+                                                    size='small'
+                                                    color="success"
+                                                    onClick={() => handleSetDefault(index)}
+                                                    disabled={index === 0}
+                                                >
+                                                    Default
+                                                </Button>
                                             </div>
                                         </React.Fragment>
                                     ))
@@ -65,7 +108,13 @@ const MyAddress = () => {
                             {/* <Button variant="outlined" className='!w-full !p-5 !border-[#000] !rounded-none !text-black' onClick={handleClickOpen}>
                                 Add Address
                             </Button> */}
-                            <ChooseProvinces userInfo={userInfo} getInfo={getInfo} oldAddress={oldAddress} />
+                            <ChooseProvinces
+                                userInfo={userInfo}
+                                getInfo={getInfo}
+                                editAddress={editAddressIndex !== null ? addressArray[editAddressIndex] : null}
+                                indexToUpdate={editAddressIndex}
+                                onEditDone={() => setEditAddressIndex(null)}
+                            />
                         </div>
                     </div>
                 </div>
