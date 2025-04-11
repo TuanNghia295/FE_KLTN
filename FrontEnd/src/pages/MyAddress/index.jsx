@@ -9,6 +9,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 // Zustand
 import useStore from '../../store/useStore';
+import FormChonThanhPhoQuanHuyen from '../../components/FormAddress';
 
 const MyAddress = () => {
     //Lấy userInfo từ Zustand
@@ -48,6 +49,8 @@ const MyAddress = () => {
                             <Button variant="outlined" className='!w-full !p-5 !border-[#000] !rounded-none !text-black' onClick={handleClickOpen}>
                                 Add Address
                             </Button>
+
+                            <FormChonThanhPhoQuanHuyen/>
                         </div>
                     </div>
                 </div>

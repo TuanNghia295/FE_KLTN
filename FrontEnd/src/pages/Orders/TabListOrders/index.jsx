@@ -45,7 +45,7 @@ const TabListOrders = () => {
           <Fragment key={index}>
             <button
               onClick={() => setActiveTab(index)}
-              className={`px-5 py-3 xl:px-10 xl:py-2 xl:w-[20%] text-[14px] font-[300] flex flex-col items-center gap-2 focus:outline-none ${
+              className={`px-2 py-3 xl:px-10 xl:py-2 xl:w-[20%] text-[14px] font-[300] flex flex-col items-center gap-2 focus:outline-none ${
                 activeTab === index
                   ? 'text-black font-[500] bg-[#f1f1f1] border-b-2 border-black'
                   : 'text-gray-600 hover:font-[500] hover:bg-[#f1f1f1] duration-300'
