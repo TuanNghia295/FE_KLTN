@@ -71,7 +71,7 @@ const MyAddress = () => {
                                                     className="w-full"
                                                     id="address"
                                                     name="address"
-                                                    label={`Address ${index + 1}`}
+                                                    label={index === 0 ? `Address (Mặc định)` : `Address ${index + 1}`}
                                                     variant="outlined"
                                                     value={address || ''}
                                                     disabled
