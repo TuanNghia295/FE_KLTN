@@ -57,6 +57,7 @@ export const useCreateOrder = () => {
     mutationFn: createOrderApi, // Hàm gọi API
     onSuccess: (data) => {
       console.log('Order created successfully:', data);
+      queryClient.invalidateQueries(['cart']);
       // Xử lý thành công:
       // - Hiển thị thông báo thành công
       // - Chuyển hướng đến trang cảm ơn/chi tiết đơn hàng

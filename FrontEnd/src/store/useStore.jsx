@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { getUserInfo } from '../services/authServices.jsx';
-import { useGetCartByUserID } from '../services/cartServices.jsx';
 
 const useStore = create((set) => ({
   // Trạng thái người dùng
@@ -45,9 +44,7 @@ const useStore = create((set) => ({
   // Update Cart Item Size
   updateItemSize: (id, newSize) => {
     set((state) => ({
-      cartItems: state.cartItems.map((item) =>
-        item._id === id ? { ...item, size: newSize } : item
-      ),
+      cartItems: state.cartItems.map((item) => (item._id === id ? { ...item, size: newSize } : item)),
     }));
   },
 
@@ -67,7 +64,7 @@ const useStore = create((set) => ({
   //Trạng thái category
   categoryListZustand: [],
 
-  setCategoryListZustand: (item) => set({categoryListZustand: item})
+  setCategoryListZustand: (item) => set({ categoryListZustand: item }),
 }));
 
 export default useStore;
