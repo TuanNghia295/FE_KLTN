@@ -29,6 +29,8 @@ const CheckOut = () => {
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cash'); // 'cash' hoặc 'bank_transfer' theo backend
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' }); // State cho thông báo
+  const [showAddressList, setShowAddressList] = useState(false); // State để hiển thị danh sách địa chỉ
+  const [selectedAddress, setSelectedAddress] = useState(userInfo?.address[0] || ''); // State cho địa chỉ được chọn
 
   const paymentOptions = [
     { value: 'cash', label: 'Payment with cash', icon: <FaRegMoneyBill1 /> }, // Giá trị khớp với backend
@@ -41,7 +43,8 @@ const CheckOut = () => {
     isLoading: isLoadingShippingFee,
     isError: isErrorShippingFee,
     error: shippingError,
-  } = useShippingFee(userInfo?.address[0] || ''); // Truyền giá trị mặc định nếu address undefined
+    refetch: refetchShippingFee, // Hàm để gọi lại API với địa chỉ mới
+  } = useShippingFee(selectedAddress); // Truyền giá trị mặc định nếu address undefined
 
   // --- Gọi API Tạo Đơn Hàng (Mutation) ---
   const {
@@ -103,7 +106,7 @@ const CheckOut = () => {
       // userId: userInfo._id,
       customerName: userInfo.fullName,
       customerPhone: userInfo.phone,
-      toAddress: userInfo.address,
+      toAddress: selectedAddress,
       items: productItems.map((item) => ({
         productId: item.productId, // Numeric ID
         quantity: item.quantity,
@@ -187,17 +190,42 @@ const CheckOut = () => {
                   size="small"
                 />
               </div>
-              <div>
+              <div className="flex items-center gap-2">
                 <TextField
                   fullWidth
                   label="Address"
-                  value={userInfo?.address[0] || ''}
+                  value={selectedAddress}
                   variant="outlined"
                   size="small"
                   multiline
                   rows={2}
                 />
+                <Button variant="text" color="error" onClick={() => setShowAddressList(true)}>
+                  Change
+                </Button>
               </div>
+              {showAddressList && (
+                <div className="address-list mt-3">
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    Select a saved address:
+                  </Typography>
+                  {userInfo?.address.map((addr, index) => (
+                    <Button
+                      key={index}
+                      fullWidth
+                      variant="outlined"
+                      sx={{ mb: 1, textAlign: 'left' }}
+                      onClick={() => {
+                        setSelectedAddress(addr);
+                        setShowAddressList(false);
+                        refetchShippingFee(addr); // Gọi lại useShippingFee với địa chỉ mới
+                      }}
+                    >
+                      {addr}
+                    </Button>
+                  ))}
+                </div>
+              )}
             </form>
             <h2 className="text-[18px] text-black font-[600] my-5">PAYMENT METHOD</h2> {/* Thêm margin */}
             <div className="w-full my-3 space-y-2">
@@ -295,13 +323,20 @@ const CheckOut = () => {
             </div>
             {/* Nút Đặt Hàng */}
             <div className="w-full mt-5">
+              {!userInfo?.address?.[0] && (
+                <Typography variant="body2" color="error" sx={{ mb: 2 }}>
+                  Please update your shipping address to place an order.
+                </Typography>
+              )}
               <Button
                 fullWidth // Chiếm toàn bộ width
                 variant="contained"
                 color="primary" // Màu chủ đạo
                 size="large" // Kích thước lớn
                 onClick={handlePlaceOrder}
-                disabled={isCreatingOrder || isErrorShippingFee || productItems.length === 0} // Vô hiệu hóa khi đang tạo hoặc lỗi ship hoặc không có sp
+                disabled={
+                  isCreatingOrder || isErrorShippingFee || productItems.length === 0 || !userInfo?.address?.[0] // Disable nếu không có địa chỉ
+                } // Vô hiệu hóa khi đang tạo hoặc lỗi ship hoặc không có sp hoặc không có địa chỉ
                 sx={{
                   backgroundColor: 'black', // Màu nền đen
                   color: 'white', // Chữ trắng
@@ -310,7 +345,7 @@ const CheckOut = () => {
                   py: 1.5, // Padding dọc
                 }}
               >
-                {isCreatingOrder ? <CircularProgress size={24} color="inherit" /> : 'Place Order'}
+                {isCreatingOrder ? <CircularProgress size={24} color="inherit" /> : 'Order'}
               </Button>
             </div>
           </div>
