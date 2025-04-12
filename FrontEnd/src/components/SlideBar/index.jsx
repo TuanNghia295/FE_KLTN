@@ -8,21 +8,12 @@ import { FaAngleUp } from 'react-icons/fa'
 import RangeSlider from 'react-range-slider-input'
 import 'react-range-slider-input/dist/style.css'
 
-const SlideBar = ({categoryListZustand, onCategorySelect }) => {
+
+const SlideBar = ({categoryListZustand, selectedCate, onCategorySelect  }) => {
+  const checked = categoryListZustand.find((c) => c._id === selectedCate)
+
   const [isOpenCategoryFilter, setIsOpenCategoryFilter] = useState(true);
   const [isOpenAvailFilter, setIsOpenAvailFilter] = useState(true);
-
-  const handleCheckboxChange = (event) => {
-    const { value, checked } = event.target;
-  
-    if (checked) {
-      // Khi chọn checkbox, gọi callback để thêm categoryId vào selectedCategories
-      onCategorySelect(value);
-    } else {
-      // Khi bỏ chọn checkbox, gọi callback để xóa categoryId khỏi selectedCategories
-      onCategorySelect(null);
-    }
-  };
 
   return (
     <aside className='slidebar'>
@@ -39,7 +30,7 @@ const SlideBar = ({categoryListZustand, onCategorySelect }) => {
               <div className='scroll max-h-[80px] md:max-h-[250px] relative '>
                 {Array.isArray(categoryListZustand) && categoryListZustand?.length > 0
                 ? categoryListZustand?.map((category) => (
-                  <FormControlLabel key={category._id || category.type} className='w-full' control={<Checkbox size='small' value={category._id} onChange={handleCheckboxChange}/>} label={category?.type} />
+                  <FormControlLabel key={category._id || category.type} className='w-full' control={<Checkbox size='small' checked={checked?._id === category._id} value={category._id} onChange={() => onCategorySelect(category.type) } />} label={category?.type} />
                 ))
                 : ""
                 }

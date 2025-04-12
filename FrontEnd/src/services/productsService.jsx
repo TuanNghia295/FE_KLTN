@@ -30,7 +30,6 @@ export const useProducts = () => {
 const getProductsByCategoryID = async ({queryKey}) => {
   const [_key, _id] = queryKey
   const response = await axiosClient.get(`/products/getAllProducts/${_id}`);
-  console.log(response)
   return response.data
 }
 

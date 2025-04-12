@@ -15,6 +15,7 @@ import { FaAngleDown } from 'react-icons/fa';
 import Pagination from '@mui/material/Pagination';
 import { useProducts, useProductsCategory } from '../../services/productsService';
 import useStore from '../../store/useStore'
+import { useNavigate } from 'react-router-dom';
 
 const normalizeString = (str) => {
   return str
@@ -25,21 +26,25 @@ const normalizeString = (str) => {
 };
 
 const ProductListing = () => {
-  const { categoryName } = useParams(); // 'men', 'women', v.v.
-  const [selectedCategory, setSelectedCategory] = useState(null)
+  const { categoryName } = useParams(); // Lấy params. Ví dụ /nam, /nu, /tre-em,...
+  const navigate = useNavigate();
   // Lấy list Category tu Zustand
   const categoryListZustand = useStore((state) => state.categoryListZustand);
 
-  const getCategory = categoryName
+  const getCategory = categoryName //Tìm category từ params trong Zustand
     ? categoryListZustand.find(
       (c) => normalizeString(c.type) === normalizeString(categoryName)
     )
     : null;
 
-
-
   const { productList } = useProducts();
-  const { productCateList } = useProductsCategory(selectedCategory || getCategory?._id);
+  const { productCateList } = useProductsCategory(getCategory?._id);
+
+  const [selectedCateParams, setSelectedCateParams] = useState(getCategory?._id)
+
+  useEffect(() => {
+    setSelectedCateParams(getCategory?._id)
+  }, [getCategory?._id])
 
 
   const [itemView, setItemView] = useState('grid');
@@ -52,13 +57,19 @@ const ProductListing = () => {
     setAnchorEl(null);
   };
 
-  // Quyết định gọi API nào (theo trạng thái selectedCategories)
-  const productData = selectedCategory || getCategory ? productCateList : productList
+  // Nếu có dữ liệu category thì gọi api category còn không thì hiển thị all
+  const productData = getCategory ? productCateList : productList
 
-  // Callback khi chọn category từ SlideBar
-  const handleCategorySelect = (categoryId) => {
-    setSelectedCategory(categoryId);
-  };
+  // Handle Change Catgegory
+  const handleChangeCategory = (slug) => {
+    const params = normalizeString(slug)
+    if (params === categoryName) {
+      // Nếu đã được chọn rồi, bỏ chọn (quay về tất cả sản phẩm)
+      navigate('/listing');
+    } else {
+      navigate(`/listing/${params}`);
+    }
+  }
 
   return (
     <section className="pt-5">
@@ -72,11 +83,12 @@ const ProductListing = () => {
               {/* Sử dụng RouterLink */}
               Home Page
             </RouterLink>
-            {/* Bạn có thể thêm link Category ở đây nếu có */}
-            {/* <RouterLink to={`/category/${productDetail.categoryId?._id}`} className="hover:underline text-inherit">
-            {productDetail.categoryId?.type || 'Category'}
-          </RouterLink> */}
-            <Typography sx={{ color: 'text.primary' }}>{getCategory?.type}</Typography>
+            <RouterLink to="/listing" className="hover:underline text-inherit">
+              {' '}
+              {/* Sử dụng RouterLink */}
+              Listing
+            </RouterLink>
+            {getCategory ? <Typography sx={{ color: 'text.primary' }}>{getCategory?.type}</Typography> : ""}
           </Breadcrumbs>
         </div>
         <h3 className="font-bold text-black text-[30px] mt-4">{getCategory ? (
@@ -86,7 +98,7 @@ const ProductListing = () => {
       <div className="bg-white p-2 mt-4">
         <div className="flexProductPage container flex gap-3">
           <div className="slidebarWrapper hidden md:block sm:w-[100%] md:w-[40%] xl:w-[20%] h-full bg-white">
-            <SlideBar categoryListZustand={categoryListZustand} onCategorySelect={handleCategorySelect} />
+            <SlideBar categoryListZustand={categoryListZustand} selectedCate={selectedCateParams} onCategorySelect={handleChangeCategory} />
           </div>
           <div className="rightContent w-[100%] xl:w-[80%]">
             <div className="bg-[#f1f1f1] p-2 w-full mb-3 rounded-md flex items-center justify-between">
