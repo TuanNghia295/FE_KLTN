@@ -26,6 +26,28 @@ export const useProducts = () => {
   };
 };
 
+// API: Lấy danh sách sản phẩm theo danh mục
+const getProductsByCategoryID = async ({queryKey}) => {
+  const [_key, _id] = queryKey
+  const response = await axiosClient.get(`/products/getAllProducts/${_id}`);
+  console.log(response)
+  return response.data
+}
+
+// Hook: Lấy danh sách sản phẩm theo danh mục
+export const useProductsCategory = (_id) => {
+  const { data: productCateList, isLoading: loadingProductList } = useQuery({
+    queryKey: ['productList', _id],
+    queryFn: getProductsByCategoryID,
+    enabled: !!_id,
+  });
+
+  return {
+    productCateList,
+    loadingProductList,
+  };
+};
+
 // Hook: Lấy chi tiết sản phẩm
 export const useProductDetail = (_id) => {
   const { data: productDetail, isLoading: loadingProductDetail } = useQuery({

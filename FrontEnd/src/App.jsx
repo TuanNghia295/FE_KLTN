@@ -20,6 +20,7 @@ import OrderDetails from './pages/OrderDetails/index.jsx';
 import ScrollToTop from './components/Scroll/ScrollToTop.jsx';
 import useStore from './store/useStore.jsx';
 import { useGetCartByUserID } from '../src/services/cartServices.jsx';
+import { useGetCategory } from './services/categoryServices.jsx';
 
 export const MainLayout = ({ children }) => (
   <>
@@ -38,6 +39,17 @@ export default function App() {
   const userInfo = useStore((state) => state.userInfo); // Lấy ra user id từ fetchUserInfo ở Zustand
   const { listCart } = useGetCartByUserID(userInfo?._id); // List ra danh sách bằng user id
   const setCartItems = useStore((state) => state.setCartItems); // Dùng useEffect để bỏ sản phẩm từ database lưu trữ vào Zustand
+  
+  //Call API Get Danh Muc
+  const { categoryList } = useGetCategory()
+  const setCategoryListZustand = useStore((state) => state.setCategoryListZustand);
+  
+  
+  useEffect(() => {
+    if (categoryList && categoryList.length > 0) {
+      setCategoryListZustand(categoryList);
+    }
+  }, [categoryList]);
 
   useEffect(() => {
     fetchUserInfo();
@@ -154,7 +166,7 @@ export default function App() {
             }
           />
           <Route
-            path="/listing/:category"
+            path="/listing/:categoryName"
             exact={true}
             element={
               <MainLayout>

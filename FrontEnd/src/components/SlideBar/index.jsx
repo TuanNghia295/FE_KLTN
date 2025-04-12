@@ -8,9 +8,21 @@ import { FaAngleUp } from 'react-icons/fa'
 import RangeSlider from 'react-range-slider-input'
 import 'react-range-slider-input/dist/style.css'
 
-const SlideBar = () => {
+const SlideBar = ({categoryListZustand, onCategorySelect }) => {
   const [isOpenCategoryFilter, setIsOpenCategoryFilter] = useState(true);
   const [isOpenAvailFilter, setIsOpenAvailFilter] = useState(true);
+
+  const handleCheckboxChange = (event) => {
+    const { value, checked } = event.target;
+  
+    if (checked) {
+      // Khi chọn checkbox, gọi callback để thêm categoryId vào selectedCategories
+      onCategorySelect(value);
+    } else {
+      // Khi bỏ chọn checkbox, gọi callback để xóa categoryId khỏi selectedCategories
+      onCategorySelect(null);
+    }
+  };
 
   return (
     <aside className='slidebar'>
@@ -25,18 +37,12 @@ const SlideBar = () => {
             </h1>
             <Collapse isOpened={isOpenCategoryFilter}>
               <div className='scroll max-h-[80px] md:max-h-[250px] relative '>
-                <FormControlLabel className='w-full' control={<Checkbox size='small'/>} label="Fashion" />
-                <FormControlLabel className='w-full' control={<Checkbox size='small'/>} label="Fashion" />
-                <FormControlLabel className='w-full' control={<Checkbox size='small'/>} label="Fashion" />
-                <FormControlLabel className='w-full' control={<Checkbox size='small'/>} label="Fashion" />
-                <FormControlLabel className='w-full' control={<Checkbox size='small'/>} label="Fashion" />
-                <FormControlLabel className='w-full' control={<Checkbox size='small'/>} label="Fashion" />
-                <FormControlLabel className='w-full' control={<Checkbox size='small'/>} label="Fashion" />
-                <FormControlLabel className='w-full' control={<Checkbox size='small'/>} label="Fashion" />
-                <FormControlLabel className='w-full' control={<Checkbox size='small'/>} label="Fashion" />
-                <FormControlLabel className='w-full' control={<Checkbox size='small'/>} label="Fashion" />
-                <FormControlLabel className='w-full' control={<Checkbox size='small'/>} label="Fashion" />
-                <FormControlLabel className='w-full' control={<Checkbox size='small'/>} label="Fashion" />
+                {Array.isArray(categoryListZustand) && categoryListZustand?.length > 0
+                ? categoryListZustand?.map((category) => (
+                  <FormControlLabel key={category._id || category.type} className='w-full' control={<Checkbox size='small' value={category._id} onChange={handleCheckboxChange}/>} label={category?.type} />
+                ))
+                : ""
+                }
               </div>
             </Collapse>  
         </div>
@@ -59,8 +65,8 @@ const SlideBar = () => {
             </Collapse>  
         </div>
 
-        <div className='box mb-3'>
-            {/*Filter hien thi full*/}
+        {/* <div className='box mb-3'> */}
+            {/* Filter hien thi full
             <h1 className='flex mb-3 !text-black text-[16px] font-[600] items-center'>Price
             </h1>
             <RangeSlider/>
@@ -71,8 +77,8 @@ const SlideBar = () => {
               <span className='ml-auto'>
                 To: <strong className='text-dark'>{1000}</strong>
               </span>
-            </div>
-        </div>
+            </div> */}
+        {/* </div> */}
     </aside>
   )
 }

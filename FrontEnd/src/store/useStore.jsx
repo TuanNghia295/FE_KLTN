@@ -63,6 +63,11 @@ const useStore = create((set) => ({
   // Hàm để mở/đóng panel giỏ hàng
   openCartPanel: false,
   setOpenCartPanel: (isOpen) => set({ openCartPanel: isOpen }),
+
+  //Trạng thái category
+  categoryListZustand: [],
+
+  setCategoryListZustand: (item) => set({categoryListZustand: item})
 }));
 
 export default useStore;

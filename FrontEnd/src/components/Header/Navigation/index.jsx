@@ -34,7 +34,7 @@ const Navigation = () => {
               </li>
 
               <li className="list-none relative">
-                <Link to={'/listing/fashion'} className="link transition text-[16px] font-[500]">
+                <Link to={'/listing/all'} className="link transition text-[16px] font-[500]">
                   <Button className="link transition font-[500] hover:!text-primary !py-4">Fashion</Button>
                 </Link>
 
@@ -44,12 +44,12 @@ const Navigation = () => {
                 >
                   <ul>
                     <li className="list-none w-full relative">
-                      <Link to={'/listing/men'}>
+                      <Link to={'/listing/nam'}>
                         <Button className="!text-textPrimary w-full !justify-start !rounded-none">Men</Button>
                       </Link>
 
                       {/* inner menu */}
-                      <div
+                      {/* <div
                         className="submenu absolute top-[0%] left-[100%] min-w-[150px] bg-white shadow-md 
                 opacity-0  transition-all duration-300"
                       >
@@ -80,17 +80,17 @@ const Navigation = () => {
                             </Link>
                           </li>
                         </ul>
-                      </div>
+                      </div> */}
                     </li>
 
                     <li className="list-none w-full">
-                      <Link to={'/listing/women'}>
+                      <Link to={'/listing/nu'}>
                         <Button className="!text-textPrimary w-full !justify-start !rounded-none">Women</Button>
                       </Link>
                     </li>
 
                     <li className="list-none w-full">
-                      <Link to={'/listing/children'}>
+                      <Link to={'/listing/tre-em'}>
                         <Button className="!text-textPrimary w-full !justify-start !rounded-none">Kids</Button>
                       </Link>
                     </li>
