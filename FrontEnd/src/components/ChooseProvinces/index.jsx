@@ -8,6 +8,8 @@ const ChooseProvinces = ({ userInfo, getInfo, editAddress = null, indexToUpdate 
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedWard, setSelectedWard] = useState('');
   const [numberAddress, setNumberAddress] = useState('');
+  const [showAddressList, setShowAddressList] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState('');
 
   const { listProvinces, getProvinceByCode, getDistrictByCode, loadingProvinces } = useProvinces();
 
@@ -67,18 +69,18 @@ const ChooseProvinces = ({ userInfo, getInfo, editAddress = null, indexToUpdate 
 
   return (
     <Fragment>
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-2 gap-4 mb-6">
         <input
           onChange={(event) => setNumberAddress(event.target.value)}
           value={numberAddress}
           placeholder="Nhập số nhà"
-          className="border border-[#ccc] p-2 rounded-md !text-black"
+          className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <select
           name="ward"
           onChange={handleChange}
           value={selectedWard}
-          className="border border-[#ccc] p-2 rounded-md"
+          className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">Chọn phường</option>
           {listWards &&
@@ -92,7 +94,7 @@ const ChooseProvinces = ({ userInfo, getInfo, editAddress = null, indexToUpdate 
           name="district"
           onChange={handleChange}
           value={selectedDistrict}
-          className="border border-[#ccc] p-2 rounded-md"
+          className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">Chọn quận huyện</option>
           {city?.districts &&
@@ -106,7 +108,7 @@ const ChooseProvinces = ({ userInfo, getInfo, editAddress = null, indexToUpdate 
           name="city"
           onChange={handleChange}
           value={selectedCity}
-          className="border border-[#ccc] p-2 rounded-md"
+          className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">Chọn thành phố</option>
           {listProvinces &&
@@ -120,6 +122,40 @@ const ChooseProvinces = ({ userInfo, getInfo, editAddress = null, indexToUpdate 
       <Button onClick={handleSave} className="w-full !bg-black !text-white !p-3">
         Save
       </Button>
+
+      {userInfo?.address && userInfo.address.length > 0 && (
+        <div className="mt-4">
+          <button
+            className="text-blue-500 underline hover:text-blue-700"
+            onClick={() => setShowAddressList(!showAddressList)}
+          >
+            {showAddressList ? 'Ẩn danh sách' : 'Thay đổi địa chỉ'}
+          </button>
+        </div>
+      )}
+
+      {showAddressList && userInfo?.address && (
+        <div className="mt-3 border p-4 rounded-lg bg-gray-100 max-h-40 overflow-y-auto">
+          <p className="font-medium mb-2">Chọn địa chỉ đã lưu:</p>
+          {userInfo.address.map((addr, index) => (
+            <button
+              key={index}
+              className={`w-full text-left p-3 mb-2 rounded-lg border transition-all duration-200 ${
+                selectedAddress === addr
+                  ? 'bg-blue-500 text-white border-blue-500'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              }`}
+              onClick={() => {
+                setSelectedAddress(addr);
+                setShowAddressList(false);
+                refetchShippingFee();
+              }}
+            >
+              {addr}
+            </button>
+          ))}
+        </div>
+      )}
     </Fragment>
   );
 };

@@ -1,31 +1,30 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axiosClient from '../apis/axiosClient';
 
-// === API Functions ===
-
 // 1. Tính phí vận chuyển
 const fetchShippingFee = async (toAddress) => {
   if (!toAddress) {
-    // Không có địa chỉ thì không cần gọi API
-    return null; // Hoặc throw error tùy logic mong muốn
+    return null;
   }
   try {
     const { data } = await axiosClient.post('/payment/calculate-shipping-fee', { toAddress });
-    // Trả về đúng cấu trúc { totalFee, distance } từ backend
     return data;
   } catch (error) {
     console.error('Error fetching shipping fee:', error.response?.data || error.message);
-    // Ném lỗi để React Query xử lý isError và error object
     throw new Error(error.response?.data?.details || error.response?.data?.error || 'Failed to calculate shipping fee');
   }
 };
 
-// 2. Tạo đơn hàng
+// 2. Tạo đơn hàng (và có thể lấy URL thanh toán PayPal từ backend)
 const createOrderApi = async (orderPayload) => {
   try {
-    const { data } = await axiosClient.post('/payment/createOrder', orderPayload);
-    // Backend trả về { message, order }
-    return data;
+    // API endpoint này giờ sẽ xử lý cả việc tạo đơn hàng
+    // và khởi tạo thanh toán PayPal nếu cần
+    const response = await axiosClient.post('/payment/createOrder', orderPayload);
+    // Backend sẽ trả về { message, order } hoặc { message, order, paymentUrl }
+    console.log('Order creation/payment initiation response:', response);
+
+    return response;
   } catch (error) {
     console.error('Error creating order:', error.response?.data || error.message);
     // Ném lỗi chi tiết từ backend nếu có
@@ -40,34 +39,32 @@ const createOrderApi = async (orderPayload) => {
 // Hook để lấy phí vận chuyển
 export const useShippingFee = (toAddress) => {
   return useQuery({
-    queryKey: ['shippingFee', toAddress], // Key phụ thuộc vào địa chỉ
+    queryKey: ['shippingFee', toAddress],
     queryFn: () => fetchShippingFee(toAddress),
-    enabled: !!toAddress, // Chỉ kích hoạt query khi có địa chỉ
-    staleTime: 5 * 60 * 1000, // Cache trong 5 phút
-    refetchOnWindowFocus: false, // Tùy chọn: không fetch lại khi focus cửa sổ
-    retry: 1, // Thử lại 1 lần nếu lỗi
+    enabled: !!toAddress,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
 };
 
-// Hook để tạo đơn hàng (Mutation)
+// Hook để tạo đơn hàng (và nhận URL thanh toán nếu có)
 export const useCreateOrder = () => {
-  const queryClient = useQueryClient(); // Để vô hiệu hóa cache nếu cần sau khi đặt hàng thành công
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: createOrderApi, // Hàm gọi API
+    mutationFn: createOrderApi,
     onSuccess: (data) => {
-      console.log('Order created successfully:', data);
-      queryClient.invalidateQueries(['cart']);
-      // Xử lý thành công:
-      // - Hiển thị thông báo thành công
-      // - Chuyển hướng đến trang cảm ơn/chi tiết đơn hàng
-      // - Vô hiệu hóa cache giỏ hàng (nếu có)
-      // queryClient.invalidateQueries(['cart']); // Ví dụ vô hiệu hóa cache giỏ hàng
+      // data có thể là { message, order } hoặc { message, order, paymentUrl }
+      console.log('Order creation/payment initiation successful:', data);
+      // Không invalidate cart ở đây ngay nếu là PayPal, chờ thanh toán thành công
+      // queryClient.invalidateQueries(['cart']);
+
+      // Quan trọng: Trả về data để component sử dụng (ví dụ: lấy paymentUrl)
+      return data;
     },
     onError: (error) => {
-      console.error('Order creation failed:', error);
-      // Xử lý lỗi:
-      // - Hiển thị thông báo lỗi chi tiết cho người dùng
+      console.error('Order creation/payment initiation failed:', error);
     },
   });
 };

@@ -21,6 +21,8 @@ import ScrollToTop from './components/Scroll/ScrollToTop.jsx';
 import useStore from './store/useStore.jsx';
 import { useGetCartByUserID } from '../src/services/cartServices.jsx';
 import { useGetCategory } from './services/categoryServices.jsx';
+import PaymentError from './pages/CheckOut/PaymentError.jsx';
+import PaymentSuccess from './pages/CheckOut/PaymentSuccess.jsx';
 
 export const MainLayout = ({ children }) => (
   <>
@@ -41,12 +43,11 @@ export default function App() {
   const userInfo = useStore((state) => state.userInfo); // Lấy ra user id từ fetchUserInfo ở Zustand
   const { listCart } = useGetCartByUserID(userInfo?._id); // List ra danh sách bằng user id
   const setCartItems = useStore((state) => state.setCartItems); // Dùng useEffect để bỏ sản phẩm từ database lưu trữ vào Zustand
-  
+
   //Call API Get Danh Muc
-  const { categoryList } = useGetCategory()
+  const { categoryList } = useGetCategory();
   const setCategoryListZustand = useStore((state) => state.setCategoryListZustand);
-  
-  
+
   useEffect(() => {
     if (categoryList && categoryList.length > 0) {
       setCategoryListZustand(categoryList);
@@ -184,6 +185,9 @@ export default function App() {
               </MainLayout>
             }
           />
+
+          <Route path="/checkout/error" exact={true} element={<PaymentError />} />
+          <Route path="/checkout/success" exact={true} element={<PaymentSuccess />} />
         </Routes>
 
         <Drawer open={openCartPanel} onClose={toggleCartPanel(false)} anchor={'right'} className="cartPanel">

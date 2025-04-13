@@ -104,10 +104,7 @@ export function useClearCart({ userId }) {
     mutationFn: () => clearCart(userId),
     mutationKey: ['clearCart', userId],
     onSuccess: () => {
-      toast.success('Cart cleared successfully!', {
-        position: 'top-center',
-        autoClose: 3000,
-      });
+      console.log('Cart cleared successfully!');
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to clear cart!', {
