@@ -14,11 +14,16 @@ const normalizeString = (str) => {
     .replace(/\s+/g, '-')               // thay khoảng trắng = dấu gạch ngang nếu cần
 };
 
-const FilterProduct = () => {
+const FilterProduct = ({perPage, setPerPage}) => {
   const location = useLocation();
   const currentPath = location.pathname; // ví dụ: "/listing/nam"
   const setOpenFilterProduct = useStore((state) => state.setOpenFilterProduct);
   const categoryListZustand = useStore((state) => state.categoryListZustand);
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setPerPage(value)
+  }
 
   return (
     <>
@@ -36,10 +41,10 @@ const FilterProduct = () => {
             <h1 className='font-[300] text-[18px] mb-2'>Filter</h1>
           </div>
           <div className="-mt-2">
-            <select className='bg-[#f1f1f1] h-[35px] px-4 rounded-md'>
+            <select className='bg-[#f1f1f1] h-[35px] px-4 rounded-md' value={perPage} onChange={handleChange}>
               <option value="8">8</option>
-              <option value="8">12</option>
-              <option value="8">16</option>
+              <option value="12">12</option>
+              <option value="16">16</option>
             </select>
           </div>
         </div>

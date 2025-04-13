@@ -51,9 +51,8 @@ const ProductListing = () => {
   const [perPage, setPerPage] = useState(8);
   const page = 1;
 
-
   const { productList } = useProducts(perPage);
-  const { productCateList } = useProductsCategory(getCategory?._id);
+  const { productCateList } = useProductsCategory(getCategory?._id, perPage);
 
   const [selectedCateParams, setSelectedCateParams] = useState(getCategory?._id)
 
@@ -196,13 +195,13 @@ const ProductListing = () => {
 
             <div className="flex w-full items-center justify-center mt-3">
               {/* <Pagination count={10} showFirstButton showLastButton /> */}
-              <button className='bg-[#fff] border border-[#ccc] text-[#black] p-2 rounded-md' onClick={() => setPerPage(p => p + 10)}>Load More...</button>
+              <button className='bg-[#000] text-white py-3 px-10 !rounded-md' onClick={() => setPerPage(p => p + 4)}>Load More...</button>
             </div>
           </div>
         </div>
       </div>
       <Drawer open={openFilterProduct} onClose={toogleFilterProduct(false)} anchor={'left'} className="filterPanel">
-          <FilterProduct />
+          <FilterProduct perPage={perPage} setPerPage={setPerPage} />
         </Drawer>
     </section>
   );
