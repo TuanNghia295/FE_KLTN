@@ -2,22 +2,21 @@ import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../apis/axiosClient';
 
 // API: Lấy tất cả sản phẩm
-const getAllProducts = async () => {
-  const response = await axiosClient.get('/products/getAllProducts');
-  return response.data;
-};
-
-// API: Lấy chi tiết sản phẩm
-const getDetailProducts = async (_id) => {
-  const response = await axiosClient.get(`/products/${_id}`);
+const getAllProducts = async ({perPage}) => {
+  const params = new URLSearchParams({
+    perPage: perPage.toString()
+  })
+  const response = await axiosClient.get(`/products/getAllProducts?${params}`);
   return response.data;
 };
 
 // Hook: Lấy danh sách sản phẩm
-export const useProducts = () => {
+export const useProducts = (perPage) => {
   const { data: productList, isLoading: loadingProductList } = useQuery({
-    queryKey: ['productList'],
-    queryFn: getAllProducts,
+    queryKey: ['productList', perPage],
+    queryFn: () =>  getAllProducts({perPage}),
+    keepPreviousData: true,
+    enabled: !!perPage,
   });
 
   return {
@@ -45,6 +44,12 @@ export const useProductsCategory = (_id) => {
     productCateList,
     loadingProductList,
   };
+};
+
+// API: Lấy chi tiết sản phẩm
+const getDetailProducts = async (_id) => {
+  const response = await axiosClient.get(`/products/${_id}`);
+  return response.data;
 };
 
 // Hook: Lấy chi tiết sản phẩm

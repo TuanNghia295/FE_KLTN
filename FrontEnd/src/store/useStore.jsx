@@ -57,14 +57,18 @@ const useStore = create((set) => ({
   // Hàm để xóa toàn bộ giỏ hàng
   clearCart: () => set({ cartItems: [] }),
 
-  // Hàm để mở/đóng panel giỏ hàng
-  openCartPanel: false,
-  setOpenCartPanel: (isOpen) => set({ openCartPanel: isOpen }),
-
   //Trạng thái category
   categoryListZustand: [],
 
   setCategoryListZustand: (item) => set({ categoryListZustand: item }),
+
+  // Hàm để mở/đóng panel giỏ hàng
+  openCartPanel: false,
+  setOpenCartPanel: (isOpen) => set({ openCartPanel: isOpen }),
+
+  // Hàm để mở/đóng FilterProduct
+  openFilterProduct: false,
+  setOpenFilterProduct: (isOpen) => set({openFilterProduct: isOpen})
 }));
 
 export default useStore;

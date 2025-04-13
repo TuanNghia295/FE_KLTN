@@ -7,6 +7,7 @@ import '../ProductListing/style.css';
 import ProductItem from '../../components/ProductItem';
 import ProductItemListView from '../../components/ProductItemListView';
 import { IoGridSharp } from 'react-icons/io5';
+import { FaFilter } from "react-icons/fa";
 import { LuMenu } from 'react-icons/lu';
 import { Button } from '@mui/material';
 import Menu from '@mui/material/Menu';
@@ -18,6 +19,7 @@ import useStore from '../../store/useStore'
 import { useNavigate } from 'react-router-dom';
 
 const normalizeString = (str) => {
+  if (!str) return "";
   return str
     .normalize('NFD')                   // tách dấu ra khỏi chữ
     .replace(/[\u0300-\u036f]/g, '')    // xóa dấu
@@ -30,6 +32,9 @@ const ProductListing = () => {
   const navigate = useNavigate();
   // Lấy list Category tu Zustand
   const categoryListZustand = useStore((state) => state.categoryListZustand);
+  // Set Open Filter Product
+  const openFilterProduct = useStore((state) => state.openFilterProduct);
+  const setOpenFilterProduct = useStore((state) => state.setOpenFilterProduct);
 
   const getCategory = categoryName //Tìm category từ params trong Zustand
     ? categoryListZustand.find(
@@ -37,7 +42,12 @@ const ProductListing = () => {
     )
     : null;
 
-  const { productList } = useProducts();
+  // Phân trang
+  const [perPage, setPerPage] = useState(8);
+  const page = 1;
+
+
+  const { productList } = useProducts(perPage);
   const { productCateList } = useProductsCategory(getCategory?._id);
 
   const [selectedCateParams, setSelectedCateParams] = useState(getCategory?._id)
@@ -104,6 +114,13 @@ const ProductListing = () => {
             <div className="bg-[#f1f1f1] p-2 w-full mb-3 rounded-md flex items-center justify-between">
               <div className="col1 flex items-center gap-1 itemViewActions">
                 <Button
+                  className={`md:!hidden !w-[40px] !h-[40px] !min-w-[40px] !rounded-full !text-[#000] ${openFilterProduct === true && 'active'
+                    }`}
+                  onClick={() => setOpenFilterProduct(true)}
+                >
+                  <FaFilter className="text-[rgba(0,0,0,0.7)]" />
+                </Button>
+                <Button
                   className={`!w-[40px] !h-[40px] !min-w-[40px] !rounded-full !text-[#000] ${itemView === 'grid' && 'active'
                     }`}
                   onClick={() => setItemView('grid')}
@@ -163,13 +180,18 @@ const ProductListing = () => {
                 </>
               ) : (
                 <>
-                  <ProductItemListView />
+                  {Array.isArray(productData) && productData.length === 0 ? (
+                    <p>Không có sản phẩm nào.</p>
+                  ) : (
+                    productData?.map((product) => <ProductItemListView key={product._id} product={product} normalizeString={normalizeString} />)
+                  )}
                 </>
               )}
             </div>
 
             <div className="flex w-full items-center justify-center mt-3">
-              <Pagination count={10} showFirstButton showLastButton />
+              {/* <Pagination count={10} showFirstButton showLastButton /> */}
+              <button className='bg-[#fff] border border-[#ccc] text-[#black] p-2 rounded-md' onClick={() => setPerPage(p => p + 10)}>Load More...</button>
             </div>
           </div>
         </div>

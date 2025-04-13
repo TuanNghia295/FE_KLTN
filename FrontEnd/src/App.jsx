@@ -21,6 +21,7 @@ import ScrollToTop from './components/Scroll/ScrollToTop.jsx';
 import useStore from './store/useStore.jsx';
 import { useGetCartByUserID } from '../src/services/cartServices.jsx';
 import { useGetCategory } from './services/categoryServices.jsx';
+import FilterProduct from '../src/components/FilterProduct'
 
 export const MainLayout = ({ children }) => (
   <>
@@ -34,7 +35,11 @@ export default function App() {
   // Lấy trạng thái và hàm từ Zustand store
   const openCartPanel = useStore((state) => state.openCartPanel);
   const setOpenCartPanel = useStore((state) => state.setOpenCartPanel);
+  const openFilterProduct = useStore((state) => state.openFilterProduct);
+  const setOpenFilterProduct = useStore((state) => state.setOpenFilterProduct);
+
   const fetchUserInfo = useStore((state) => state.fetchUserInfo);
+
   // Lấy thông tin giỏ hàng từ database (React Query vào Zustand)
   const userInfo = useStore((state) => state.userInfo); // Lấy ra user id từ fetchUserInfo ở Zustand
   const { listCart } = useGetCartByUserID(userInfo?._id); // List ra danh sách bằng user id
@@ -74,6 +79,9 @@ export default function App() {
     setOpenCartPanel(newOpen);
   };
 
+  const toogleFilterProduct = (newOpen) => () => {
+    setOpenFilterProduct(newOpen)
+  }
   return (
     <>
       <ToastContainer />
@@ -186,6 +194,10 @@ export default function App() {
 
         <Drawer open={openCartPanel} onClose={toggleCartPanel(false)} anchor={'right'} className="cartPanel">
           <CartPanel />
+        </Drawer>
+
+        <Drawer open={openFilterProduct} onClose={toogleFilterProduct(false)} anchor={'left'} className="filterPanel">
+          <FilterProduct />
         </Drawer>
       </BrowserRouter>
     </>
