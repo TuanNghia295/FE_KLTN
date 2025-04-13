@@ -17,7 +17,6 @@ const normalizeString = (str) => {
 const FilterProduct = () => {
   const location = useLocation();
   const currentPath = location.pathname; // ví dụ: "/listing/nam"
-  console.log(currentPath)
   const setOpenFilterProduct = useStore((state) => state.setOpenFilterProduct);
   const categoryListZustand = useStore((state) => state.categoryListZustand);
 
@@ -31,16 +30,30 @@ const FilterProduct = () => {
         <IoCloseSharp className="text-[20px] cursor-pointer" onClick={() => setOpenFilterProduct(false)} />
       </div>
       <div className='category w-[300px] p-4'>
+        {/* Filter PerPage */}
+        <div className='filterPerPage flex justify-between py-4 items-center'>
+          <div>
+            <h1 className='font-[300] text-[18px] mb-2'>Filter</h1>
+          </div>
+          <div className="-mt-2">
+            <select className='bg-[#f1f1f1] h-[35px] px-4 rounded-md'>
+              <option value="8">8</option>
+              <option value="8">12</option>
+              <option value="8">16</option>
+            </select>
+          </div>
+        </div>
+        {/* List Category */}
         <h1 className='font-[300] text-[18px] mb-2'>Category</h1>
         <ul className='flex flex-col gap-3'>
-          {Array.isArray(categoryListZustand) && categoryListZustand.length > 0 && categoryListZustand.map((category) => {
+          {Array.isArray(categoryListZustand) && categoryListZustand.length > 0 && categoryListZustand.map((category, index) => {
             const normalizedType = normalizeString(category?.type);
             const isActive = currentPath === `/listing/${normalizedType}`;
             const nextPath = isActive ? '/listing' : `/listing/${normalizedType}`;
 
             return (
-              <Link to={nextPath}>
-                <li className={`p-2 rounded-md shadow-sm ${isActive ? 'text-white bg-[#494949]' : 'bg-[#f1f1f1]'}`} key={category._id}>{category?.type}</li>
+              <Link to={nextPath} key={index}>
+                <li className={`p-2 rounded-md shadow-sm ${isActive ? 'text-white bg-[#494949]' : 'bg-[#f1f1f1]'}`}>{category?.type}</li>
               </Link>
             )
           })}

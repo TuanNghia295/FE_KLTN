@@ -11,7 +11,7 @@ const getAllProducts = async ({perPage}) => {
 };
 
 // Hook: Lấy danh sách sản phẩm
-export const useProducts = (perPage) => {
+export const useProducts = (perPage = 8) => {
   const { data: productList, isLoading: loadingProductList } = useQuery({
     queryKey: ['productList', perPage],
     queryFn: () =>  getAllProducts({perPage}),

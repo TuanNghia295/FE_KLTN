@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Drawer from '@mui/material/Drawer';
 import SlideBar from '../../components/SlideBar';
 import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
@@ -17,6 +18,7 @@ import Pagination from '@mui/material/Pagination';
 import { useProducts, useProductsCategory } from '../../services/productsService';
 import useStore from '../../store/useStore'
 import { useNavigate } from 'react-router-dom';
+import FilterProduct from '../../components/FilterProduct'
 
 const normalizeString = (str) => {
   if (!str) return "";
@@ -35,6 +37,9 @@ const ProductListing = () => {
   // Set Open Filter Product
   const openFilterProduct = useStore((state) => state.openFilterProduct);
   const setOpenFilterProduct = useStore((state) => state.setOpenFilterProduct);
+  const toogleFilterProduct = (newOpen) => () => {
+    setOpenFilterProduct(newOpen)
+  }
 
   const getCategory = categoryName //Tìm category từ params trong Zustand
     ? categoryListZustand.find(
@@ -196,6 +201,9 @@ const ProductListing = () => {
           </div>
         </div>
       </div>
+      <Drawer open={openFilterProduct} onClose={toogleFilterProduct(false)} anchor={'left'} className="filterPanel">
+          <FilterProduct />
+        </Drawer>
     </section>
   );
 };
