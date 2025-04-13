@@ -16,6 +16,8 @@ const CartPanel = () => {
   const setOpenCartPanel = useStore((state) => state.setOpenCartPanel);
   const userInfo = useStore((state) => state.userInfo);
 
+  console.log('cartItems', cartItems);
+
   //Call API Update Cart By User ID
   const userId = useStore((state) => state.userInfo?._id);
   const { mutate: updateCart } = useUpdateCartByUserID();

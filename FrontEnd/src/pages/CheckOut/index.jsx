@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaCreditCard, FaRegMoneyBill1 } from 'react-icons/fa6';
 import useStore from '../../store/useStore';
 import { useShippingFee, useCreateOrder } from '../../services/paymentServices.jsx';
+import { useClearCart } from '../../services/cartServices.jsx';
 
 // Hàm định dạng tiền tệ
 const formatCurrency = (value) => {
@@ -22,7 +23,7 @@ const CheckOut = () => {
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' });
   const [showAddressList, setShowAddressList] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(userInfo?.address[0] || '');
-
+  const { clearingCartFn } = useClearCart({ userId: userInfo?._id });
   const paymentOptions = [
     { value: 'Cash', label: 'Payment with cash', icon: <FaRegMoneyBill1 /> },
     { value: 'BankTransfer', label: 'Payment with Bank Transfer/VNPay', icon: <FaCreditCard /> },
@@ -110,6 +111,7 @@ const CheckOut = () => {
     if (isOrderSuccess) {
       setNotification({ open: true, message: 'Order placed successfully!', severity: 'success' });
       resetCreateOrder();
+      clearingCartFn(); // Xóa giỏ hàng sau khi đặt hàng thành công
 
       // Reset giỏ hàng sau khi đặt hàng thành công
       clearCart();

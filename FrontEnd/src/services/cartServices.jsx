@@ -10,6 +10,14 @@ const addToCart = async (data) => {
   return response.items;
 };
 
+// Clear cart
+const clearCart = async (userId) => {
+  console.log('Clearing cart for userId:', userId);
+
+  const response = await axiosClient.delete(`/cart/delete/${userId}`);
+  return response.data; // Ensure the response data is returned
+};
+
 //Hook Add To Cart
 export function useAddToCart() {
   const setCartItems = useStore((state) => state.setCartItems);
@@ -89,4 +97,25 @@ export function useUpdateCartByUserID() {
       });
     },
   });
+}
+
+export function useClearCart({ userId }) {
+  const { mutate: clearingCartFn, isPending: isClearing } = useMutation({
+    mutationFn: () => clearCart(userId),
+    mutationKey: ['clearCart', userId],
+    onSuccess: () => {
+      toast.success('Cart cleared successfully!', {
+        position: 'top-center',
+        autoClose: 3000,
+      });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to clear cart!', {
+        position: 'top-center',
+        autoClose: 3000,
+      });
+    },
+  });
+
+  return { clearingCartFn, isClearing };
 }
