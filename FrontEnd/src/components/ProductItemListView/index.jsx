@@ -13,6 +13,7 @@ import { useAddToCart } from '../../services/cartServices';
 import { CgPlayTrackNextR } from "react-icons/cg";
 import { CgPlayTrackPrevR } from "react-icons/cg";
 import { motion, AnimatePresence } from 'framer-motion';
+import CircularProgress from '@mui/material/CircularProgress';
 
 
 const ProductItemListView = ({ product, normalizeString }) => {
@@ -171,7 +172,9 @@ const ProductItemListView = ({ product, normalizeString }) => {
                 handleAddToCart(data);
                 setSelectedSize(null)
               }} // Thêm logic ở đây
-            >Add To Cart</Button>
+            >
+              {loadingAddToCart ? <CircularProgress className='!w-6 !h-6' color="inherit" /> : "Add To Cart"}
+            </Button>
           </div>
         </div>
       </div>

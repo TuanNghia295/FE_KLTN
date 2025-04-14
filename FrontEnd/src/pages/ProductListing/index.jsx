@@ -53,11 +53,12 @@ const ProductListing = () => {
   // Phân trang
   const isMobile = useMediaQuery('(max-width:768px)');
   const [search, setSearch] = useState('');  // State để lưu giá trị tìm kiếm
+  const [searchCate, setSearchCate] = useState('');  // State để lưu giá trị tìm kiếm
   const [perPage, setPerPage] = useState(8);
   const [page, setPage] = useState(1);
 
   const { productList, total, loadingProductList } = useProducts(perPage, page, search);
-  const { productCateList, totalCate, loadingProductCateList } = useProductsCategory(getCategory?._id, perPage, page);
+  const { productCateList, totalCate, loadingProductCateList } = useProductsCategory(getCategory?._id, perPage, page, searchCate);
   const totalPage = getCategory ? totalCate : total
 
   const [selectedCateParams, setSelectedCateParams] = useState(getCategory?._id)
@@ -93,13 +94,6 @@ const ProductListing = () => {
     }
   }
 
-  // Hàm xử lý tìm kiếm với debounce
-  const handleSearchChange = useMemo(() => debounce((e) => {
-    setSearch(e.target.value);  // Cập nhật giá trị tìm kiếm
-    setPage(1)
-    setAllProducts([])
-  }, 500), []);  // Delay 500ms sau khi người dùng ngừng nhập
-
   // Reset sản phẩm khi đổi category hoac perPage
   useEffect(() => {
     setAllProducts([]);     // Xóa toàn bộ sản phẩm cũ
@@ -123,6 +117,14 @@ const ProductListing = () => {
       }
     }
   }, [productList, productCateList, isMobile, search]);
+
+  // Hàm xử lý tìm kiếm với debounce
+  const handleSearchChange = useMemo(() => debounce((e) => {
+    setSearch(e.target.value);
+    setSearchCate(e.target.value) // Cập nhật giá trị tìm kiếm neu khong phai category
+    setPage(1)
+    setAllProducts([])
+  }, 500), []);  // Delay 500ms sau khi người dùng ngừng nhập
 
   return (
     <section className="pt-5">

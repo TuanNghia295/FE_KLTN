@@ -33,10 +33,11 @@ export const useProducts = (perPage = 8, page = 1, search = '') => {
 
 // API: Lấy danh sách sản phẩm theo danh mục
 const getProductsByCategoryID = async ({queryKey}) => {
-  const [_key, _id, perPage, page] = queryKey
+  const [_key, _id, perPage, page, search] = queryKey
   const params = new URLSearchParams({
     perPage: perPage.toString(),
-    page: page.toString()
+    page: page.toString(),
+    search,
   })
   const response = await axiosClient.get(`/products/getAllProducts/${_id}?${params}`);
   return {
@@ -46,9 +47,9 @@ const getProductsByCategoryID = async ({queryKey}) => {
 }
 
 // Hook: Lấy danh sách sản phẩm theo danh mục
-export const useProductsCategory = (_id, perPage, page) => {
+export const useProductsCategory = (_id, perPage, page, search) => {
   const { data, isLoading: loadingProductCateList } = useQuery({
-    queryKey: ['productList', _id, perPage, page],
+    queryKey: ['productList', _id, perPage, page, search],
     queryFn: getProductsByCategoryID,
     enabled: !!_id,
   });
