@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 @font-face {
     font-family: BeautiqueDisplay-Regular;
     src: url(../src/assets/BeautiqueDisplay-Regular.otf);
@@ -16,12 +17,12 @@
 body::-webkit-scrollbar {
     width: 5px;
     height: 5px;
-  }
-  
+}
+
 body::-webkit-scrollbar-thumb {
     background-color: #000;
 }
-  
+
 body::-webkit-scrollbar-track {
     background: #fff;
 }
@@ -86,7 +87,7 @@ nav ul button:hover {
     background-color: #000;
     z-index: 100;
     opacity: 0;
-    }
+}
 
 .myAccountTabs li a.active::before {
     opacity: 100;
@@ -95,3 +96,13 @@ nav ul button:hover {
 .Toastify__toast {
     font-size: 14px !important;
 }
+
+/* Ẩn thanh scroll nhưng vẫn scroll được */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }

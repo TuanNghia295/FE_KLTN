@@ -228,11 +228,11 @@ const ProductListing = () => {
                 <CircularProgress color="inherit" />
               </div>
             ) : ""}
-            <div className="flex w-full items-center justify-center mt-3">
+            <div className="flex w-full items-center justify-center my-10">
               {isMobile ? (
                 hasMore && (
                   <button
-                    className="bg-[#000] text-white py-3 px-10 !rounded-md"
+                    className="border border-[#b8b8b8] shadow-sm bg-white rounded-md text-black w-full py-2"
                     onClick={() => setPage((p) => p + 1)}
                   >
                     Load More...
