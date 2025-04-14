@@ -17,7 +17,7 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import '../Home/style.css'; // Đảm bảo file này được tối ưu hoặc tree-shaking tốt
 import { useBanner } from '../../services/BannerServices';
-import { useProducts } from '../../services/productsService';
+import { useProductsCategory } from '../../services/productsService';
 
 // Tách logic lấy số cột responsive
 const getColumns = () => (window.innerWidth < 768 ? 1 : window.innerWidth < 1024 ? 2 : 4); // Cập nhật logic responsive nếu cần
@@ -25,7 +25,14 @@ const getColumns = () => (window.innerWidth < 768 ? 1 : window.innerWidth < 1024
 const Home = () => {
   const [columns, setColumns] = useState(getColumns);
   const { listBanner } = useBanner();
-  const { productList, loadingProductList } = useProducts();
+  const [cateId, setCateID] = useState('')
+  const perPage = 8
+  const page = 1
+  const { productCateList, loadingProductCateList } = useProductsCategory(cateId, perPage, page);
+  // Xử lý handeChangeCate trong component
+  const handeChangeCate = (value) => {
+      setCateID(value)
+  }
 
   // Xử lý responsive columns
   useEffect(() => {
@@ -117,16 +124,16 @@ const Home = () => {
               <h2 className="text-xl md:text-2xl font-semibold mb-3 md:mb-0">Popular Products</h2>
               <div className="ml-auto">
                 {/* TabsHomePage cũng được lazy load */}
-                <TabsHomePage />
+                <TabsHomePage handeChangeCate={handeChangeCate} />
               </div>
             </div>
             {/* ProductSlider được lazy load, loading data xử lý bên ngoài Suspense */}
-            {loadingProductList ? (
+            {loadingProductCateList ? (
               <div className="flex justify-center items-center min-h-[200px]">
                 <LoadingComponent />
               </div>
             ) : (
-              <ProductsSlider listProducts={productList || []} />
+              <ProductsSlider listProducts={productCateList || []} />
             )}
           </div>
         </Suspense>

@@ -23,6 +23,7 @@ import { useGetCartByUserID } from '../src/services/cartServices.jsx';
 import { useGetCategory } from './services/categoryServices.jsx';
 import PaymentError from './pages/CheckOut/PaymentError.jsx';
 import PaymentSuccess from './pages/CheckOut/PaymentSuccess.jsx';
+import Page404 from './pages/Page404/index.jsx';
 
 export const MainLayout = ({ children }) => (
   <>
@@ -104,7 +105,7 @@ export default function App() {
           <Route path={'/login'} exact={true} element={<Login />} />
           <Route path={'/register'} exact={true} element={<Register />} />
           <Route path={'/verify'} exact={true} element={<VerifyAccount />} />
-
+          <Route path={'*'} exact={true} element={<Page404 hscreen={'h-screen'} />} />
           <Route
             path={'/checkout'}
             exact={true}
