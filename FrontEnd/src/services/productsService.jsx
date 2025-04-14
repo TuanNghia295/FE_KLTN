@@ -9,7 +9,6 @@ const getAllProducts = async ({perPage, page, search = ''}) => {
     search,
   })
   const response = await axiosClient.get(`/products/getAllProducts?${params}`);
-  console.log(response.data)
   return {
     data: response.data,
     total: Math.ceil(response.totalPage/perPage)

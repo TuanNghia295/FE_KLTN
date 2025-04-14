@@ -24,6 +24,7 @@ import { useGetCategory } from './services/categoryServices.jsx';
 import PaymentError from './pages/CheckOut/PaymentError.jsx';
 import PaymentSuccess from './pages/CheckOut/PaymentSuccess.jsx';
 import Page404 from './pages/Page404/index.jsx';
+import SearchPage from './pages/SearchPage/index.jsx';
 
 export const MainLayout = ({ children }) => (
   <>
@@ -106,6 +107,14 @@ export default function App() {
           <Route path={'/register'} exact={true} element={<Reg />} />
           <Route path={'/verify'} exact={true} element={<VerifyAccount />} />
           <Route path={'*'} exact={true} element={<Page404 hscreen={'h-screen'} />} />
+          <Route
+            path="/search"
+            element={
+              <MainLayout>
+                <SearchPage />
+              </MainLayout>
+            }
+          />
           <Route
             path={'/checkout'}
             exact={true}
