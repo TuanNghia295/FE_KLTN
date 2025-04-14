@@ -4,6 +4,7 @@ import { IoCloseSharp } from 'react-icons/io5';
 import { Link } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { FaFilter } from "react-icons/fa";
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 const normalizeString = (str) => {
   if (!str) return "";
@@ -14,11 +15,12 @@ const normalizeString = (str) => {
     .replace(/\s+/g, '-')               // thay khoảng trắng = dấu gạch ngang nếu cần
 };
 
-const FilterProduct = ({perPage, setPerPage}) => {
+const FilterProduct = ({ perPage, setPerPage }) => {
   const location = useLocation();
   const currentPath = location.pathname; // ví dụ: "/listing/nam"
   const setOpenFilterProduct = useStore((state) => state.setOpenFilterProduct);
   const categoryListZustand = useStore((state) => state.categoryListZustand);
+  const isMobile = useMediaQuery('(max-width:768px)');
 
   const handleChange = (e) => {
     const value = e.target.value;
@@ -32,13 +34,16 @@ const FilterProduct = ({perPage, setPerPage}) => {
           <FaFilter />
           <p className='text-[20px]'>Filter</p>
         </div>
-        <IoCloseSharp className="text-[20px] cursor-pointer" onClick={() => setOpenFilterProduct(false)} />
+        {isMobile ?
+          < IoCloseSharp className="text-[20px] cursor-pointer" onClick={() => setOpenFilterProduct(false)} />
+          : ""
+        }
       </div>
       <div className='category w-[300px] p-4'>
         {/* Filter PerPage */}
         <div className='filterPerPage flex justify-between py-4 items-center'>
           <div>
-            <h1 className='font-[300] text-[18px] mb-2'>Filter</h1>
+            <h1 className='font-[300] text-[18px] mb-2'>Product 1 Page</h1>
           </div>
           <div className="-mt-2">
             <select className='bg-[#f1f1f1] h-[35px] px-4 rounded-md' value={perPage} onChange={handleChange}>

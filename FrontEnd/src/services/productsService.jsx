@@ -10,7 +10,7 @@ const getAllProducts = async ({perPage, page}) => {
   const response = await axiosClient.get(`/products/getAllProducts?${params}`);
   return {
     data: response.data,
-    total: response.totalPage
+    total: Math.ceil(response.totalPage/perPage)
   }
 };
 

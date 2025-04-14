@@ -25,7 +25,7 @@ export function useRegister() {
         position: 'top-center',
         autoClose: 3000,
       });
-      navigate('/'); // Chuyển hướng sau khi đăng ký thành công
+      navigate('/login'); // Chuyển hướng sau khi đăng ký thành công
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Đăng ký thất bại', {

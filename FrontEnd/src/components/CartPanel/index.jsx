@@ -1,6 +1,8 @@
 import React, { Fragment, useMemo, useState } from 'react';
 import { IoCloseSharp } from 'react-icons/io5';
 import { MdDelete } from 'react-icons/md';
+import { MdAddShoppingCart } from "react-icons/md";
+import { BsFillCartXFill } from "react-icons/bs";
 import '../CartPanel/style.css';
 import { Link } from 'react-router-dom';
 import { Button, CircularProgress, Tooltip } from '@mui/material';
@@ -62,7 +64,16 @@ const CartPanel = () => {
       {/* Phần giỏ hàng */}
       <div className="scroll custom-scrollbar w-full max-h-[70%] overflow-y-scroll overflow-x-hidden py-3 px-4">
         {cartItems?.length === 0 ? (
-          <p className="text-center text-gray-500">Your cart is empty</p>
+          <div className='flex flex-col items-center justify-center gap-4'>
+            <BsFillCartXFill className='text-[100px]' />
+            <p className="text-center font-[600] text-[25px] text-black">Your cart is empty</p>
+            <Link to='/listing'>
+              <Button className='!bg-black !text-white flex gap-3 !items-center' onClick={() => setOpenCartPanel(false)}>
+                <MdAddShoppingCart className='text-[25px] bg-white rounded-full text-black p-1' />
+                <p>Shopping Now</p>
+              </Button>
+            </Link>
+          </div>
         ) : (
           cartItems?.map((item) => (
             <div key={item._id} className="cartItem flex items-center gap-4 mb-4 border-b pb-4">

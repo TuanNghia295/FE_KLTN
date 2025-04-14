@@ -5,7 +5,7 @@ import ProductListing from './pages/ProductListing/index.jsx';
 import Footer from './pages/Footer/index.jsx';
 import ProductDetails from './pages/ProductDetails/index.jsx';
 import Login from './pages/Login/index.jsx';
-import Register from './pages/Register/index.jsx';
+import Reg from './pages/Register/index2.jsx';
 import Drawer from '@mui/material/Drawer';
 import { useEffect } from 'react';
 import CartPanel from './components/CartPanel/index.jsx';
@@ -103,7 +103,7 @@ export default function App() {
             }
           />
           <Route path={'/login'} exact={true} element={<Login />} />
-          <Route path={'/register'} exact={true} element={<Register />} />
+          <Route path={'/register'} exact={true} element={<Reg />} />
           <Route path={'/verify'} exact={true} element={<VerifyAccount />} />
           <Route path={'*'} exact={true} element={<Page404 hscreen={'h-screen'} />} />
           <Route

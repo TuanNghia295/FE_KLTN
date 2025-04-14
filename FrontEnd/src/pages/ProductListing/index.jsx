@@ -20,6 +20,7 @@ import useStore from '../../store/useStore'
 import { useNavigate } from 'react-router-dom';
 import FilterProduct from '../../components/FilterProduct'
 import CircularProgress from '@mui/material/CircularProgress';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 const normalizeString = (str) => {
   if (!str) return "";
@@ -49,12 +50,13 @@ const ProductListing = () => {
     : null;
 
   // Phân trang
+  const isMobile = useMediaQuery('(max-width:768px)');
   const [perPage, setPerPage] = useState(8);
   const [page, setPage] = useState(1);
 
   const { productList, total, loadingProductList } = useProducts(perPage, page);
   const { productCateList, totalCate, loadingProductCateList } = useProductsCategory(getCategory?._id, perPage, page);
-  const totalProduct = getCategory ? totalCate : total
+  const totalPage = getCategory ? totalCate : total
 
   const [selectedCateParams, setSelectedCateParams] = useState(getCategory?._id)
 
@@ -76,7 +78,7 @@ const ProductListing = () => {
   // Nếu có dữ liệu category thì gọi api category còn không thì hiển thị all
   const [allProducts, setAllProducts] = useState([]);
   const isLoading = getCategory ? loadingProductCateList : loadingProductList
-  const hasMore = allProducts.length < totalProduct;
+  const hasMore = page < totalPage
 
   // Handle Change Catgegory
   const handleChangeCategory = (slug) => {
@@ -89,25 +91,30 @@ const ProductListing = () => {
     }
   }
 
-  // Reset sản phẩm khi đổi category
+  // Reset sản phẩm khi đổi category hoac perPage
   useEffect(() => {
     setAllProducts([]);     // Xóa toàn bộ sản phẩm cũ
     setPage(1);             // Reset về trang đầu
-  }, [categoryName]);
+  }, [categoryName, perPage, isMobile]);
 
-  // Mỗi khi có dữ liệu mới, thì append vào danh sách
   useEffect(() => {
     const newProducts = getCategory ? productCateList : productList;
-  
-    if (Array.isArray(newProducts) && newProducts.length > 0) {
-      setAllProducts(prev => {
-        const existingIds = new Set(prev.map(item => item._id));
-        const uniqueNew = newProducts.filter(item => !existingIds.has(item._id));
-        return [...prev, ...uniqueNew];
-      });
+
+    if (Array.isArray(newProducts)) {
+      if (isMobile) {
+        // Load More: append
+        setAllProducts((prev) => {
+          const existingIds = new Set(prev.map((item) => item._id));
+          const uniqueNew = newProducts.filter((item) => !existingIds.has(item._id));
+          return [...prev, ...uniqueNew];
+        });
+      } else {
+        // Pagination: replace
+        setAllProducts(newProducts);
+      }
     }
-  }, [productList, productCateList]);
-  
+  }, [productList, productCateList, isMobile]);
+
   return (
     <section className="pt-5">
       <div className="container !text-center">
@@ -135,7 +142,8 @@ const ProductListing = () => {
       <div className="bg-white p-2 mt-4">
         <div className="flexProductPage container flex gap-3">
           <div className="slidebarWrapper hidden md:block sm:w-[100%] md:w-[40%] xl:w-[20%] h-full bg-white">
-            <SlideBar categoryListZustand={categoryListZustand} selectedCate={selectedCateParams} onCategorySelect={handleChangeCategory} />
+            {/* <SlideBar categoryListZustand={categoryListZustand} selectedCate={selectedCateParams} onCategorySelect={handleChangeCategory} /> */}
+            <FilterProduct perPage={perPage} setPerPage={setPerPage} />
           </div>
           <div className="rightContent w-[100%] xl:w-[80%]">
             <div className="bg-[#f1f1f1] p-2 w-full mb-3 rounded-md flex items-center justify-between">
@@ -217,17 +225,28 @@ const ProductListing = () => {
             </div>
             {isLoading ? (
               <div className='flex justify-center'>
-              <CircularProgress color="inherit" />
+                <CircularProgress color="inherit" />
               </div>
             ) : ""}
             <div className="flex w-full items-center justify-center mt-3">
-              {/* <Pagination count={10} showFirstButton showLastButton /> */}
-              {hasMore
-                ? (
-                  <button className='bg-[#000] text-white py-3 px-10 !rounded-md' onClick={() => setPage(p => p + 1)}>Load More...</button>
+              {isMobile ? (
+                hasMore && (
+                  <button
+                    className="bg-[#000] text-white py-3 px-10 !rounded-md"
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Load More...
+                  </button>
                 )
-                : ""
-              }
+              ) : (
+                <Pagination
+                  count={totalPage}
+                  page={page}
+                  onChange={(e, value) => setPage(value)}
+                  showFirstButton
+                  showLastButton
+                />
+              )}
             </div>
           </div>
         </div>

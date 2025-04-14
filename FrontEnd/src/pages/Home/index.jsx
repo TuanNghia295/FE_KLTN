@@ -120,7 +120,7 @@ const Home = () => {
         {/* Đổi màu nền cho khác biệt */}
         <Suspense fallback={<SectionFallback />}>
           <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row items-center justify-between mb-4">
+            <div className="flex flex-row items-center justify-between mb-4">
               <h2 className="text-xl md:text-2xl font-semibold mb-3 md:mb-0">Popular Products</h2>
               <div className="ml-auto">
                 {/* TabsHomePage cũng được lazy load */}

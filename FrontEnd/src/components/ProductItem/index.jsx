@@ -8,23 +8,33 @@ import { MdZoomOutMap } from 'react-icons/md';
 import Tooltip from '@mui/material/Tooltip';
 import { formatCash } from '../../hook/formatCash';
 
-const ProductItem = ({ product, customHeight }) => {
+const ProductItem = ({ product }) => {
   return (
     <div className="productItem rounded-md w-[100%] overflow-hidden bg-white text-black shadow-lg relative">
       <div className="group imgWrapper overflow-hidden rounded-none relative">
         <Link to={`/products/${product._id}`}>
-          <div className="img h-[150px] md:h-[250px] overflow-hidden" style={{ height: customHeight }}>
-            {Array.isArray(product?.images) && product?.images?.length > 0 ? (
-              product.images.map((image, index) => (
-                <div key={index}>
-                  <img src={image.url} className="w-full h-full object-cover" alt={product.name} />
-                  <img
-                    src={image.url}
-                    className="w-full h-full object-cover absolute top-[0px] left-[0px] opacity-0 transition-all duration-1000 group-hover:opacity-100"
-                    alt={product.name}
-                  />
-                </div>
-              ))
+          <div className="img h-full md:h-[250px] overflow-hidden relative group">
+            {Array.isArray(product?.images) && product.images.length >= 2 ? (
+              <>
+                {/* Ảnh chính */}
+                <img
+                  src={product.images[0].url}
+                  className="w-full h-full object-cover"
+                  alt={product.name}
+                />
+                {/* Ảnh hover */}
+                <img
+                  src={product.images[1].url}
+                  className="w-full h-full object-cover absolute top-0 left-0 opacity-0 transition-all duration-1000 group-hover:opacity-100"
+                  alt={product.name}
+                />
+              </>
+            ) : product?.images?.length === 1 ? (
+              <img
+                src={product.images[0].url}
+                className="w-full h-full object-cover"
+                alt={product.name}
+              />
             ) : (
               <p>No images available</p>
             )}

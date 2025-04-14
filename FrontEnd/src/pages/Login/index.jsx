@@ -11,7 +11,7 @@ import Banner1 from '../../assets/log-reg/1.jpg';
 
 const Login = () => {
   const [isShowPassword, setIsShowPassword] = useState(false);
-  const { mutate: login, isLoading, isError } = useLogin();
+  const { mutate: login, isPending, isError } = useLogin();
 
   const formik = useFormik({
     initialValues: {
@@ -158,7 +158,7 @@ const Login = () => {
               type="submit"
               fullWidth
               variant="contained"
-              disabled={isLoading}
+              disabled={isPending}
               sx={{
                 mt: 3,
                 py: 1.5,
@@ -167,7 +167,7 @@ const Login = () => {
                 '&.Mui-disabled': { bgcolor: 'grey.500', color: 'white' },
               }}
             >
-              {isLoading ? (<Fragment><CircularProgress size={24} sx={{ color: 'white' }} /></Fragment>) : ('Sign In')}
+              {isPending ? (<Fragment><CircularProgress size={24} sx={{ color: 'white' }} /></Fragment>) : ('Sign In')}
             </Button>
 
             {/* Hiển thị lỗi nếu có */}
