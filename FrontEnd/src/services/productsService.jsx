@@ -2,12 +2,14 @@ import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../apis/axiosClient';
 
 // API: Lấy tất cả sản phẩm
-const getAllProducts = async ({perPage, page}) => {
+const getAllProducts = async ({perPage, page, search = ''}) => {
   const params = new URLSearchParams({
     perPage: perPage.toString(),
-    page: page.toString()
+    page: page.toString(),
+    search,
   })
   const response = await axiosClient.get(`/products/getAllProducts?${params}`);
+  console.log(response.data)
   return {
     data: response.data,
     total: Math.ceil(response.totalPage/perPage)
@@ -15,10 +17,10 @@ const getAllProducts = async ({perPage, page}) => {
 };
 
 // Hook: Lấy danh sách sản phẩm
-export const useProducts = (perPage = 8, page = 1) => {
+export const useProducts = (perPage = 8, page = 1, search = '') => {
   const { data, isLoading: loadingProductList } = useQuery({
-    queryKey: ['productList', perPage, page],
-    queryFn: () =>  getAllProducts({perPage, page}),
+    queryKey: ['productList', perPage, page, search],
+    queryFn: () =>  getAllProducts({perPage, page, search}),
     keepPreviousData: true,
     enabled: !!page,
   });

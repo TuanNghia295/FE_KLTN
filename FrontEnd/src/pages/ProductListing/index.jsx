@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import Drawer from '@mui/material/Drawer';
 import SlideBar from '../../components/SlideBar';
 import Typography from '@mui/material/Typography';
@@ -21,6 +21,7 @@ import { useNavigate } from 'react-router-dom';
 import FilterProduct from '../../components/FilterProduct'
 import CircularProgress from '@mui/material/CircularProgress';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import debounce from 'lodash.debounce';  // Thư viện debounce
 
 const normalizeString = (str) => {
   if (!str) return "";
@@ -51,10 +52,11 @@ const ProductListing = () => {
 
   // Phân trang
   const isMobile = useMediaQuery('(max-width:768px)');
+  const [search, setSearch] = useState('');  // State để lưu giá trị tìm kiếm
   const [perPage, setPerPage] = useState(8);
   const [page, setPage] = useState(1);
 
-  const { productList, total, loadingProductList } = useProducts(perPage, page);
+  const { productList, total, loadingProductList } = useProducts(perPage, page, search);
   const { productCateList, totalCate, loadingProductCateList } = useProductsCategory(getCategory?._id, perPage, page);
   const totalPage = getCategory ? totalCate : total
 
@@ -91,6 +93,13 @@ const ProductListing = () => {
     }
   }
 
+  // Hàm xử lý tìm kiếm với debounce
+  const handleSearchChange = useMemo(() => debounce((e) => {
+    setSearch(e.target.value);  // Cập nhật giá trị tìm kiếm
+    setPage(1)
+    setAllProducts([])
+  }, 500), []);  // Delay 500ms sau khi người dùng ngừng nhập
+
   // Reset sản phẩm khi đổi category hoac perPage
   useEffect(() => {
     setAllProducts([]);     // Xóa toàn bộ sản phẩm cũ
@@ -113,7 +122,7 @@ const ProductListing = () => {
         setAllProducts(newProducts);
       }
     }
-  }, [productList, productCateList, isMobile]);
+  }, [productList, productCateList, isMobile, search]);
 
   return (
     <section className="pt-5">
@@ -170,9 +179,8 @@ const ProductListing = () => {
                   <LuMenu />
                 </Button>
               </div>
-
               <div className="col2 ml-auto flex items-center gap-3 pr-4 justify-end">
-                <span className="text-[14px] font-[500] pl-3 text-[rgba(0,0,0,0.7)]">Sort By</span>
+                {/* <span className="text-[14px] font-[500] pl-3 text-[rgba(0,0,0,0.7)]">Sort By</span>
                 <Button
                   id="basic-button"
                   aria-controls={open ? 'basic-menu' : undefined}
@@ -201,9 +209,17 @@ const ProductListing = () => {
                   <MenuItem onClick={handleClose}>Price, high to low</MenuItem>
                   <MenuItem onClick={handleClose}>Date, old to new</MenuItem>
                   <MenuItem onClick={handleClose}>Date, new to old</MenuItem>
-                </Menu>
+                </Menu> */}
+                {/* Input tìm kiếm */}
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm sản phẩm..."
+                  onChange={handleSearchChange}
+                  className="p-2 border rounded"
+                />
               </div>
             </div>
+            {/* Phần hiển thị */}
             <div className={`grid ${itemView === 'grid' ? 'grid-cols-2 xl:grid-cols-4' : 'grid-cols-1'} gap-4`}>
               {itemView === 'grid' ? (
                 <>
