@@ -19,6 +19,7 @@ import { useProducts, useProductsCategory } from '../../services/productsService
 import useStore from '../../store/useStore'
 import { useNavigate } from 'react-router-dom';
 import FilterProduct from '../../components/FilterProduct'
+import CircularProgress from '@mui/material/CircularProgress';
 
 const normalizeString = (str) => {
   if (!str) return "";
@@ -49,10 +50,11 @@ const ProductListing = () => {
 
   // Phân trang
   const [perPage, setPerPage] = useState(8);
-  const page = 1;
+  const [page, setPage] = useState(1);
 
-  const { productList } = useProducts(perPage);
-  const { productCateList } = useProductsCategory(getCategory?._id, perPage);
+  const { productList, total, loadingProductList } = useProducts(perPage, page);
+  const { productCateList, totalCate, loadingProductCateList } = useProductsCategory(getCategory?._id, perPage, page);
+  const totalProduct = getCategory ? totalCate : total
 
   const [selectedCateParams, setSelectedCateParams] = useState(getCategory?._id)
 
@@ -72,7 +74,9 @@ const ProductListing = () => {
   };
 
   // Nếu có dữ liệu category thì gọi api category còn không thì hiển thị all
-  const productData = getCategory ? productCateList : productList
+  const [allProducts, setAllProducts] = useState([]);
+  const isLoading = getCategory ? loadingProductCateList : loadingProductList
+  const hasMore = allProducts.length < totalProduct;
 
   // Handle Change Catgegory
   const handleChangeCategory = (slug) => {
@@ -85,6 +89,25 @@ const ProductListing = () => {
     }
   }
 
+  // Reset sản phẩm khi đổi category
+  useEffect(() => {
+    setAllProducts([]);     // Xóa toàn bộ sản phẩm cũ
+    setPage(1);             // Reset về trang đầu
+  }, [categoryName]);
+
+  // Mỗi khi có dữ liệu mới, thì append vào danh sách
+  useEffect(() => {
+    const newProducts = getCategory ? productCateList : productList;
+  
+    if (Array.isArray(newProducts) && newProducts.length > 0) {
+      setAllProducts(prev => {
+        const existingIds = new Set(prev.map(item => item._id));
+        const uniqueNew = newProducts.filter(item => !existingIds.has(item._id));
+        return [...prev, ...uniqueNew];
+      });
+    }
+  }, [productList, productCateList]);
+  
   return (
     <section className="pt-5">
       <div className="container !text-center">
@@ -176,33 +199,42 @@ const ProductListing = () => {
             <div className={`grid ${itemView === 'grid' ? 'grid-cols-2 xl:grid-cols-4' : 'grid-cols-1'} gap-4`}>
               {itemView === 'grid' ? (
                 <>
-                  {Array.isArray(productData) && productData.length === 0 ? (
+                  {Array.isArray(allProducts) && allProducts.length === 0 ? (
                     <p>Không có sản phẩm nào.</p>
                   ) : (
-                    productData?.map((product) => <ProductItem key={product._id} product={product} />)
+                    allProducts?.map((product) => <ProductItem key={product._id} product={product} />)
                   )}
                 </>
               ) : (
                 <>
-                  {Array.isArray(productData) && productData.length === 0 ? (
+                  {Array.isArray(allProducts) && allProducts.length === 0 ? (
                     <p>Không có sản phẩm nào.</p>
                   ) : (
-                    productData?.map((product) => <ProductItemListView key={product._id} product={product} normalizeString={normalizeString} />)
+                    allProducts?.map((product) => <ProductItemListView key={product._id} product={product} normalizeString={normalizeString} />)
                   )}
                 </>
               )}
             </div>
-
+            {isLoading ? (
+              <div className='flex justify-center'>
+              <CircularProgress color="inherit" />
+              </div>
+            ) : ""}
             <div className="flex w-full items-center justify-center mt-3">
               {/* <Pagination count={10} showFirstButton showLastButton /> */}
-              <button className='bg-[#000] text-white py-3 px-10 !rounded-md' onClick={() => setPerPage(p => p + 4)}>Load More...</button>
+              {hasMore
+                ? (
+                  <button className='bg-[#000] text-white py-3 px-10 !rounded-md' onClick={() => setPage(p => p + 1)}>Load More...</button>
+                )
+                : ""
+              }
             </div>
           </div>
         </div>
       </div>
       <Drawer open={openFilterProduct} onClose={toogleFilterProduct(false)} anchor={'left'} className="filterPanel">
-          <FilterProduct perPage={perPage} setPerPage={setPerPage} />
-        </Drawer>
+        <FilterProduct perPage={perPage} setPerPage={setPerPage} />
+      </Drawer>
     </section>
   );
 };

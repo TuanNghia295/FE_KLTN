@@ -2,50 +2,60 @@ import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../apis/axiosClient';
 
 // API: Lấy tất cả sản phẩm
-const getAllProducts = async ({perPage}) => {
+const getAllProducts = async ({perPage, page}) => {
   const params = new URLSearchParams({
-    perPage: perPage.toString()
+    perPage: perPage.toString(),
+    page: page.toString()
   })
   const response = await axiosClient.get(`/products/getAllProducts?${params}`);
-  return response.data;
+  return {
+    data: response.data,
+    total: response.totalPage
+  }
 };
 
 // Hook: Lấy danh sách sản phẩm
-export const useProducts = (perPage = 8) => {
-  const { data: productList, isLoading: loadingProductList } = useQuery({
-    queryKey: ['productList', perPage],
-    queryFn: () =>  getAllProducts({perPage}),
+export const useProducts = (perPage = 8, page = 1) => {
+  const { data, isLoading: loadingProductList } = useQuery({
+    queryKey: ['productList', perPage, page],
+    queryFn: () =>  getAllProducts({perPage, page}),
     keepPreviousData: true,
-    enabled: !!perPage,
+    enabled: !!page,
   });
 
   return {
-    productList,
+    productList: data?.data,
+    total: data?.total,
     loadingProductList,
   };
 };
 
 // API: Lấy danh sách sản phẩm theo danh mục
 const getProductsByCategoryID = async ({queryKey}) => {
-  const [_key, _id, perPage] = queryKey
+  const [_key, _id, perPage, page] = queryKey
   const params = new URLSearchParams({
-    perPage: perPage.toString()
+    perPage: perPage.toString(),
+    page: page.toString()
   })
   const response = await axiosClient.get(`/products/getAllProducts/${_id}?${params}`);
-  return response.data
+  return {
+    data: response.data,
+    total: response.pagination.totalPages
+  }
 }
 
 // Hook: Lấy danh sách sản phẩm theo danh mục
-export const useProductsCategory = (_id, perPage) => {
-  const { data: productCateList, isLoading: loadingProductList } = useQuery({
-    queryKey: ['productList', _id, perPage],
+export const useProductsCategory = (_id, perPage, page) => {
+  const { data, isLoading: loadingProductCateList } = useQuery({
+    queryKey: ['productList', _id, perPage, page],
     queryFn: getProductsByCategoryID,
     enabled: !!_id,
   });
 
   return {
-    productCateList,
-    loadingProductList,
+    productCateList: data?.data,
+    totalCate: data?.total,
+    loadingProductCateList,
   };
 };
 
