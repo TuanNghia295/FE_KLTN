@@ -69,7 +69,7 @@ const ProductItemListView = ({ product, normalizeString }) => {
 
   return (
     <div className='productItem rounded-md w-[100%] overflow-hidden bg-white text-black shadow-lg flex items-center'>
-      <div className='group imgWrapper w-[50%] xl:w-[20%] overflow-hidden  relative'>
+      <div className='group imgWrapper w-[50%] xl:w-[30%] overflow-hidden  relative'>
         <Link to={`/products/${product._id}`}>
           <div className="img h-full md:h-[250px] overflow-hidden relative group">
             {Array.isArray(product?.images) && product.images.length >= 2 ? (
