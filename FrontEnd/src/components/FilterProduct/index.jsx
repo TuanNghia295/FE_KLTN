@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { FaFilter } from "react-icons/fa";
 import useMediaQuery from '@mui/material/useMediaQuery';
+import SlideBar from '../SlideBar/index'
 
 const normalizeString = (str) => {
   if (!str) return "";
@@ -15,7 +16,7 @@ const normalizeString = (str) => {
     .replace(/\s+/g, '-')               // thay khoảng trắng = dấu gạch ngang nếu cần
 };
 
-const FilterProduct = ({ perPage, setPerPage }) => {
+const FilterProduct = ({ perPage, setPerPage, selectedCate, onCategorySelect }) => {
   const location = useLocation();
   const currentPath = location.pathname; // ví dụ: "/listing/nam"
   const setOpenFilterProduct = useStore((state) => state.setOpenFilterProduct);
@@ -54,7 +55,7 @@ const FilterProduct = ({ perPage, setPerPage }) => {
           </div>
         </div>
         {/* List Category */}
-        <h1 className='font-[300] text-[18px] mb-2'>Category</h1>
+        {/* <h1 className='font-[300] text-[18px] mb-2'>Category</h1>
         <ul className='flex flex-col gap-3'>
           {Array.isArray(categoryListZustand) && categoryListZustand.length > 0 && categoryListZustand.map((category, index) => {
             const normalizedType = normalizeString(category?.type);
@@ -67,7 +68,8 @@ const FilterProduct = ({ perPage, setPerPage }) => {
               </Link>
             )
           })}
-        </ul>
+        </ul> */}
+        <SlideBar categoryListZustand={categoryListZustand} selectedCate={selectedCate} onCategorySelect={onCategorySelect}/>
       </div>
     </>
   )

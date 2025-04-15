@@ -27,7 +27,7 @@ const SlideBar = ({categoryListZustand, selectedCate, onCategorySelect  }) => {
             </Button>
             </h1>
             <Collapse isOpened={isOpenCategoryFilter}>
-              <div className='scroll max-h-[80px] md:max-h-[250px] relative '>
+              <div className='scroll max-h-[200px] md:max-h-[250px] relative '>
                 {Array.isArray(categoryListZustand) && categoryListZustand?.length > 0
                 ? categoryListZustand?.map((category) => (
                   <FormControlLabel key={category._id || category.type} className='w-full' control={<Checkbox size='small' checked={checked?._id === category._id} value={category._id} onChange={() => onCategorySelect(category.type) } />} label={category?.type} />

@@ -270,7 +270,7 @@ const ProductListing = () => {
         </div>
       </div>
       <Drawer open={openFilterProduct} onClose={toogleFilterProduct(false)} anchor={'left'} className="filterPanel">
-        <FilterProduct perPage={perPage} setPerPage={setPerPage} />
+        <FilterProduct perPage={perPage} setPerPage={setPerPage} selectedCate={selectedCateParams} onCategorySelect={handleChangeCategory} />
       </Drawer>
     </section>
   );
