@@ -7,21 +7,20 @@ import { FaFilter } from "react-icons/fa";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import SlideBar from '../SlideBar/index'
 
-const normalizeString = (str) => {
-  if (!str) return "";
-  return str
-    .normalize('NFD')                   // tách dấu ra khỏi chữ
-    .replace(/[\u0300-\u036f]/g, '')    // xóa dấu
-    .toLowerCase()                      // chuyển về thường
-    .replace(/\s+/g, '-')               // thay khoảng trắng = dấu gạch ngang nếu cần
-};
+// const normalizeString = (str) => {
+//   if (!str) return "";
+//   return str
+//     .normalize('NFD')                   // tách dấu ra khỏi chữ
+//     .replace(/[\u0300-\u036f]/g, '')    // xóa dấu
+//     .toLowerCase()                      // chuyển về thường
+//     .replace(/\s+/g, '-')               // thay khoảng trắng = dấu gạch ngang nếu cần
+// };
 
 const FilterProduct = ({ perPage, setPerPage, selectedCate, onCategorySelect }) => {
-  const location = useLocation();
-  const currentPath = location.pathname; // ví dụ: "/listing/nam"
+  // const location = useLocation();
+  // const currentPath = location.pathname; // ví dụ: "/listing/nam"
   const setOpenFilterProduct = useStore((state) => state.setOpenFilterProduct);
   const categoryListZustand = useStore((state) => state.categoryListZustand);
-  const isMobile = useMediaQuery('(max-width:768px)');
 
   const handleChange = (e) => {
     const value = e.target.value;
@@ -35,13 +34,10 @@ const FilterProduct = ({ perPage, setPerPage, selectedCate, onCategorySelect }) 
           <FaFilter />
           <p className='text-[20px]'>Filter</p>
         </div>
-        {isMobile ?
           < IoCloseSharp className="text-[20px] cursor-pointer" onClick={() => setOpenFilterProduct(false)} />
-          : ""
-        }
       </div>
       <div className='category w-[300px] p-4'>
-        {/* Filter PerPage */}
+        {/* Filter PerPage
         <div className='filterPerPage flex justify-between py-4 items-center'>
           <div>
             <h1 className='font-[300] text-[18px] mb-2'>Product 1 Page</h1>
@@ -53,7 +49,7 @@ const FilterProduct = ({ perPage, setPerPage, selectedCate, onCategorySelect }) 
               <option value="16">16</option>
             </select>
           </div>
-        </div>
+        </div> */}
         {/* List Category */}
         {/* <h1 className='font-[300] text-[18px] mb-2'>Category</h1>
         <ul className='flex flex-col gap-3'>

@@ -48,7 +48,7 @@ const SlideBar = ({categoryListZustand, selectedCate, onCategorySelect  }) => {
             </Button>
             </h1>
             <Collapse isOpened={isOpenAvailFilter}>
-              <div className='scroll max-h-[80px] md:max-h-[250px] relative '>
+              <div className='scroll max-h-[200px] md:max-h-[250px] relative '>
                 <FormControlLabel className='w-full' control={<Checkbox size='small'/>} label="Available (17)" />
                 <FormControlLabel className='w-full' control={<Checkbox size='small'/>} label="In Stock (15)" />
                 <FormControlLabel className='w-full' control={<Checkbox size='small'/>} label="Not Available (1)" />
