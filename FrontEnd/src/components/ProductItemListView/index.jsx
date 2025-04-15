@@ -70,7 +70,7 @@ const ProductItemListView = ({ product, normalizeString }) => {
 
   return (
     <div className='productItem rounded-md w-[100%] overflow-hidden bg-white text-black shadow-lg flex items-center'>
-      <div className='group imgWrapper w-[50%] xl:w-[30%] overflow-hidden  relative'>
+      <div className='group imgWrapper w-[50%] overflow-hidden  relative'>
         <Link to={`/products/${product._id}`}>
           <div className="img h-full md:h-[250px] overflow-hidden relative group">
             {Array.isArray(product?.images) && product.images.length >= 2 ? (
@@ -121,7 +121,7 @@ const ProductItemListView = ({ product, normalizeString }) => {
         </div>
         <div className='flex flex-col'>
           <div className="flex my-2 gap-1 relative max-w-[150px]">
-            <button onClick={handlePrev} disabled={startIndex === 0}><CgPlayTrackPrevR /></button>
+            <button onClick={handlePrev} disabled={startIndex === 0}><CgPlayTrackPrevR className='text-[25px]' /></button>
             <AnimatePresence custom={direction} mode="wait">
               <motion.div
                 key={startIndex}
@@ -164,7 +164,7 @@ const ProductItemListView = ({ product, normalizeString }) => {
                 )}
               </motion.div>
             </AnimatePresence>
-            <button onClick={handleNext} disabled={startIndex + 4 >= product.variations.length}><CgPlayTrackNextR /></button>
+            <button onClick={handleNext} disabled={startIndex + 4 >= product.variations.length}><CgPlayTrackNextR className='text-[25px]' /></button>
           </div>
           <div>
             <Button className='!bg-black !text-white !mt-3'

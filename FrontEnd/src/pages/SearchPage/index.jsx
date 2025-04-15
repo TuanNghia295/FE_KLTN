@@ -1,7 +1,7 @@
 import React from 'react'
 import { useLocation } from 'react-router-dom';
 import { useProducts } from '../../services/productsService';
-import ProductItemListView from '../../components/ProductItemListView'
+import ProductItem from '../../components/ProductItem'
 import { IoSearchSharp } from "react-icons/io5";
 import useMediaQuery from '@mui/material/useMediaQuery';
 
@@ -41,12 +41,12 @@ const SearchPage = () => {
     return (
         <section className='container !my-5 flex flex-col gap-3'>
             <div className='text-[20px] font-bold text-black text-center'>SEARCH RESULT</div>
-            <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2' } gap-4`}>
+            <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-4' } gap-4`}>
                 {Array.isArray(productList) && productList.length > 0
                     ? (
                         productList.map((product) => (
                             <>
-                                <ProductItemListView product={product} normalizeString={normalizeString} />
+                                <ProductItem product={product} />
                             </>
                         ))
                     )

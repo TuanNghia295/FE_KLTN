@@ -28,7 +28,8 @@ const Home = () => {
   const [cateId, setCateID] = useState('')
   const perPage = 8
   const page = 1
-  const { productCateList, loadingProductCateList } = useProductsCategory(cateId, perPage, page);
+  const search = ''
+  const { productCateList, loadingProductCateList } = useProductsCategory(cateId, perPage, page, search);
   // Xử lý handeChangeCate trong component
   const handeChangeCate = (value) => {
       setCateID(value)

@@ -153,8 +153,8 @@ const ProductListing = () => {
       <div className="bg-white p-2 mt-4">
         <div className="flexProductPage container flex gap-3">
           <div className="slidebarWrapper hidden md:block sm:w-[100%] md:w-[40%] xl:w-[20%] h-full bg-white">
-            {/* <SlideBar categoryListZustand={categoryListZustand} selectedCate={selectedCateParams} onCategorySelect={handleChangeCategory} /> */}
-            <FilterProduct perPage={perPage} setPerPage={setPerPage} />
+            <SlideBar categoryListZustand={categoryListZustand} selectedCate={selectedCateParams} onCategorySelect={handleChangeCategory} />
+            {/*<FilterProduct perPage={perPage} setPerPage={setPerPage} />*/}
           </div>
           <div className="rightContent w-[100%] xl:w-[80%]">
             <div className="bg-[#f1f1f1] p-2 w-full mb-3 rounded-md flex items-center justify-between">
@@ -246,7 +246,7 @@ const ProductListing = () => {
                 <CircularProgress color="inherit" />
               </div>
             ) : ""}
-            <div className="flex w-full items-center justify-center my-10">
+            <div className="flex w-full items-center justify-center mt-5">
               {isMobile ? (
                 hasMore && (
                   <button
