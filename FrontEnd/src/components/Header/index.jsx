@@ -14,11 +14,11 @@ import Avatar from '@mui/material/Avatar';
 import '../Header/style.css';
 import { useLogout } from '../../services/authServices.jsx';
 import useStore from '../../store/useStore.jsx';
-import { motion, AnimatePresence  } from "framer-motion";
+import { motion, AnimatePresence } from 'framer-motion';
 
 //Icon Next, Prev
-import { GrFormNext } from "react-icons/gr";
-import { GrFormPrevious } from "react-icons/gr";
+import { GrFormNext } from 'react-icons/gr';
+import { GrFormPrevious } from 'react-icons/gr';
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   '& .MuiBadge-badge': {
@@ -54,42 +54,20 @@ export default function Header() {
   const toggleMobileMenu = () => setOpenMobileMenu(!openMobileMenu);
 
   //Banner Text
-  const [bannerText, setBannerText] = useState(0)
+  const [bannerText, setBannerText] = useState(0);
 
-  const notes = [
-    "Get up to 50% off for the new season.",
-    "FREESHIPPING FOR ALL ORDER OVER 1.000.000đ",
-  ];
+  const notes = ['Get up to 50% off for the new season.', 'FREESHIPPING FOR ALL ORDER OVER 1.000.000đ'];
 
   const handleNext = () => {
     setBannerText((prev) => (prev + 1) % notes.length);
-  }
+  };
 
   const handlePrev = () => {
     setBannerText((prev) => (prev + 1) % notes.length);
-  }
+  };
 
   return (
     <header className="bg-white">
-      {/* Top strip */}
-      <div className="top-strip py-2 px-4 border-t-[1px] border-b-[1px] border-gray-250 flex items-center justify-center">
-        <button onClick={handlePrev} className='text-[30px]'><GrFormPrevious /></button>
-        <div className="w-[90%] xl:w-[50%] px-5 text-center">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={bannerText}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {notes[bannerText]}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-        <button onClick={handleNext} className='text-[30px]'><GrFormNext /></button>
-      </div>
-
       {/* Header */}
       <div className="header py-3 border-b-[1px] border-gray-250">
         <div className="container flex items-center justify-between">
@@ -129,9 +107,7 @@ export default function Header() {
                         )}
                       </div>
                       <Link to="/my-account">
-                      <li className="hover:bg-[#f1f1f1] px-5 xl:px-10 py-2 rounded-md cursor-pointer">
-                        My Account
-                      </li>
+                        <li className="hover:bg-[#f1f1f1] px-5 xl:px-10 py-2 rounded-md cursor-pointer">My Account</li>
                       </Link>
                       <li
                         className="hover:bg-[#f1f1f1] px-5 xl:px-10 py-2 rounded-md cursor-pointer"
@@ -154,9 +130,12 @@ export default function Header() {
               <li>
                 <StyledEngineProvider injectFirst>
                   <CustomTooltip title="Giỏ hàng">
-                    <IconButton aria-label="cart" onClick={() => {
-                      setOpenCartPanel(true)
-                    }}>
+                    <IconButton
+                      aria-label="cart"
+                      onClick={() => {
+                        setOpenCartPanel(true);
+                      }}
+                    >
                       <StyledBadge badgeContent={cartItems?.length} color="error">
                         <ShoppingCartIcon style={{ color: '#000' }} />
                       </StyledBadge>

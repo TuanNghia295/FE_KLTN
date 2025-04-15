@@ -2,24 +2,24 @@ import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../apis/axiosClient';
 
 // API: Lấy tất cả sản phẩm
-const getAllProducts = async ({perPage, page, search = ''}) => {
+const getAllProducts = async ({ perPage, page, search = '' }) => {
   const params = new URLSearchParams({
     perPage: perPage.toString(),
     page: page.toString(),
     search,
-  })
+  });
   const response = await axiosClient.get(`/products/getAllProducts?${params}`);
   return {
     data: response.data,
-    total: Math.ceil(response.totalPage/perPage)
-  }
+    total: Math.ceil(response.totalPage / perPage),
+  };
 };
 
 // Hook: Lấy danh sách sản phẩm
 export const useProducts = (perPage = 8, page = 1, search = '') => {
   const { data, isLoading: loadingProductList } = useQuery({
     queryKey: ['productList', perPage, page, search],
-    queryFn: () =>  getAllProducts({perPage, page, search}),
+    queryFn: () => getAllProducts({ perPage, page, search }),
     keepPreviousData: true,
     enabled: !!page,
   });
@@ -32,19 +32,19 @@ export const useProducts = (perPage = 8, page = 1, search = '') => {
 };
 
 // API: Lấy danh sách sản phẩm theo danh mục
-const getProductsByCategoryID = async ({queryKey}) => {
-  const [_key, _id, perPage, page, search] = queryKey
+const getProductsByCategoryID = async ({ queryKey }) => {
+  const [_key, _id, perPage, page, search] = queryKey;
   const params = new URLSearchParams({
     perPage: perPage.toString(),
     page: page.toString(),
     search,
-  })
+  });
   const response = await axiosClient.get(`/products/getAllProducts/${_id}?${params}`);
   return {
     data: response.data,
-    total: response.pagination.totalPages
-  }
-}
+    total: response.pagination.totalPages,
+  };
+};
 
 // Hook: Lấy danh sách sản phẩm theo danh mục
 export const useProductsCategory = (_id, perPage, page, search) => {
@@ -63,6 +63,8 @@ export const useProductsCategory = (_id, perPage, page, search) => {
 
 // API: Lấy chi tiết sản phẩm
 const getDetailProducts = async (_id) => {
+  console.log('_id', _id);
+
   const response = await axiosClient.get(`/products/${_id}`);
   return response.data;
 };
