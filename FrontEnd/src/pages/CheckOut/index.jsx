@@ -92,7 +92,6 @@ const CheckOut = () => {
 
     // --- Chuẩn bị payload ---
     const payload = {
-      // Không cần userId ở đây vì backend lấy từ middleware
       customerName: userInfo.fullName,
       customerPhone: userInfo.phone,
       toAddress: selectedAddress,
@@ -103,9 +102,7 @@ const CheckOut = () => {
         color: item.color,
       })),
       paymentMethod: selectedPaymentMethod,
-      note: '', // Bạn có thể thêm trường nhập ghi chú nếu muốn
       isReturn: false,
-      // Không cần gửi amount và description ở đây nữa, backend sẽ tính toán
     };
 
     console.log('Calling createOrder API with payload:', payload);

@@ -20,6 +20,7 @@ const createOrderApi = async (orderPayload) => {
   try {
     // API endpoint này giờ sẽ xử lý cả việc tạo đơn hàng
     // và khởi tạo thanh toán PayPal nếu cần
+    console.log('Payload being sent to backend:', orderPayload);
     const response = await axiosClient.post('/payment/createOrder', orderPayload);
     // Backend sẽ trả về { message, order } hoặc { message, order, paymentUrl }
     console.log('Order creation/payment initiation response:', response);
