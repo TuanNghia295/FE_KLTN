@@ -8,20 +8,23 @@ import { format } from 'date-fns';
 const TabListOrders = ({ orders }) => {
   const [activeTab, setActiveTab] = useState(0);
   const [tabs, setTabs] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 2;
+  console.log('orders', orders);
 
   useEffect(() => {
     const categorizedTabs = [
       {
         icon: <IoCheckboxOutline className="text-blue-500" />,
         name: 'Chờ xử lý',
-        statuses: ['Pending', 'Processing'],
-        data: Array.isArray(orders) ? orders.filter((order) => ['Pending', 'Processing'].includes(order.status)) : [],
+        statuses: ['Pending'],
+        data: Array.isArray(orders) ? orders.filter((order) => ['Pending'].includes(order.status)) : [],
       },
       {
         icon: <FaTruck className="text-yellow-500" />,
         name: 'Đang giao',
-        statuses: ['Delivering'],
-        data: Array.isArray(orders) ? orders.filter((order) => order.status === 'Delivering') : [],
+        statuses: ['Processing'],
+        data: Array.isArray(orders) ? orders.filter((order) => order.status === 'Processing') : [],
       },
       {
         icon: <FaCheckCircle className="text-green-500" />,
@@ -44,8 +47,6 @@ const TabListOrders = ({ orders }) => {
       case 'Pending':
         return <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">Chờ xử lý</span>;
       case 'Processing':
-        return <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs">Đang xử lý</span>;
-      case 'Delivering':
         return <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">Đang giao</span>;
       case 'Completed':
         return <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Hoàn thành</span>;
@@ -64,19 +65,13 @@ const TabListOrders = ({ orders }) => {
     );
   };
 
-  // Tính toán số lượng đơn hàng hiển thị tối đa theo kích thước màn hình
-  const getVisibleOrdersCount = () => {
-    if (window.innerWidth < 640) return 2; // Mobile: 2 đơn
-    if (window.innerWidth < 1024) return 3; // Tablet: 3 đơn
-    return 4; // Desktop: 4 đơn
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
-  // Tính chiều cao container scroll dựa trên số lượng đơn hàng hiển thị
-  const calculateMaxHeight = () => {
-    const visibleCount = getVisibleOrdersCount();
-    const cardHeight = window.innerWidth < 640 ? 220 : 180; // Card cao hơn trên mobile
-    return `${visibleCount * cardHeight + 32}px`; // Thêm padding
-  };
+  const paginatedData = tabs[activeTab]?.data?.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const totalPages = Math.ceil((tabs[activeTab]?.data?.length || 0) / itemsPerPage);
 
   return (
     <div className="w-full px-2 sm:px-4">
@@ -85,7 +80,10 @@ const TabListOrders = ({ orders }) => {
         {tabs.map((tab, index) => (
           <button
             key={index}
-            onClick={() => setActiveTab(index)}
+            onClick={() => {
+              setActiveTab(index);
+              setCurrentPage(1);
+            }}
             className={`flex-shrink-0 px-3 py-2 mx-1 rounded-lg flex items-center space-x-2 text-sm ${
               activeTab === index
                 ? 'bg-blue-100 text-blue-700 border border-blue-300'
@@ -106,7 +104,10 @@ const TabListOrders = ({ orders }) => {
         {tabs.map((tab, index) => (
           <button
             key={index}
-            onClick={() => setActiveTab(index)}
+            onClick={() => {
+              setActiveTab(index);
+              setCurrentPage(1);
+            }}
             className={`px-4 xl:px-6 py-3 mx-1 flex flex-col items-center relative ${
               activeTab === index ? 'text-blue-600 font-medium' : 'text-gray-500 hover:text-gray-700'
             }`}
@@ -127,12 +128,13 @@ const TabListOrders = ({ orders }) => {
       <div
         className="space-y-3 sm:space-y-4 overflow-y-auto pr-1"
         style={{
-          maxHeight: calculateMaxHeight(),
+          maxHeight: `${itemsPerPage * 180 + 32}px`,
           scrollbarWidth: 'thin',
+          overflowX: 'hidden', // Ensure no horizontal scroll
         }}
       >
-        {tabs[activeTab]?.data?.length > 0 ? (
-          tabs[activeTab].data.map((order) => (
+        {paginatedData?.length > 0 ? (
+          paginatedData.map((order) => (
             <div key={order._id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
               {/* Order header */}
               <div className="p-3 sm:p-4 border-b border-gray-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
@@ -215,6 +217,23 @@ const TabListOrders = ({ orders }) => {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-4">
+          {Array.from({ length: totalPages }, (_, index) => (
+            <button
+              key={index}
+              onClick={() => handlePageChange(index + 1)}
+              className={`px-3 py-1 mx-1 rounded ${
+                currentPage === index + 1 ? 'bg-black text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
