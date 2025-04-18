@@ -9,7 +9,7 @@ import Gallery from '../../components/gallery';
 import HomeCartSlider from '../../components/HomeCartSlider';
 import { useProductDetail, useProducts } from '../../services/productsService'; // Hook lấy dữ liệu
 
-import '../ProductDetails/style.css'; // <<<--- DÒNG NÀY ĐÃ BỊ XÓA
+import '../ProductDetails/style.css';
 
 //Call API Add To Cart (Setup & Tich Hop)
 import useStore from '../../store/useStore'; //Gọi Zustand useStore (Lưu trữ thông tin người dùng)

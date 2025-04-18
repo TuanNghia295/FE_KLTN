@@ -97,9 +97,16 @@ const CheckOut = () => {
       toAddress: selectedAddress,
       items: cartItems.map((item) => ({
         productId: item.product.productId,
+        images: item.product.images.map((image) => ({
+          url: image.url,
+          isPrimary: image.isPrimary || false,
+          order: image.order || null,
+          publicId: image.publicId || null,
+        })),
+        name: item.product.name,
+        size: item.size, // Include size
+        color: item.color, // Include color
         quantity: item.quantity,
-        size: item.size,
-        color: item.color,
       })),
       paymentMethod: selectedPaymentMethod,
       isReturn: false,

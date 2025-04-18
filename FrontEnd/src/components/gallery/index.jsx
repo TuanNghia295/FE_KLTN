@@ -22,7 +22,6 @@ export default function Gallery({ imageProduct }) {
           '--swiper-navigation-color': '#fff',
           '--swiper-pagination-color': '#fff',
         }}
-        loop={true}
         spaceBetween={10}
         navigation={true}
         thumbs={{ swiper: thumbsSwiper }}
@@ -46,7 +45,6 @@ export default function Gallery({ imageProduct }) {
       {/* Swiper hiển thị hình ảnh thu nhỏ */}
       <Swiper
         onSwiper={setThumbsSwiper}
-        loop={true}
         spaceBetween={10}
         slidesPerView={4}
         freeMode={true}

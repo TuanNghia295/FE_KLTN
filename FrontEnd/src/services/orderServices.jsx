@@ -33,7 +33,7 @@ export const useOrder = () => {
   } = useMutation({
     mutationFn: (orderId) => getOrderById(orderId),
     onSuccess: (data) => {
-      console.log('Order detail:', data);
+      console.log("'Order detail fetched successfully:', data);");
     },
     onError: (error) => {
       console.error('Error fetching order detail:', error);

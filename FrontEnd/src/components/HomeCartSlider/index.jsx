@@ -20,7 +20,6 @@ const HomeCartSlider = ({ slidesPerView, data }) => {
           navigation={true}
           modules={[Navigation]}
           className="mySwiper"
-          loop={true}
         >
           {data?.map((item) => {
             const { _id, name, price, images } = item;

@@ -13,24 +13,24 @@ const ProductsSlider = ({ listProducts }) => {
     if (window.innerWidth < 768) return 1;
     if (window.innerWidth < 1024) return 3;
     return 4;
-  }
+  };
 
   const getCustomHeight = () => {
     if (window.innerWidth < 768) return '350px';
     if (window.innerWidth < 1280) return '200px';
-  }
+  };
 
   const [columns, setColumns] = useState(getColumns());
 
-  const [customHeight, setCustomHeight] =  useState(getCustomHeight())
+  const [customHeight, setCustomHeight] = useState(getCustomHeight());
 
   const listProductLimited = listProducts?.slice(0, 8); // Giới hạn số lượng sản phẩm hiển thị
 
   useEffect(() => {
     const handleResize = () => {
-      setColumns(getColumns())
-      setCustomHeight(getCustomHeight())
-    }
+      setColumns(getColumns());
+      setCustomHeight(getCustomHeight());
+    };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -44,7 +44,6 @@ const ProductsSlider = ({ listProducts }) => {
           navigation={true}
           modules={[Navigation]}
           className="productSlide"
-          loop={true}
         >
           {listProductLimited?.length === 0 ? (
             <p>Không có sản phẩm nào.</p>

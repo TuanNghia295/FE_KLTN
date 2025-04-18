@@ -1,13 +1,11 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { CiViewList } from 'react-icons/ci';
 import { FaMapLocationDot } from 'react-icons/fa6';
 import { PiMoneyWavyLight } from 'react-icons/pi';
 import { Link, useParams } from 'react-router-dom';
-import { Button } from '@mui/material';
 import OrderStatus from './OrderStatusComponent';
 import HomeCartSlider from '../../components/HomeCartSlider';
 import { useOrder } from '../../services/orderServices';
-import { useProductDetail } from '../../services/productsService';
 
 const OrderDetails = () => {
   // lấy orderId từ url
@@ -15,14 +13,13 @@ const OrderDetails = () => {
 
   const { getOrderDetail, orderDetail, isLoadingDetail, isError, error } = useOrder();
 
-  const { productDetail } = useProductDetail(orderDetail?.items[0]?.productVariationId);
-  console.log('productDetail', productDetail);
-
   useEffect(() => {
     if (id) {
       getOrderDetail(id);
     }
   }, [id, getOrderDetail]);
+
+  console.log('orderDetail', orderDetail);
 
   if (isLoadingDetail) {
     return <div>Loading...</div>;
@@ -39,106 +36,89 @@ const OrderDetails = () => {
   const slidesPerView = window.innerWidth > 1024 ? 4 : window.innerWidth > 600 ? 4 : 3;
 
   return (
-    <section className="container !py-10">
-      <section className="statusOrder flex bg-red-500 p-4 items-center rounded-t-lg text-white gap-10">
-        <div className="part1 text-[60px]">
+    <section className="container mx-auto py-10 px-4 lg:px-8">
+      <section className="statusOrder flex bg-red-500 p-6 items-center rounded-t-lg text-white gap-6 shadow-md">
+        <div className="icon text-[50px]">
           <CiViewList />
         </div>
-        <div className="part2 text-[16px]">
-          <p className="font-[600]">Order Status: {orderDetail.status}</p>
-          <p>Description</p>
+        <div className="details text-[16px]">
+          <p className="font-bold text-lg">Order Status: {orderDetail.status}</p>
+          <p className="text-sm">Description</p>
         </div>
       </section>
-      <section className="statusOrder flex bg-[#fff] p-4 items-center rounded-b-lg text-black gap-10">
-        <div className="part1 text-[60px]">
+      <section className="statusOrder flex bg-white p-6 items-center rounded-b-lg text-black gap-6 shadow-md">
+        <div className="icon text-[50px]">
           <FaMapLocationDot />
         </div>
-        <div className="part2 text-[16px]">
-          <p className="font-[600]">Shipping Address</p>
-          <p>Full Name: {orderDetail.shippingAddress.fullName}</p>
-          <p>Phone: {orderDetail.shippingAddress.phone}</p>
-          <p>Address: {orderDetail.shippingAddress.address}</p>
+        <div className="details text-[16px]">
+          <p className="font-bold text-lg">Shipping Address</p>
+          <p className="text-sm">Full Name: {orderDetail.shippingAddress.fullName}</p>
+          <p className="text-sm">Phone: {orderDetail.shippingAddress.phone}</p>
+          <p className="text-sm">Address: {orderDetail.shippingAddress.address}</p>
         </div>
       </section>
 
-      <section className="paymentMethod bg-white my-10 rounded-lg p-4">
-        <span className="text-[20px] font-[600] text-black flex items-center gap-4">
-          <PiMoneyWavyLight className="text-[30px]" />
+      <section className="paymentMethod bg-white my-8 rounded-lg p-6 shadow-md">
+        <span className="text-[20px] font-bold text-green-600 flex items-center gap-4">
+          <PiMoneyWavyLight className="text-[30px] text-green-600" />
           Payment Method
         </span>
-        <div className="pt-5">
-          <p className="text-[17px]">{orderDetail.payment.method}</p>
+        <div className="pt-4">
+          <p className="text-[17px] font-medium text-green-600">{orderDetail.payment.method}</p>
         </div>
       </section>
 
-      <section className="bg-white p-4 rounded-lg">
+      <section className="bg-white p-6 rounded-lg shadow-md">
         <OrderStatus status={orderDetail.status} />
-        <div className="flex flex-col xl:flex-row">
-          <div className="rightPart w-[100%] xl:w-[30%] pl-0 xl:pl-5 font-[300]">
-            <div className="flex w-full">
-              <h2 className="text-[18px] text-black font-[600]">ORDER ID: {orderDetail._id}</h2>
-            </div>
-
-            <div className="w-full my-3">
-              <p className="border-t border-b border-[#f1f1f1] py-2  flex">
-                Product <span className="ml-auto">Subtotal</span>
+        <div className="flex flex-col xl:flex-row gap-6">
+          <div className="leftPart w-full xl:w-1/2 flex justify-center items-center">
+            <img
+              className="rounded-xl object-cover max-w-full max-h-[300px]"
+              src={orderDetail.items[0]?.images[0]?.url || '/placeholder-image.png'}
+              alt={orderDetail.items[0]?.productName || 'Product Image'}
+            />
+          </div>
+          <div className="rightPart w-full xl:w-1/2">
+            <div className="flex flex-col gap-4">
+              <h2 className="text-[24px] font-bold text-black">{orderDetail.items[0]?.productName}</h2>
+              <p className="text-sm text-gray-600">
+                <span className="font-bold">Size:</span> {orderDetail.items[0]?.size || 'N/A'}
+              </p>
+              <p className="text-sm text-gray-600">
+                <span className="font-bold">Color:</span> {orderDetail.items[0]?.color || 'N/A'}
+              </p>
+              <p className="text-sm text-gray-600">
+                <span className="font-bold">Quantity:</span> {orderDetail.items[0]?.quantity}
+              </p>
+              <p className="text-sm text-gray-600">
+                <span className="font-bold">Price:</span> {orderDetail.items[0]?.price}$
+              </p>
+              <p className="text-sm text-gray-600">
+                <span className="font-bold">Order ID:</span> {orderDetail._id}
+              </p>
+              <p className="text-sm text-gray-600">
+                <span className="font-bold">Date:</span> {new Date(orderDetail.createdAt).toLocaleDateString()}
+              </p>
+              <p className="text-sm text-gray-600">
+                <span className="font-bold">Description:</span> Order placed successfully
               </p>
             </div>
-
-            <div>
-              {orderDetail.items.map((item, index) => (
-                <div key={index} className="itemCheckout flex items-center mb-3">
-                  <div className="border border-[#f1f1f1] rounded-xl w-[60px] h-[60px] relative">
-                    <img
-                      className="rounded-xl object-center w-[60px] h-[60px]"
-                      src={item.productImage || '/placeholder-image.png'}
-                      alt={item.productName || 'Product Image'}
-                    />
-                    <p className="absolute -top-2 -right-2 rounded-full text-white bg-[#5e5e5e] text-center min-w-6 min-h-6">
-                      {item.quantity}
-                    </p>
-                  </div>
-
-                  <div className="info ml-3">
-                    <h4 className="font-[500] text-black">{item.productName}</h4>
-                    <p>Size: {item.size || 'N/A'}</p>
-                  </div>
-
-                  <div className="ml-auto">{item.price}$</div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="leftPart w-[100%] xl:w-[70%] pl-0 xl:pl-10">
-            <table className="min-w-full border-collapse border border-gray-300 rounded-lg">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="border border-gray-300 px-4 py-2">Date</th>
-                  <th className="border border-gray-300 px-4 py-2">Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="odd:bg-white even:bg-gray-50">
-                  <td className="border border-gray-300 px-4 py-2">
-                    {new Date(orderDetail.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">Order placed successfully</td>
-                </tr>
-              </tbody>
-            </table>
-            <div className="flex justify-end gap-3 py-4">
+            <div className="flex justify-end gap-4 mt-6">
               <Link to="/my-orders">
-                <button className="bg-black text-white p-3">Return My Order</button>
+                <button className="border border-gray-300 text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-100 transition">
+                  Back
+                </button>
               </Link>
-              <button className="bg-red-500 text-white p-3">Cancel Order</button>
+              <button className="border border-red-500 text-red-500 px-6 py-2 rounded-lg shadow-md hover:bg-red-100 transition">
+                Cancel Order
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Sản phẩm khác */}
-      <section>
-        <h2 className="text-[20px] font-[600] mb-4 pl-8  mt-9">Related Product</h2>
+      <section className="mt-10">
+        <h2 className="text-[20px] font-bold mb-6">Related Products</h2>
         <HomeCartSlider slidesPerView={slidesPerView} />
       </section>
     </section>

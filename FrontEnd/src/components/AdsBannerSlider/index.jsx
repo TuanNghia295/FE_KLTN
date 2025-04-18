@@ -14,7 +14,7 @@ const AdsBannerSlider = (props) => {
         navigation={true}
         modules={[Navigation]}
         className="mySwiper"
-        loop={true}
+        
       >
         <SwiperSlide>
           <BannerBox img={Adsbanner1} link={'/login'}></BannerBox>

@@ -51,7 +51,6 @@ const HomeSlider = () => {
   return (
     <Swiper
       pagination={{ dynamicBullets: true, clickable: true }}
-      loop={true}
       autoplay={{ delay: 3000, disableOnInteraction: false }}
       modules={[Autoplay, Pagination]}
       style={{
