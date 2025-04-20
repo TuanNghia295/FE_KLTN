@@ -6,10 +6,15 @@ import { MdDiscount } from 'react-icons/md';
 import CategoryPannel from './CategoryPannel';
 import { useState } from 'react';
 import '../Navigation/style.css';
+import useStore from '../../../store/useStore'
+import { normalizeString } from '../../../hook/normalizeString'
 
 const Navigation = () => {
   const [isOpenCategory, setIsOpenCategory] = useState(false);
   const toogleCategory = () => setIsOpenCategory(!isOpenCategory);
+  // Lấy list Category tu Zustand
+  const categoryListZustand = useStore((state) => state.categoryListZustand);
+  const params = normalizeString(categoryListZustand[3]?.type)
 
   return (
     <>
@@ -34,7 +39,7 @@ const Navigation = () => {
               </li>
 
               <li className="list-none relative">
-                <Link to={'/listing/all'} className="link transition text-[16px] font-[500]">
+                <Link to={'/listing'} className="link transition text-[16px] font-[500]">
                   <Button className="link transition font-[500] hover:!text-primary !py-4">Fashion</Button>
                 </Link>
 
@@ -42,11 +47,24 @@ const Navigation = () => {
                   className="submenu absolute top-[120%] left-[0] min-w-[150px] bg-white shadow-md 
                 opacity-0  transition-all duration-300"
                 >
+                  {/* List category */}
                   <ul>
+                    {Array.isArray(categoryListZustand) && categoryListZustand.length > 0 && categoryListZustand.map((category) => (
+                      <li className="list-none w-full">
+                        <Link to={`/listing/${normalizeString(category?.type)}`}>
+                          <Button className="!text-textPrimary w-full !justify-start !rounded-none">{category?.type}</Button>
+                        </Link>
+                      </li>
+                    ))
+                    }
+                  </ul>
+
+
+                  {/* <ul>
                     <li className="list-none w-full relative">
                       <Link to={'/listing/nam'}>
                         <Button className="!text-textPrimary w-full !justify-start !rounded-none">Men</Button>
-                      </Link>
+                      </Link> */}
 
                       {/* inner menu */}
                       {/* <div
@@ -81,7 +99,7 @@ const Navigation = () => {
                           </li>
                         </ul>
                       </div> */}
-                    </li>
+                    {/* </li>
 
                     <li className="list-none w-full">
                       <Link to={'/listing/nu'}>
@@ -100,11 +118,11 @@ const Navigation = () => {
                         <Button className="!text-textPrimary w-full !justify-start !rounded-none">Other</Button>
                       </Link>
                     </li>
-                  </ul>
+                  </ul> */}
                 </div>
               </li>
 
-              <li className="list-none">
+              {/* <li className="list-none">
                 <Link to={'/listing/footwear'} className="link transition text-[16px] font-[500]">
                   <Button className="link transition font-[500] hover:!text-primary !py-4">Footwear</Button>
                 </Link>
@@ -120,7 +138,7 @@ const Navigation = () => {
                 <Link to={'/listing/sale'} className="link transition text-[16px] font-[500]">
                   <Button className="link transition font-[500] hover:!text-primary !py-4">Sale</Button>
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
 
@@ -134,7 +152,7 @@ const Navigation = () => {
         </div>
       </nav>
 
-      <CategoryPannel isOpenCategory={isOpenCategory} toogleCategory={toogleCategory} />
+      <CategoryPannel categoryListZustand={categoryListZustand} isOpenCategory={isOpenCategory} toogleCategory={toogleCategory} />
     </>
   );
 };
