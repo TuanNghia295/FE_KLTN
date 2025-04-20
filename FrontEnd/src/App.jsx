@@ -25,6 +25,7 @@ import PaymentError from './pages/CheckOut/PaymentError.jsx';
 import PaymentSuccess from './pages/CheckOut/PaymentSuccess.jsx';
 import Page404 from './pages/Page404/index.jsx';
 import SearchPage from './pages/SearchPage/index.jsx';
+import ForgotPassword from './pages/ForgotPassword/index.jsx';
 
 export const MainLayout = ({ children }) => (
   <>
@@ -105,6 +106,7 @@ export default function App() {
           />
           <Route path={'/login'} exact={true} element={<Login />} />
           <Route path={'/register'} exact={true} element={<Reg />} />
+          <Route path={'/forgot-password'} exact={true} element={<ForgotPassword />} />
           <Route path={'/verify'} exact={true} element={<VerifyAccount />} />
           <Route path={'*'} exact={true} element={<Page404 hscreen={'h-screen'} />} />
           <Route

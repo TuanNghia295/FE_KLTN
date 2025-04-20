@@ -30,6 +30,7 @@ const Home = () => {
   const page = 1
   const search = ''
   const { productCateList, loadingProductCateList } = useProductsCategory(cateId, perPage, page, search);
+
   // Xử lý handeChangeCate trong component
   const handeChangeCate = (value) => {
       setCateID(value)

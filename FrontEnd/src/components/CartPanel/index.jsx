@@ -15,10 +15,9 @@ const CartPanel = () => {
   // Lấy các trạng thái và hàm từ Zustand store
   const cartItems = useStore((state) => state.cartItems);
   const setCartItems = useStore((state) => state.setCartItems);
+  const updateItemSize = useStore((state) => state.updateItemSize);
   const setOpenCartPanel = useStore((state) => state.setOpenCartPanel);
   const userInfo = useStore((state) => state.userInfo);
-
-  console.log('cartItems', cartItems);
 
   //Call API Update Cart By User ID
   const userId = useStore((state) => state.userInfo?._id);
@@ -122,6 +121,8 @@ const CartPanel = () => {
                             color: selectedVariation?.color, // Nếu biến thể có thuộc tính color
                             quantity: item?.quantity, // Giữ nguyên số lượng hiện tại
                           });
+                          // Cập nhật luôn Zustand
+                          updateItemSize(item._id, selectedVariation?.size);
                         }}
                       />
                     ) : (

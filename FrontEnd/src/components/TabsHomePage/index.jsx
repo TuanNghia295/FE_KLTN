@@ -3,27 +3,32 @@ import useStore from '../../store/useStore'
 
 const TabsHomePage = ({handeChangeCate}) => {
   const tabNames = useStore((state) => state.categoryListZustand);
-  const [activeTab, setActiveTab] = useState(tabNames[0]?._id);
+  const [activeTab, setActiveTab] = useState();
   const [showButtons, setShowButtons] = useState(false);
-
+  
   useEffect(() => {
     const handleResize = () => {
       setShowButtons(window.innerWidth > 600);
     };
-
+  
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  const handleSelect = (event) => {
-    setActiveTab(event.target.value);
-    handeChangeCate(activeTab)
-  };
-
+  
   useEffect(() => {
-    handeChangeCate(activeTab)
-  }, [activeTab])
+    if (tabNames.length > 0) {
+      const firstTabId = tabNames[0]?._id;
+      setActiveTab(firstTabId);
+      handeChangeCate(firstTabId);
+    }
+  }, [tabNames]);
+  
+  const handleSelect = (event) => {
+    const selectedTabId = event.target.value;
+    setActiveTab(selectedTabId);
+    handeChangeCate(selectedTabId);
+  };
 
   return (
     <>
