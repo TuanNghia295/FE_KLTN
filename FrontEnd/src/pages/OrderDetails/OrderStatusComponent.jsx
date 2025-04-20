@@ -3,15 +3,15 @@ import React, { useEffect, useState } from 'react';
 const OrderStatus = ({ status }) => {
   const statuses = [
     { id: 1, name: 'Đã Đặt', isActive: status === 'Pending' },
-    { id: 2, name: 'Đang vận chuyển', isActive: status === 'Processing' },
-    { id: 3, name: 'Đang Giao', isActive: status === 'Completed' },
+    { id: 2, name: 'Đang Vận Chuyển', isActive: status === 'Processing' },
+    { id: 3, name: 'Đã Giao', isActive: status === 'Completed' },
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const targetIndex = statuses.findIndex((item) => item.isActive);
 
   useEffect(() => {
-    if (currentIndex !== targetIndex) {
+    if (currentIndex !== targetIndex && targetIndex !== -1) {
       const step = targetIndex > currentIndex ? 1 : -1;
       const interval = setInterval(() => {
         setCurrentIndex((prev) => {
@@ -23,33 +23,30 @@ const OrderStatus = ({ status }) => {
       }, 150);
       return () => clearInterval(interval);
     }
-  }, [targetIndex]);
+  }, [currentIndex, targetIndex]);
 
   return (
-    <div className="flex flex-row justify-between items-center p-5 md:p-10 relative w-full overflow-hidden">
-      <div className="absolute top-7 md:top-12 right-10 md:right-14  xl:right-16 transform -translate-y-1/2 w-[85%] md:w-[86%] xl:w-[92%] h-1 bg-gray-200">
-        {statuses.map(
-          (item, index) =>
-            index < statuses.length - 1 && (
-              <div
-                key={index}
-                className={`absolute h-1 transition-all duration-300 ${
-                  index < currentIndex ? 'bg-red-500' : 'bg-gray-200'
-                }`}
-                style={{
-                  left: `${(index / (statuses.length - 1)) * 100}%`,
-                  right: `${100 - ((index + 1) / (statuses.length - 1)) * 100}%`,
-                }}
-              />
-            )
-        )}
-      </div>
+    <div className="flex justify-between items-center w-full py-4 relative">
+      {/* Progress Line */}
+      <div className="absolute top-6 left-0 right-0 h-1 bg-gray-200" />
+      <div
+        className="absolute top-6 left-0 h-1 bg-red-500 transition-all duration-500 ease-out"
+        style={{ width: `${(currentIndex / (statuses.length - 1)) * 100}%` }}
+      />
+
+      {/* Status Points */}
       {statuses.map((item, index) => (
-        <div key={item.id} className="flex flex-col items-center relative">
-          <div className={`h-4 w-4 rounded-full ${index <= currentIndex ? 'bg-red-500' : 'bg-gray-300'}`}></div>
+        <div key={item.id} className="flex flex-col items-center relative z-10">
+          <div
+            className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ${
+              index <= currentIndex ? 'bg-red-500' : 'bg-gray-300'
+            }`}
+          >
+            {index <= currentIndex && <div className="w-3 h-3 rounded-full bg-white" />}
+          </div>
           <span
-            className={`text-xs md:text-sm mt-3 ${
-              index <= currentIndex ? 'text-red-600 font-medium' : 'text-gray-500'
+            className={`mt-2 text-xs font-medium transition-colors duration-300 ${
+              index <= currentIndex ? 'text-red-600' : 'text-gray-500'
             }`}
           >
             {item.name}

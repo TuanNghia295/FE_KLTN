@@ -55,7 +55,7 @@ const CheckOut = () => {
   }, [cartItems]);
 
   const shippingFee = shippingData?.totalFee ?? 0;
-  const distance = shippingData?.distance ?? 'N/A';
+  const distance = shippingData?.distance ?? '';
   const totalAmount = subtotal + shippingFee;
 
   const handlePaymentChange = (value) => {
@@ -110,6 +110,8 @@ const CheckOut = () => {
       })),
       paymentMethod: selectedPaymentMethod,
       isReturn: false,
+      shippingFee: shippingFee, // Add shipping fee to payload
+      distance: distance, // Add distance to payload
     };
 
     console.log('Calling createOrder API with payload:', payload);
@@ -359,7 +361,7 @@ const CheckOut = () => {
               </div>
               <div className="flex items-center justify-between text-sm">
                 <Tooltip title={distance ? `Distance: ${distance}` : ''} placement="top">
-                  <p className="text-gray-600">Shipping</p>
+                  <p className="text-gray-600">Shipping ({distance ?? null})</p>
                 </Tooltip>
                 {isLoadingShippingFee ? (
                   <CircularProgress size={16} color="inherit" />
