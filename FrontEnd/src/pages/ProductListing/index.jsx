@@ -103,14 +103,18 @@ const ProductListing = () => {
   }, [categoryName, perPage, isMobile]);
 
   useEffect(() => {
-    let newProducts = getCategory ? productCateList : productList;
-  
-    if (getCategory?.type === 'Sale') {
-      newProducts = productCateList?.map(product => ({
+    let sourceProducts  = getCategory ? productCateList : productList;
+
+  // Kiểm tra và giảm giá nếu sản phẩm thuộc category "Sale"
+  const newProducts = sourceProducts?.map(product => {
+    if (product?.categoryId?.type === 'Sale') {
+      return {
         ...product,
-        priceNew: product.price * 0.9, // giảm 10%
-      }));
+        priceNew: product.price * 0.9, // Giảm 10%
+      };
     }
+    return product;
+  });
   
     if (Array.isArray(newProducts)) {
       if (isMobile) {
@@ -125,7 +129,7 @@ const ProductListing = () => {
         setAllProducts(newProducts);
       }
     }
-  }, [productList, productCateList, isMobile, search]);
+  }, [productList, productCateList, isMobile, search, getCategory]);
   
 
   // Hàm xử lý tìm kiếm với debounce
