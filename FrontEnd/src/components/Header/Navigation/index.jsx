@@ -49,7 +49,9 @@ const Navigation = () => {
                 >
                   {/* List category */}
                   <ul>
-                    {Array.isArray(categoryListZustand) && categoryListZustand.length > 0 && categoryListZustand.map((category) => (
+                    {Array.isArray(categoryListZustand) && categoryListZustand.length > 0 && categoryListZustand
+                    .filter((category) => category.type !== 'Sale')
+                    .map((category) => (
                       <li className="list-none w-full">
                         <Link to={`/listing/${normalizeString(category?.type)}`}>
                           <Button className="!text-textPrimary w-full !justify-start !rounded-none">{category?.type}</Button>
@@ -132,13 +134,13 @@ const Navigation = () => {
                 <Link to={'/listing/jewellery'} className="link transition text-[16px] font-[500]">
                   <Button className="link transition font-[500] hover:!text-primary !py-4">Jewellery</Button>
                 </Link>
-              </li>
+              </li> */}
 
               <li className="list-none">
                 <Link to={'/listing/sale'} className="link transition text-[16px] font-[500]">
                   <Button className="link transition font-[500] hover:!text-primary !py-4">Sale</Button>
                 </Link>
-              </li> */}
+              </li>
             </ul>
           </div>
 

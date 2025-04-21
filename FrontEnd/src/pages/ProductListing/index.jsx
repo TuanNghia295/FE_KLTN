@@ -50,6 +50,8 @@ const ProductListing = () => {
     )
     : null;
 
+  console.log(getCategory)
+
   // Phân trang
   const isMobile = useMediaQuery('(max-width:768px)');
   const [search, setSearch] = useState('');  // State để lưu giá trị tìm kiếm
@@ -101,8 +103,15 @@ const ProductListing = () => {
   }, [categoryName, perPage, isMobile]);
 
   useEffect(() => {
-    const newProducts = getCategory ? productCateList : productList;
-
+    let newProducts = getCategory ? productCateList : productList;
+  
+    if (getCategory?.type === 'Sale') {
+      newProducts = productCateList?.map(product => ({
+        ...product,
+        priceNew: product.price * 0.9, // giảm 10%
+      }));
+    }
+  
     if (Array.isArray(newProducts)) {
       if (isMobile) {
         // Load More: append
@@ -117,6 +126,7 @@ const ProductListing = () => {
       }
     }
   }, [productList, productCateList, isMobile, search]);
+  
 
   // Hàm xử lý tìm kiếm với debounce
   const handleSearchChange = useMemo(() => debounce((e) => {

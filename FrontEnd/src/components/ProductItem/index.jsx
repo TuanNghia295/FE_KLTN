@@ -64,10 +64,20 @@ const ProductItem = ({ product }) => {
         </h3>
 
         <div className="flex items-center gap-4">
-          <span className="newPrice text-black text-[18px]">{formatCash(product?.price)}</span>
+          {product?.priceNew ? (
+            <>
+              <div className='flex gap-2'>
+                <span className="newPrice text-black line-through text-[18px]">{formatCash(product?.price)}</span>
+                <span className="newPrice text-red-500 text-[18px]">{formatCash(product?.priceNew)}</span>
+              </div>
+            </>
+          ) : (
+            <span className="newPrice text-black text-[18px]">{formatCash(product?.price)}</span>
+          )
+          }
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 
