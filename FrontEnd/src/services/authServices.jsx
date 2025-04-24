@@ -11,6 +11,32 @@ export const register = async (values) => {
   return response;
 };
 
+// API đăng nhập
+export const login = async (values) => {
+  const response = await axiosClient.post(`/auth/login`, values, {
+    withCredentials: true,
+  });
+  localStorage.setItem('accesstoken', response.data.accessToken);
+  return response.data;
+};
+
+// API reset mật khẩu
+export const resetPassword = async (email) => {
+  const response = await axiosClient.post(`/auth/reset-password`, { email });
+  console.log('response', response);
+
+  return response;
+};
+
+// API cập nhật mật khẩu
+export const updatePassword = async ({ email, newPassword }) => {
+  const response = await axiosClient.post(`/auth/update-password`, {
+    email,
+    newPassword,
+  });
+  return response;
+};
+
 // Hook đăng ký
 export function useRegister() {
   const navigate = useNavigate();
@@ -25,10 +51,12 @@ export function useRegister() {
         position: 'top-center',
         autoClose: 3000,
       });
-      navigate('/login'); // Chuyển hướng sau khi đăng ký thành công
+      navigate('/login');
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Đăng ký thất bại', {
+      console.log('register error', error.response?.data?.error);
+
+      toast.error('Email or Phone numbers used another account', {
         position: 'top-center',
         autoClose: 3000,
       });
@@ -36,25 +64,16 @@ export function useRegister() {
   });
 }
 
-// API đăng nhập
-export const login = async (values) => {
-  const response = await axiosClient.post(`/auth/login`, values, {
-    withCredentials: true, // Để gửi cookie
-  });
-  localStorage.setItem('accesstoken', response.data.accessToken); // Lưu token vào localStorage
-  return response.data;
-};
-
 // Hook đăng nhập
 export function useLogin() {
   const navigate = useNavigate();
-  const getInfo = useStore((state) => state.getInfo); // Lấy hàm cập nhật thông tin từ Zustand
+  const getInfo = useStore((state) => state.getInfo);
 
   return useMutation({
     mutationKey: ['login'],
     mutationFn: login,
     onSuccess: (data) => {
-      getInfo(data); // Cập nhật thông tin người dùng trong Zustand
+      getInfo(data);
       toast.success('Sign in successfully !', {
         position: 'top-center',
         autoClose: 3000,
@@ -64,11 +83,10 @@ export function useLogin() {
         draggable: true,
         theme: 'colored',
       });
-      navigate('/'); // Chuyển hướng sau khi đăng nhập thành công
+      navigate('/');
     },
     onError: (error) => {
       console.log('error', error);
-
       toast.error(error.response?.data?.message || 'Sign in unsuccessfully !', {
         position: 'top-center',
         autoClose: 3000,
@@ -77,6 +95,43 @@ export function useLogin() {
         pauseOnHover: true,
         draggable: true,
         theme: 'colored',
+      });
+    },
+  });
+}
+
+// Hook reset mật khẩu
+export function useResetPassword() {
+  return useMutation({
+    mutationKey: ['resetPassword'],
+    mutationFn: resetPassword,
+    onSuccess: () => {
+      console.log('Gửi email thành công!');
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Gửi email thất bại', {
+        position: 'top-center',
+        autoClose: 3000,
+      });
+    },
+  });
+}
+
+// Hook cập nhật mật khẩu
+export function useUpdatePassword() {
+  return useMutation({
+    mutationKey: ['updatePassword'],
+    mutationFn: updatePassword,
+    onSuccess: () => {
+      toast.success('Mật khẩu đã được cập nhật thành công!', {
+        position: 'top-center',
+        autoClose: 3000,
+      });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Cập nhật mật khẩu thất bại', {
+        position: 'top-center',
+        autoClose: 3000,
       });
     },
   });
@@ -91,19 +146,19 @@ export const getUserInfo = async () => {
 // API đăng xuất
 export const logout = async () => {
   const response = await axiosClient.post('/auth/logout');
-  localStorage.removeItem('accesstoken'); // Xóa token khỏi localStorage
+  localStorage.removeItem('accesstoken');
   return response;
 };
 
 // Hook đăng xuất
 export function useLogout() {
-  const clearInfo = useStore((state) => state.clearInfo); // Lấy hàm xóa thông tin từ Zustand
-  const clearCart = useStore((state) => state.clearCart); // Clear cart user
+  const clearInfo = useStore((state) => state.clearInfo);
+  const clearCart = useStore((state) => state.clearCart);
 
   return useMutation({
     mutationFn: logout,
     onSuccess: () => {
-      clearInfo(); // Xóa thông tin người dùng trong Zustand
+      clearInfo();
       clearCart();
       toast.success('Đăng xuất thành công', {
         position: 'top-center',
