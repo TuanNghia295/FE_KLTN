@@ -18,6 +18,7 @@ import 'swiper/css/pagination';
 import '../Home/style.css'; // Đảm bảo file này được tối ưu hoặc tree-shaking tốt
 import { useBanner } from '../../services/BannerServices';
 import { useProductsCategory } from '../../services/productsService';
+import ChatBox from '../../components/ChatBox/ChatBox';
 
 // Tách logic lấy số cột responsive
 const getColumns = () => (window.innerWidth < 768 ? 1 : window.innerWidth < 1024 ? 2 : 4); // Cập nhật logic responsive nếu cần
@@ -25,16 +26,16 @@ const getColumns = () => (window.innerWidth < 768 ? 1 : window.innerWidth < 1024
 const Home = () => {
   const [columns, setColumns] = useState(getColumns);
   const { listBanner } = useBanner();
-  const [cateId, setCateID] = useState('')
-  const perPage = 8
-  const page = 1
-  const search = ''
+  const [cateId, setCateID] = useState('');
+  const perPage = 8;
+  const page = 1;
+  const search = '';
   const { productCateList, loadingProductCateList } = useProductsCategory(cateId, perPage, page, search);
 
   // Xử lý handeChangeCate trong component
   const handeChangeCate = (value) => {
-      setCateID(value)
-  }
+    setCateID(value);
+  };
 
   // Xử lý responsive columns
   useEffect(() => {
@@ -58,6 +59,9 @@ const Home = () => {
 
   return (
     <div className="bg-white min-h-screen">
+      {/* ChatBox */}
+      <ChatBox />
+
       {/* HomeSlider - Component này nên xử lý lazy loading ảnh bên trong nó */}
       {/* Chỉ ảnh đầu tiên nên là eager, các ảnh sau là lazy */}
       <div className="relative">
