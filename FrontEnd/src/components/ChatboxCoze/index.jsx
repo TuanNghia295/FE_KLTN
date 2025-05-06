@@ -7,6 +7,9 @@ import { MdCleaningServices } from "react-icons/md";
 import '../ChatboxCoze/style.css'
 import useStore from '../../store/useStore';
 import { Link } from 'react-router-dom';
+import { useAddToCart } from '../../services/cartServices';
+import { IoBagAddSharp } from "react-icons/io5";
+import {formatCash } from '../../hook/formatCash'
 
 // function parseStructuredProductMarkdown(markdown) {
 //     const productBlocks = markdown.split(/\n\d+\.\s+\*\*/); // tách các block bắt đầu bằng số thứ tự
@@ -37,20 +40,46 @@ import { Link } from 'react-router-dom';
 //     return results;
 // }
 
+//Ver 1
+// const extractJSON = (fullAnswer) => {
+//     // Bước 1: Ưu tiên tìm giữa ```json ... ```
+//     let match = fullAnswer.match(/```json\s+([\s\S]*?)```/);
+//     if (match && match[1]) {
+//         try {
+//             return JSON.parse(match[1]);
+//         } catch (err) {
+//             console.error('Lỗi parse JSON trong ```json:```', err);
+//         }
+//     }
 
+//     // Bước 2: Nếu không có, tìm đoạn JSON đầu tiên bằng regex đơn giản hơn
+//     match = fullAnswer.match(/\{[\s\S]*?\}/); // tìm đoạn {...}
+//     if (match) {
+//         try {
+//             return JSON.parse(match[0]);
+//         } catch (err) {
+//             console.error('Lỗi parse JSON dạng thô:', err);
+//         }
+//     }
+
+//     return null;
+// };
+
+//Ver 2
 const extractJSON = (fullAnswer) => {
-    // Bước 1: Ưu tiên tìm giữa ```json ... ```
+    // Bước 1: Ưu tiên tìm đoạn giữa ```json ... ```
     let match = fullAnswer.match(/```json\s+([\s\S]*?)```/);
     if (match && match[1]) {
         try {
-            return JSON.parse(match[1]);
+            const cleaned = match[1].trim();
+            return JSON.parse(cleaned);
         } catch (err) {
             console.error('Lỗi parse JSON trong ```json:```', err);
         }
     }
 
-    // Bước 2: Nếu không có, tìm đoạn JSON đầu tiên bằng regex đơn giản hơn
-    match = fullAnswer.match(/\{[\s\S]*?\}/); // tìm đoạn {...}
+    // Bước 2: Nếu không có, tìm đoạn JSON thô (có thể là object hoặc array)
+    match = fullAnswer.match(/(\{[\s\S]*?\}|\[[\s\S]*?\])/);
     if (match) {
         try {
             return JSON.parse(match[0]);
@@ -62,15 +91,18 @@ const extractJSON = (fullAnswer) => {
     return null;
 };
 
+
 // Component chính
 function ChatBoxCoze() {
     const user_id = useStore((state) => state.userInfo?._id); // Lấy ra user id từ fetchUserInfo ở Zustand
+    const { mutate: handleAddToCart } = useAddToCart();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([]);
-    console.log(messages)
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const messageRef = useRef(null);
+    const [selectedSizes, setSelectedSizes] = useState({});
+    const [cart, setCart] = useState(null);
 
     useEffect(() => {
         if (messages.length === 0) {
@@ -130,9 +162,11 @@ function ChatBoxCoze() {
         setLoading(true)
         setMessages((prev) => [...prev, { role: 'bot', type: 'loading', content: 'Đang phân tích...' }]);
 
+        const finalUserId = user_id ? user_id : `guest_${Math.random().toString(36).substring(2, 12)}`;
+
         try {
             const response = await axios.post('http://localhost:3001/chat/chatWithCoze', {
-                user_id: user_id,
+                user_id: finalUserId,
                 additional_messages: [
                     userMessage
                 ],
@@ -179,6 +213,50 @@ function ChatBoxCoze() {
         if (e.key === 'Enter') sendMessage();
     };
 
+    //Add To Cart
+    // const handleChooseSize = (e, productId, variations) => {
+    //     const size = e.target.value;
+    //     const userId = user_id;
+
+    //     // Lưu lại size đã chọn cho sản phẩm này
+    //     setSelectedSizes(prev => ({ ...prev, [productId]: size }));
+
+    //     // Tìm color đầu tiên ứng với size
+    //     const variation = variations.find(v => v.size === size);
+    //     if (!variation) return;
+
+    //     const color = variation.color;
+
+    //     // Xoá sản phẩm cũ cùng productId trong giỏ (nếu có)
+    //     const updatedCart = cart.filter(item => item.productId !== productId);
+
+    //     // Thêm sản phẩm mới vào giỏ
+    //     setCart([
+    //         ...updatedCart,
+    //         { userId, productId, size, color, quantity: 1 }
+    //     ]);
+    // };
+    const handleChooseSize = (e, productId, variations) => {
+        const size = e.target.value;
+        const userId = user_id;
+
+        setSelectedSizes(prev => ({ ...prev, [productId]: size }));
+
+        const variation = variations.find(v => v.size === size);
+        if (!variation) return;
+
+        const color = variation.color;
+
+        // Set cart thành 1 object duy nhất
+        setCart({
+            userId,
+            productId,
+            size,
+            color,
+            quantity: 1
+        });
+    };
+
     return (
         <>
 
@@ -198,7 +276,7 @@ function ChatBoxCoze() {
                             </div>
                         </div>
                         <div className='ml-auto'>
-                            <button onClick={()=> {setMessages([])}}><MdCleaningServices /></button>
+                            <button onClick={() => { setMessages([]) }}><MdCleaningServices /></button>
                         </div>
                     </div>
                     <div className="flex-1 overflow-y-auto space-y-2 p-4 bg-white">
@@ -221,24 +299,41 @@ function ChatBoxCoze() {
                                             {msg.content.map((product, i) => (
                                                 <div key={i} className="border rounded-xl p-4 shadow bg-white">
                                                     <img
-                                                        src={product.img}
-                                                        alt={product.name}
+                                                        src={product.images}
                                                         className="w-full h-32 object-cover rounded-lg"
                                                     />
                                                     <h3 className="font-semibold mt-2 text-lg">{product.name}</h3>
+                                                    <p className="text-red-500 font-semibold mt-1">{formatCash(product.price)}</p>
                                                     <p className="text-sm text-gray-600">
                                                         {product.description.split(' ').slice(0, 10).join(' ')}
                                                         {product.description.split(' ').length > 20 && '...'}
+                                                        {product._id && (
+                                                            <Link
+                                                                to={`/products/${product._id}`}
+                                                                className="inline-block text-blue-600 underline text-sm"
+                                                            >
+                                                                Xem chi tiết
+                                                            </Link>
+                                                        )}
                                                     </p>
-                                                    <p className="text-red-500 font-semibold mt-1">{product.price}</p>
-                                                    {product.link && (
-                                                        <Link
-                                                            to={product.link}
-                                                            className="inline-block mt-2 text-blue-600 underline text-sm"
+                                                    <div className='addToCart flex gap-4 items-center bg-[#f1f1f1] p-2 my-2 rounded-md'>
+                                                        <select
+                                                            className='bg-[#f1f1f1] p-1 rounded-md'
+                                                            value={selectedSizes[product.productId] || ''}
+                                                            onChange={(e) => handleChooseSize(e, product.productId, product.variations)}
                                                         >
-                                                            Xem chi tiết
-                                                        </Link>
-                                                    )}
+                                                            <option value="">Choose Size</option>
+                                                            {[...new Set(product.variations.map(v => v.size))].map(size => (
+                                                                <option key={size} value={size}>{size}</option>
+                                                            ))}
+                                                        </select>
+                                                        <button
+                                                            className='ml-auto'
+                                                            onClick={() => {
+                                                                handleAddToCart(cart);
+                                                            }}
+                                                        ><IoBagAddSharp className='text-[20px]' /></button>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -273,7 +368,7 @@ function ChatBoxCoze() {
                             onClick={() => sendMessage()}
                             disabled={loading}
                         >
-                            <IoSendSharp   className='text-[40px] !text-black hover:bg-black hover:!text-white rounded-full p-2 duration-500' />
+                            <IoSendSharp className='text-[40px] !text-black hover:bg-black hover:!text-white rounded-full p-2 duration-500' />
                         </button>
                     </div>
                 </div>
