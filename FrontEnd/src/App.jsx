@@ -27,10 +27,13 @@ import Page404 from './pages/Page404/index.jsx';
 import SearchPage from './pages/SearchPage/index.jsx';
 import ForgotPassword from './pages/ForgotPassword/index.jsx';
 import ResetPassword from './pages/ResetPassWord/index.jsx';
+import ChatPage from './pages/Chatbox/index.jsx';
+import ChatBoxCoze from './components/ChatboxCoze/index.jsx';
 
 export const MainLayout = ({ children }) => (
   <>
     <Header />
+    <ChatBoxCoze/>
     <main>{children}</main>
     <Footer />
   </>
@@ -110,6 +113,7 @@ export default function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path={'/verify'} exact={true} element={<VerifyAccount />} />
+          <Route path={'/chat'} exact={true} element={<ChatPage />} />
           <Route path={'*'} exact={true} element={<Page404 hscreen={'h-screen'} />} />
           <Route
             path="/search"

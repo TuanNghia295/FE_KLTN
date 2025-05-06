@@ -60,7 +60,7 @@ const Home = () => {
   return (
     <div className="bg-white min-h-screen">
       {/* ChatBox */}
-      <ChatBox />
+      {/* <ChatBox /> */}
 
       {/* HomeSlider - Component này nên xử lý lazy loading ảnh bên trong nó */}
       {/* Chỉ ảnh đầu tiên nên là eager, các ảnh sau là lazy */}

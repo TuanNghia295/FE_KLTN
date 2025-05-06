@@ -49,17 +49,21 @@ const Navigation = () => {
                 >
                   {/* List category */}
                   <ul>
-                    {Array.isArray(categoryListZustand) && categoryListZustand.length > 0 && categoryListZustand
-                    .filter((category) => category.type !== 'Sale')
-                    .map((category) => (
-                      <li className="list-none w-full">
-                        <Link to={`/listing/${normalizeString(category?.type)}`}>
-                          <Button className="!text-textPrimary w-full !justify-start !rounded-none">{category?.type}</Button>
-                        </Link>
-                      </li>
-                    ))
+                    {Array.isArray(categoryListZustand) && categoryListZustand.length > 0 &&
+                      categoryListZustand
+                        .filter((category) => category.type !== 'Sale')
+                        .map((category) => (
+                          <li key={category.type} className="list-none w-full">
+                            <Link to={`/listing/${normalizeString(category?.type)}`}>
+                              <Button className="!text-textPrimary w-full !justify-start !rounded-none">
+                                {category?.type}
+                              </Button>
+                            </Link>
+                          </li>
+                        ))
                     }
                   </ul>
+
 
 
                   {/* <ul>
@@ -68,8 +72,8 @@ const Navigation = () => {
                         <Button className="!text-textPrimary w-full !justify-start !rounded-none">Men</Button>
                       </Link> */}
 
-                      {/* inner menu */}
-                      {/* <div
+                  {/* inner menu */}
+                  {/* <div
                         className="submenu absolute top-[0%] left-[100%] min-w-[150px] bg-white shadow-md 
                 opacity-0  transition-all duration-300"
                       >
@@ -101,7 +105,7 @@ const Navigation = () => {
                           </li>
                         </ul>
                       </div> */}
-                    {/* </li>
+                  {/* </li>
 
                     <li className="list-none w-full">
                       <Link to={'/listing/nu'}>
