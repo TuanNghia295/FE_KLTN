@@ -165,7 +165,7 @@ function ChatBoxCoze() {
         const finalUserId = user_id ? user_id : `guest_${Math.random().toString(36).substring(2, 12)}`;
 
         try {
-            const response = await axios.post('http://localhost:3001/chat/chatWithCoze', {
+            const response = await axios.post('https://be-khoaluan.onrender.com/chat/chatWithCoze', {
                 user_id: finalUserId,
                 additional_messages: [
                     userMessage
