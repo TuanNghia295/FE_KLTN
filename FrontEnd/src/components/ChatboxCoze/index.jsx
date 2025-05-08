@@ -9,7 +9,9 @@ import useStore from '../../store/useStore';
 import { Link } from 'react-router-dom';
 import { useAddToCart } from '../../services/cartServices';
 import { IoBagAddSharp } from "react-icons/io5";
-import {formatCash } from '../../hook/formatCash'
+import { MdFullscreen } from "react-icons/md";
+import { formatCash } from '../../hook/formatCash'
+import axiosClient from '../../apis/axiosClient';
 
 // function parseStructuredProductMarkdown(markdown) {
 //     const productBlocks = markdown.split(/\n\d+\.\s+\*\*/); // tách các block bắt đầu bằng số thứ tự
@@ -103,6 +105,7 @@ function ChatBoxCoze() {
     const messageRef = useRef(null);
     const [selectedSizes, setSelectedSizes] = useState({});
     const [cart, setCart] = useState(null);
+    const [fullscreen, setFullScreen] = useState(false);
 
     useEffect(() => {
         if (messages.length === 0) {
@@ -165,14 +168,16 @@ function ChatBoxCoze() {
         const finalUserId = user_id ? user_id : `guest_${Math.random().toString(36).substring(2, 12)}`;
 
         try {
-            const response = await axios.post('https://be-khoaluan.onrender.com/chat/chatWithCoze', {
+            const response = await axiosClient.post('/chat/chatWithCoze', {
                 user_id: finalUserId,
                 additional_messages: [
                     userMessage
                 ],
             });
 
-            const data = response.data; // Quan trọng: phải đúng key là `messages`
+            console.log(response)
+
+            const data = response; // Quan trọng: phải đúng key là `messages`
 
             // Gom các đoạn `answer` lại và gom `follow_up` riêng
             let fullAnswer = '';
@@ -266,7 +271,7 @@ function ChatBoxCoze() {
 
 
             {isOpen && (
-                <div className="chat-container flex flex-col">
+                <div className={`chat-container flex flex-col ${fullscreen ? '!w-screen !h-screen !bottom-0 !left-0 !rounded-none' : ''}`}>
                     <div className='flex bg-white text-black p-4 shadow-sm border-b border-[#ccc] items-center rounded-t-xl'>
                         <div className='part1 flex gap-3 items-center'>
                             <SiNike className='text-[50px] text-white bg-[#000] p-1 rounded-full' />
@@ -275,7 +280,8 @@ function ChatBoxCoze() {
                                 <p className='font-thin'>Active now</p>
                             </div>
                         </div>
-                        <div className='ml-auto'>
+                        <div className='ml-auto gap-3 flex'>
+                            <button onClick={() => { setFullScreen(!fullscreen) }}><MdFullscreen /></button>
                             <button onClick={() => { setMessages([]) }}><MdCleaningServices /></button>
                         </div>
                     </div>
