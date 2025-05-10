@@ -4,11 +4,15 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { getAuth, verifyPasswordResetCode, confirmPasswordReset } from 'firebase/auth';
 import { useUpdatePassword } from '../../services/authServices';
+import app from '../../firebase';
+
+const auth = getAuth(app);
 
 const ResetPassword = () => {
   const [newPassword, setNewPassword] = useState('');
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState('');
+  const [email, setEmail] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
   const { mutate: updatePassword } = useUpdatePassword();
@@ -16,14 +20,28 @@ const ResetPassword = () => {
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     const actionCode = query.get('oobCode');
+    const continueUrl = query.get('continueUrl');
 
-    if (!actionCode) {
+    console.log('Action code:', actionCode);
+    console.log('Continue URL:', continueUrl);
+
+    if (!actionCode || !continueUrl) {
       setError('Liên kết không hợp lệ.');
       return;
     }
 
+    // Giải mã continueUrl để lấy email
+    try {
+      const decodedUrl = decodeURIComponent(continueUrl);
+      const emailParam = new URL(decodedUrl).searchParams.get('email');
+      console.log('Extracted email:', emailParam);
+      setEmail(emailParam);
+    } catch {
+      console.error('Error decoding continueUrl');
+      setError('Liên kết không hợp lệ.');
+    }
+
     // Xác minh action code
-    const auth = getAuth();
     verifyPasswordResetCode(auth, actionCode).catch(() => {
       setError('Liên kết không hợp lệ hoặc đã hết hạn.');
     });
@@ -38,8 +56,6 @@ const ResetPassword = () => {
     const actionCode = query.get('oobCode');
 
     try {
-      const auth = getAuth();
-      const email = await verifyPasswordResetCode(auth, actionCode);
       await confirmPasswordReset(auth, actionCode, newPassword);
 
       // Đồng bộ mật khẩu với MongoDB
@@ -50,8 +66,8 @@ const ResetPassword = () => {
             toast.success('Mật khẩu đã được cập nhật! Vui lòng đăng nhập lại.');
             navigate('/login');
           },
-          onError: (error) => {
-            setError(error.response?.data?.message || 'Cập nhật mật khẩu thất bại.');
+          onError: (updateError) => {
+            setError(updateError.response?.data?.message || 'Cập nhật mật khẩu thất bại.');
           },
         }
       );

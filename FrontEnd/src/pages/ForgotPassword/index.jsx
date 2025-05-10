@@ -25,8 +25,7 @@ const ForgotPassword = () => {
         },
         onError: (error) => {
           console.log('error mail', error);
-
-          toast.error(error.response?.data?.message || 'Gửi email thất bại');
+          // toast.error(error.response?.data?.message || 'Gửi email thất bại');
         },
       });
     },
