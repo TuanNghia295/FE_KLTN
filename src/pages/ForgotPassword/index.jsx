@@ -1,16 +1,20 @@
-import React, { Fragment } from 'react';
+import React, { useState } from 'react';
 import { TextField, Button, Box, Typography, CircularProgress } from '@mui/material';
 import { SiNike } from 'react-icons/si';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import Banner1 from '../../assets/log-reg/1.jpg';
-import { useResetPassword } from '../../services/authServices';
 import { toast } from 'react-toastify';
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
+import app from '../../firebase'; // Đảm bảo đã khởi tạo firebase app ở file này
+
+const auth = getAuth(app);
 
 const ForgotPassword = () => {
-  const { mutate: sendingResetPass, isPending, isError } = useResetPassword();
-  const navigate = useNavigate();
+  const [isPending, setIsPending] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -18,22 +22,27 @@ const ForgotPassword = () => {
     validationSchema: Yup.object({
       email: Yup.string().email('Email không hợp lệ').required('Vui lòng nhập email'),
     }),
-    onSubmit: (values) => {
-      sendingResetPass(values.email, {
-        onSuccess: () => {
-          toast.success('Email đặt lại mật khẩu đã được gửi! Vui lòng kiểm tra hộp thư.');
-        },
-        onError: (error) => {
-          console.log('error mail', error);
-          // toast.error(error.response?.data?.message || 'Gửi email thất bại');
-        },
-      });
+    onSubmit: async (values) => {
+      setIsPending(true);
+      setErrorMessage('');
+
+      try {
+        await sendPasswordResetEmail(auth, values.email, {
+          url: `https://iuhshoes.netlify.app/reset-password?email=${encodeURIComponent(values.email)}`,
+        });
+        toast.success('Email đặt lại mật khẩu đã được gửi! Vui lòng kiểm tra hộp thư.');
+      } catch (error) {
+        console.error('Reset email error:', error);
+        setErrorMessage('Không thể gửi email khôi phục. Vui lòng kiểm tra email và thử lại.');
+      } finally {
+        setIsPending(false);
+      }
     },
   });
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: { xs: 'grey.100', xl: 'white' } }}>
-      {/* Cột Banner */}
+      {/* Banner */}
       <Box
         sx={{
           display: { xs: 'none', xl: 'block' },
@@ -77,7 +86,7 @@ const ForgotPassword = () => {
         </div>
       </Box>
 
-      {/* Cột Form */}
+      {/* Form */}
       <Box
         sx={{
           display: 'flex',
@@ -98,19 +107,14 @@ const ForgotPassword = () => {
           }}
         >
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-            <Link to="/" style={{ display: { xs: 'block', xl: 'none' }, color: 'black' }}>
+            <Link to="/" style={{ color: 'black' }}>
               <SiNike size={30} />
             </Link>
-            <Typography
-              variant="h6"
-              component="h3"
-              sx={{ fontWeight: 'bold', textAlign: { xs: 'right', xl: 'center' }, width: '100%' }}
-            >
+            <Typography variant="h6" component="h3" sx={{ fontWeight: 'bold', textAlign: 'right', width: '100%' }}>
               FORGOT PASSWORD
             </Typography>
           </Box>
 
-          {/* Form */}
           <form onSubmit={formik.handleSubmit} noValidate>
             <TextField
               fullWidth
@@ -139,12 +143,12 @@ const ForgotPassword = () => {
               }}
               disabled={isPending}
             >
-              {isPending ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Reset Password'}
+              {isPending ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Gửi Email Khôi Phục'}
             </Button>
 
-            {isError && (
+            {errorMessage && (
               <Typography variant="body2" color="error" sx={{ mt: 2, textAlign: 'center' }}>
-                Gửi email thất bại. Vui lòng kiểm tra lại thông tin.
+                {errorMessage}
               </Typography>
             )}
           </form>
