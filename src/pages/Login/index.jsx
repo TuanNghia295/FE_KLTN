@@ -1,34 +1,42 @@
-import React, { Fragment, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { TextField, Button, Box, Typography, CircularProgress } from '@mui/material';
 import { IoMdEye, IoMdEyeOff } from 'react-icons/io';
 import { FcGoogle } from 'react-icons/fc';
 import { SiNike } from 'react-icons/si';
 import { Link } from 'react-router-dom';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { useLogin } from '../../services/authServices';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import app from '../../firebase';
 import Banner1 from '../../assets/log-reg/1.jpg';
+import { useLogin } from '../../services/authServices';
+
+const auth = getAuth(app);
 
 const Login = () => {
   const [isShowPassword, setIsShowPassword] = useState(false);
-  const { mutate: login, isPending, isError } = useLogin();
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState('');
+  const { mutate: login } = useLogin();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setIsPending(true);
 
-  const formik = useFormik({
-    initialValues: {
-      phone: '',
-      password: '',
-    },
-    validationSchema: Yup.object({
-      phone: Yup.string().required('Vui lòng nhập số điện thoại'),
-      password: Yup.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự').required('Vui lòng nhập mật khẩu'),
-    }),
-    onSubmit: (values) => {
-      login(values); // Gọi mutation để thực hiện đăng nhập
-    },
-  });
+    const email = e.target.email.value;
+    const password = e.target.password.value;
 
-  const togglePasswordVisibility = () => {
-    setIsShowPassword(!isShowPassword);
+    try {
+      // Đăng nhập với Firebase Authentication
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const firebaseUid = userCredential.user.uid;
+
+      // Gửi firebaseUid đến backend
+      login({ firebaseUid });
+    } catch (err) {
+      console.error('Lỗi đăng nhập:', err);
+      setError('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
@@ -110,21 +118,9 @@ const Login = () => {
             </Typography>
           </Box>
 
-          <form onSubmit={formik.handleSubmit} noValidate>
-            {/* Phone Input */}
-            <TextField
-              fullWidth
-              margin="normal"
-              id="phone"
-              name="phone"
-              label="Số điện thoại"
-              variant="outlined"
-              value={formik.values.phone}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={formik.touched.phone && Boolean(formik.errors.phone)}
-              helperText={formik.touched.phone && formik.errors.phone}
-            />
+          <form onSubmit={handleSubmit} noValidate>
+            {/* Email Input */}
+            <TextField fullWidth margin="normal" id="email" name="email" label="Email" variant="outlined" required />
 
             {/* Password Input */}
             <TextField
@@ -135,16 +131,12 @@ const Login = () => {
               label="Mật khẩu"
               variant="outlined"
               type={isShowPassword ? 'text' : 'password'}
-              value={formik.values.password}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={formik.touched.password && Boolean(formik.errors.password)}
-              helperText={formik.touched.password && formik.errors.password}
+              required
               InputProps={{
                 endAdornment: (
                   <Button
                     aria-label={isShowPassword ? 'Hide password' : 'Show password'}
-                    onClick={togglePasswordVisibility}
+                    onClick={() => setIsShowPassword(!isShowPassword)}
                     sx={{ minWidth: 'auto', padding: '5px', color: 'text.secondary' }}
                   >
                     {isShowPassword ? <IoMdEyeOff size={20} /> : <IoMdEye size={20} />}
@@ -167,13 +159,19 @@ const Login = () => {
                 '&.Mui-disabled': { bgcolor: 'grey.500', color: 'white' },
               }}
             >
-              {isPending ? (<Fragment><CircularProgress size={24} sx={{ color: 'white' }} /></Fragment>) : ('Sign In')}
+              {isPending ? (
+                <Fragment>
+                  <CircularProgress size={24} sx={{ color: 'white' }} />
+                </Fragment>
+              ) : (
+                'Sign In'
+              )}
             </Button>
 
             {/* Hiển thị lỗi nếu có */}
-            {isError && (
+            {error && (
               <Typography variant="body2" color="error" sx={{ mt: 2, textAlign: 'center' }}>
-                Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.
+                {error}
               </Typography>
             )}
 
