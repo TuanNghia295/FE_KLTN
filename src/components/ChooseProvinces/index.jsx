@@ -70,23 +70,17 @@ const ChooseProvinces = ({ userInfo, getInfo, editAddress = null, indexToUpdate 
   return (
     <Fragment>
       <div className="grid grid-cols-2 gap-4 mb-6">
-        <input
-          onChange={(event) => setNumberAddress(event.target.value)}
-          value={numberAddress}
-          placeholder="Nhập số nhà"
-          className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
         <select
-          name="ward"
+          name="city"
           onChange={handleChange}
-          value={selectedWard}
+          value={selectedCity}
           className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">Chọn phường</option>
-          {listWards &&
-            listWards.map((ward) => (
-              <option key={ward.code} value={ward.name}>
-                {ward.name}
+          <option value="">Chọn thành phố</option>
+          {listProvinces &&
+            listProvinces.map((city) => (
+              <option key={city.code} value={city.code}>
+                {city.name}
               </option>
             ))}
         </select>
@@ -105,25 +99,31 @@ const ChooseProvinces = ({ userInfo, getInfo, editAddress = null, indexToUpdate 
             ))}
         </select>
         <select
-          name="city"
+          name="ward"
           onChange={handleChange}
-          value={selectedCity}
+          value={selectedWard}
           className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">Chọn thành phố</option>
-          {listProvinces &&
-            listProvinces.map((city) => (
-              <option key={city.code} value={city.code}>
-                {city.name}
+          <option value="">Chọn phường</option>
+          {listWards &&
+            listWards.map((ward) => (
+              <option key={ward.code} value={ward.name}>
+                {ward.name}
               </option>
             ))}
         </select>
+        <input
+          onChange={(event) => setNumberAddress(event.target.value)}
+          value={numberAddress}
+          placeholder="Nhập số nhà"
+          className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
       <Button onClick={handleSave} className="w-full !bg-black !text-white !p-3">
         Save
       </Button>
 
-      {userInfo?.address && userInfo.address.length > 0 && (
+      {/* {userInfo?.address && userInfo.address.length > 0 && (
         <div className="mt-4">
           <button
             className="text-blue-500 underline hover:text-blue-700"
@@ -132,7 +132,7 @@ const ChooseProvinces = ({ userInfo, getInfo, editAddress = null, indexToUpdate 
             {showAddressList ? 'Ẩn danh sách' : 'Thay đổi địa chỉ'}
           </button>
         </div>
-      )}
+      )} */}
 
       {showAddressList && userInfo?.address && (
         <div className="mt-3 border p-4 rounded-lg bg-gray-100 max-h-40 overflow-y-auto">

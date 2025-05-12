@@ -15,7 +15,11 @@ export function useUpdateUser() {
     onMutate: () => {
       console.log('Đang cập nhật...');
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Cập nhật thành công', data);
+      if (data?.data?.address.length === 0) {
+        return;
+      }
       toast.success('Cập nhật thông tin thành công', {
         position: 'top-center',
         autoClose: 3000,

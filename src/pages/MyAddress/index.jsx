@@ -1,10 +1,10 @@
-import AccountSlidebar from '../../components/AccountSlidebar';
-import * as React from 'react';
+import { useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import AccountSlidebar from '../../components/AccountSlidebar';
 import Page404 from '../Page404/index';
 import useStore from '../../store/useStore';
 import ChooseProvinces from '../../components/ChooseProvinces';
@@ -15,13 +15,22 @@ const MyAddress = () => {
   const getInfo = useStore((state) => state.getInfo);
   const { mutate: updateUserInfo, isPending } = useUpdateUser();
 
-  const addressArray = userInfo?.address;
+  const addressArray = userInfo?.address || [];
 
-  const [editAddressIndex, setEditAddressIndex] = React.useState(null);
-  const [open, setOpen] = React.useState(false);
+  const [editAddressIndex, setEditAddressIndex] = useState(null);
+  const [open, setOpen] = useState(false);
+
+  // Lọc và xóa địa chỉ có giá trị "Default" khi component được tải
+  useEffect(() => {
+    if (addressArray.some((address) => address === 'Default')) {
+      const filteredAddresses = addressArray.filter((address) => address !== 'Default');
+      updateUserInfo({ address: filteredAddresses });
+      getInfo({ ...userInfo, address: filteredAddresses });
+    }
+  }, [addressArray, updateUserInfo, getInfo, userInfo]);
 
   const handleDeleteAddress = (index) => {
-    const updatedAddressList = [...(userInfo?.address || [])];
+    const updatedAddressList = [...addressArray];
     updatedAddressList.splice(index, 1);
     updateUserInfo({ address: updatedAddressList });
     getInfo({ ...userInfo, address: updatedAddressList });
@@ -50,19 +59,12 @@ const MyAddress = () => {
     const updatedAddressList =
       editAddressIndex !== null
         ? addressArray.map((addr, index) => (index === editAddressIndex ? newAddress : addr))
-        : [...(userInfo?.address || []), newAddress];
+        : [...addressArray, newAddress];
 
     updateUserInfo({ address: updatedAddressList });
     getInfo({ ...userInfo, address: updatedAddressList });
     handleClose();
   };
-
-  // Remove aria-hidden workaround if Material-UI is handling it correctly
-  // React.useEffect(() => {
-  //   if (open) {
-  //     document.getElementById('root').removeAttribute('aria-hidden');
-  //   }
-  // }, [open]);
 
   if (!userInfo) {
     return (
@@ -99,14 +101,12 @@ const MyAddress = () => {
               </Button>
             </div>
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-              <div className="user-address p-4 border rounded-md bg-gray-50">
-                <h2 className="font-medium text-lg mb-3">Default Address</h2>
-                {addressArray && addressArray[0] ? (
+              {addressArray.length > 0 && (
+                <div className="user-address p-4 border rounded-md bg-gray-50">
+                  <h2 className="font-medium text-lg mb-3">Default Address</h2>
                   <p className="text-gray-700">{addressArray[0]}</p>
-                ) : (
-                  <p className="text-gray-500">No default address found. Please add one.</p>
-                )}
-              </div>
+                </div>
+              )}
               <div className="saved-addresses p-4 border rounded-md bg-gray-50">
                 <h2 className="font-medium text-lg mb-3">Saved Addresses</h2>
                 {Array.isArray(addressArray) && addressArray.length > 0 ? (
