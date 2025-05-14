@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { CiViewList } from 'react-icons/ci';
 import { FaMapLocationDot } from 'react-icons/fa6';
 import { PiMoneyWavyLight } from 'react-icons/pi';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import OrderStatus from './OrderStatusComponent';
 import HomeCartSlider from '../../components/HomeCartSlider';
 import { useOrder } from '../../services/orderServices';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
+import useStore from '../../store/useStore';
 
 const OrderDetails = () => {
   // lấy orderId từ url
@@ -14,6 +15,9 @@ const OrderDetails = () => {
 
   const { getOrderDetail, orderDetail, isLoadingDetail, isError, error, cancelOrderMutation } = useOrder();
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [showBankModal, setShowBankModal] = useState(false);
+  const navigate = useNavigate();
+  const userInfo = useStore((state) => state.userInfo);
 
   useEffect(() => {
     if (id) {
@@ -54,6 +58,18 @@ const OrderDetails = () => {
   const slidesPerView = window.innerWidth > 1024 ? 4 : window.innerWidth > 600 ? 4 : 3;
 
   const handleCancelOrder = async () => {
+    console.log('userInfo', userInfo.bankInfo);
+
+    // Kiểm tra thông tin ngân hàng trong userInfo
+    if (
+      !userInfo ||
+      !userInfo.bankInfo.accountHolderName ||
+      !userInfo.bankInfo.accountNumber ||
+      !userInfo.bankInfo.bankName
+    ) {
+      setShowBankModal(true);
+      return;
+    }
     cancelOrderMutation(orderDetail._id);
     setIsCancelModalOpen(false);
   };
@@ -208,6 +224,36 @@ const OrderDetails = () => {
           </Button>
           <Button onClick={handleCancelOrder} color="secondary" autoFocus>
             Yes, Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={showBankModal}
+        onClose={() => setShowBankModal(false)}
+        aria-labelledby="bank-info-dialog-title"
+        aria-describedby="bank-info-dialog-description"
+      >
+        <DialogTitle id="bank-info-dialog-title">Cập nhật thông tin ngân hàng</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="bank-info-dialog-description">
+            Bạn cần cập nhật đầy đủ thông tin ngân hàng để thực hiện yêu cầu hủy đơn hàng. Vui lòng cập nhật trong trang
+            tài khoản cá nhân.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowBankModal(false)} color="primary">
+            Để sau
+          </Button>
+          <Button
+            onClick={() => {
+              setShowBankModal(false);
+              navigate('/my-account');
+            }}
+            color="secondary"
+            autoFocus
+          >
+            Cập nhật ngay
           </Button>
         </DialogActions>
       </Dialog>

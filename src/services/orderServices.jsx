@@ -51,7 +51,8 @@ export const useOrder = () => {
 
   const { mutate: cancelOrderMutation } = useMutation({
     mutationFn: (id) => cancelOrder(id),
-    onSuccess: (d) => {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['orderDetail']);
       console.log('Order cancelled successfully');
       toast.success('Request cancel order successfully', {
         position: 'top-center',
@@ -59,7 +60,7 @@ export const useOrder = () => {
       });
       setInterval(() => {
         window.location.replace('/my-orders');
-      }, 15000);
+      }, 1000);
     },
     onError: (error) => {
       console.error('Error cancelling order:', error.message);
