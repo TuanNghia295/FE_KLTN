@@ -19,9 +19,9 @@ const getOrderById = async (orderId) => {
   }
 };
 
-// user Huy don hang
+// user gửi uy cầu hủy đơn hàng
 const cancelOrder = async (id) => {
-  const response = await axiosClient.delete(`/orders/user/${id}`);
+  const response = await axiosClient.patch(`/orders/user/cancelRequest/${id}`);
   return response.data;
 };
 
@@ -51,9 +51,9 @@ export const useOrder = () => {
 
   const { mutate: cancelOrderMutation } = useMutation({
     mutationFn: (id) => cancelOrder(id),
-    onSuccess: () => {
+    onSuccess: (d) => {
       console.log('Order cancelled successfully');
-      toast.success('Order cancelled successfully', {
+      toast.success('Request cancel order successfully', {
         position: 'top-center',
         autoClose: 3000,
       });

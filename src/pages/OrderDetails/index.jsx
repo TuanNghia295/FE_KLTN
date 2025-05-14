@@ -121,7 +121,7 @@ const OrderDetails = () => {
             </div>
             <div className="rightPart w-full xl:w-1/2">
               <div className="flex flex-col gap-4">
-                <h2 className="text-[24px] font-bold text-black">{orderDetail.items[0]?.productName}</h2>
+                <h2 className="text-[24px] font-bold text-black">{orderDetail.items[0]?.name}</h2>
                 <p className="text-sm text-gray-600">
                   <span className="font-bold">Size:</span> {orderDetail.items[0]?.size || 'N/A'}
                 </p>
@@ -153,22 +153,31 @@ const OrderDetails = () => {
                   <span className="font-bold">Description:</span> Order placed successfully
                 </p>
               </div>
-              <div className="flex justify-end gap-4 mt-6">
+              <div className="flex flex-col sm:flex-row justify-end gap-4 mt-6">
                 <Link to="/my-orders">
-                  <button className="border border-gray-300 text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-100 transition">
-                    Back
+                  <button
+                    className="flex items-center justify-center gap-2 border border-gray-300 text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-100 active:bg-gray-200 transition font-medium min-w-full sm:min-w-[160px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    style={{ fontWeight: 500, fontSize: '1rem', letterSpacing: 0.2 }}
+                  >
+                    <span className="hidden sm:inline">Back</span>
+                    <span className="sm:hidden">Back</span>
                   </button>
                 </Link>
                 <button
-                  className={`border px-6 py-2 rounded-lg shadow-md transition ${
-                    orderDetail.status === 'Pending'
-                      ? 'border-red-500 text-red-500 hover:bg-red-100'
-                      : 'border-gray-300 text-gray-300 cursor-not-allowed'
-                  }`}
-                  disabled={orderDetail.status !== 'Pending'}
+                  className={`border px-6 py-2 rounded-lg shadow-md transition font-medium min-w-[160px] flex items-center justify-center
+                    ${
+                      orderDetail.status === 'Pending' && !orderDetail.cancelRequest
+                        ? 'border-red-500 text-red-500 hover:bg-red-100 active:bg-red-200 focus:ring-2 focus:ring-red-300'
+                        : orderDetail.cancelRequest
+                        ? 'border-yellow-500 text-yellow-700 bg-yellow-50 cursor-not-allowed'
+                        : 'border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed'
+                    }
+                  `}
+                  disabled={orderDetail.status !== 'Pending' || orderDetail.cancelRequest}
                   onClick={() => setIsCancelModalOpen(true)}
+                  style={{ transition: 'all 0.2s', fontWeight: 500 }}
                 >
-                  Cancel Order
+                  {orderDetail.cancelRequest ? <>Processing cancellation...</> : 'Cancel Order'}
                 </button>
               </div>
             </div>

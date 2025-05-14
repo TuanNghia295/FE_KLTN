@@ -1,10 +1,10 @@
 import React, { Fragment, useMemo, useState } from 'react';
 import { IoCloseSharp } from 'react-icons/io5';
 import { MdDelete } from 'react-icons/md';
-import { MdAddShoppingCart } from "react-icons/md";
-import { BsFillCartXFill } from "react-icons/bs";
+import { MdAddShoppingCart } from 'react-icons/md';
+import { BsFillCartXFill } from 'react-icons/bs';
 import '../CartPanel/style.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button, CircularProgress, Tooltip } from '@mui/material';
 import useStore from '../../store/useStore';
 import ChooseSizeList from '../ChooseSizeList';
@@ -18,7 +18,7 @@ const CartPanel = () => {
   const updateItemSize = useStore((state) => state.updateItemSize);
   const setOpenCartPanel = useStore((state) => state.setOpenCartPanel);
   const userInfo = useStore((state) => state.userInfo);
-
+  const navigate = useNavigate();
   //Call API Update Cart By User ID
   const userId = useStore((state) => state.userInfo?._id);
   const { mutate: updateCart } = useUpdateCartByUserID();
@@ -63,12 +63,15 @@ const CartPanel = () => {
       {/* Phần giỏ hàng */}
       <div className="scroll custom-scrollbar w-full max-h-[70%] overflow-y-scroll overflow-x-hidden py-3 px-4">
         {cartItems?.length === 0 ? (
-          <div className='flex flex-col items-center justify-center gap-4'>
-            <BsFillCartXFill className='text-[100px]' />
+          <div className="flex flex-col items-center justify-center gap-4">
+            <BsFillCartXFill className="text-[100px]" />
             <p className="text-center font-[600] text-[25px] text-black">Your cart is empty</p>
-            <Link to='/listing'>
-              <Button className='!bg-black !text-white flex gap-3 !items-center' onClick={() => setOpenCartPanel(false)}>
-                <MdAddShoppingCart className='text-[25px] bg-white rounded-full text-black p-1' />
+            <Link to="/listing">
+              <Button
+                className="!bg-black !text-white flex gap-3 !items-center"
+                onClick={() => setOpenCartPanel(false)}
+              >
+                <MdAddShoppingCart className="text-[25px] bg-white rounded-full text-black p-1" />
                 <p>Shopping Now</p>
               </Button>
             </Link>
@@ -172,14 +175,20 @@ const CartPanel = () => {
           <span className="ml-auto font-medium">{formatCurrency(total)}</span>
         </div>
         <div className="flex flex-col w-full justify-center mt-4">
-          <Link to="/checkout">
-            <Button
-              className="w-full !bg-black !rounded-none !text-white !py-3"
-              onClick={() => setOpenCartPanel(false)}
-            >
-              Checkout
-            </Button>
-          </Link>
+          <Button
+            className={`w-full !rounded-none !py-3 ${
+              cartItems?.length === 0
+                ? '!bg-gray-400 !text-white cursor-not-allowed hover:!bg-gray-500'
+                : '!bg-black !text-white hover:!bg-gray-900'
+            }`}
+            onClick={() => {
+              setOpenCartPanel(false);
+              navigate('/checkout');
+            }}
+            disabled={cartItems?.length === 0}
+          >
+            Checkout
+          </Button>
         </div>
       </div>
     </>

@@ -2,16 +2,27 @@ import { useState, useMemo, useEffect } from 'react';
 import TextField from '@mui/material/TextField';
 import { Button, CircularProgress, Box, Typography, Snackbar, Alert, Tooltip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { FaCreditCard, FaRegMoneyBill1, FaPaypal } from 'react-icons/fa6'; // Thêm FaPaypal
+import { FaCreditCard, FaPaypal } from 'react-icons/fa6'; // Add FaPaypal import
 import useStore from '../../store/useStore';
 import { useShippingFee, useCreateOrder } from '../../services/paymentServices.jsx'; // Chỉ cần useCreateOrder
 import { useClearCart } from '../../services/cartServices.jsx';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContentText from '@mui/material/DialogContentText';
 
 // Hàm định dạng tiền tệ
 const formatCurrency = (value) => {
   if (value === undefined || value === null || isNaN(value)) return 'N/A';
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
 };
+
+// Restore PayPal payment method
+const paymentOptions = [
+  { value: 'Cash', label: 'Payment with cash', icon: <FaCreditCard /> },
+  { value: 'Paypal', label: 'Payment with PayPal', icon: <FaPaypal /> },
+];
 
 const CheckOut = () => {
   const navigate = useNavigate();
@@ -22,16 +33,10 @@ const CheckOut = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('Cash');
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' });
   const [showAddressList, setShowAddressList] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState(userInfo?.address[0] || '');
+  const [selectedAddress, setSelectedAddress] = useState(userInfo?.address?.[0] || '');
+  const [showAddressModal, setShowAddressModal] = useState(false);
+
   const { clearingCartFn } = useClearCart({ userId: userInfo?._id });
-
-  // Cập nhật paymentOptions với Paypal
-  const paymentOptions = [
-    { value: 'Cash', label: 'Payment with cash', icon: <FaRegMoneyBill1 /> },
-    // { value: 'BankTransfer', label: 'Payment with Bank Transfer', icon: <FaCreditCard /> }, // Bỏ BankTransfer nếu chỉ dùng Paypal
-    { value: 'Paypal', label: 'Payment with Paypal', icon: <FaPaypal /> }, // Sử dụng icon Paypal
-  ];
-
   const {
     data: shippingData,
     isLoading: isLoadingShippingFee,
@@ -42,12 +47,12 @@ const CheckOut = () => {
 
   const {
     mutate: createOrderMutate,
-    isPending: isProcessingOrder, // Đổi tên để rõ ràng hơn (bao gồm cả tạo order và gọi PayPal)
-    isSuccess: isOrderCreationSuccess, // Chỉ đánh dấu thành công của việc gọi API createOrder
-    isError: isOrderCreationError, // Chỉ đánh dấu lỗi của việc gọi API createOrder
+    isPending: isProcessingOrder,
+    isSuccess: isOrderCreationSuccess,
+    isError: isOrderCreationError,
     error: orderCreationError,
     reset: resetCreateOrder,
-    data: orderResponseData, // Dữ liệu trả về (có thể chứa paymentUrl)
+    data: orderResponseData,
   } = useCreateOrder();
 
   const subtotal = useMemo(() => {
@@ -58,12 +63,24 @@ const CheckOut = () => {
   const distance = shippingData?.distance ?? '';
   const totalAmount = subtotal + shippingFee;
 
+  useEffect(() => {
+    console.log('userInfo', userInfo);
+
+    if (userInfo && (!userInfo.address || userInfo.address.length === 0 || userInfo.address.includes('Default'))) {
+      setShowAddressModal(true);
+    }
+  }, [userInfo]);
+
+  const handleCloseAddressModal = () => {
+    setShowAddressModal(false);
+    navigate('/my-address');
+  };
+
   const handlePaymentChange = (value) => {
     setSelectedPaymentMethod(value);
   };
 
   const handlePlaceOrder = () => {
-    // --- Kiểm tra điều kiện ---
     if (!userInfo || !userInfo._id) {
       setNotification({ open: true, message: 'User information is missing. Please log in again.', severity: 'error' });
       return;
@@ -85,12 +102,10 @@ const CheckOut = () => {
       return;
     }
     if (!selectedAddress) {
-      // Kiểm tra selectedAddress thay vì userInfo.address[0]
       setNotification({ open: true, message: 'Please select or provide a shipping address.', severity: 'error' });
       return;
     }
 
-    // --- Chuẩn bị payload ---
     const payload = {
       customerName: userInfo.fullName,
       customerPhone: userInfo.phone,
@@ -104,47 +119,37 @@ const CheckOut = () => {
           publicId: image.publicId || null,
         })),
         name: item.product.name,
-        size: item.size, // Include size
-        color: item.color, // Include color
+        size: item.size,
+        color: item.color,
         quantity: item.quantity,
       })),
       paymentMethod: selectedPaymentMethod,
       isReturn: false,
-      shippingFee: shippingFee, // Add shipping fee to payload
-      distance: distance, // Add distance to payload
+      shippingFee: shippingFee,
+      distance: distance,
     };
 
-    console.log('Calling createOrder API with payload:', payload);
-    // Gọi API createOrder cho mọi trường hợp (backend sẽ xử lý)
     createOrderMutate(payload);
   };
 
-  // --- Xử lý sau khi gọi API createOrder thành công ---
   useEffect(() => {
     if (isOrderCreationSuccess && orderResponseData) {
-      console.log('API createOrder response:', orderResponseData);
       if (orderResponseData.paymentUrl) {
-        // Nếu có paymentUrl (trường hợp PayPal), chuyển hướng người dùng
-        console.log('Redirecting to PayPal:', orderResponseData.paymentUrl);
         window.location.href = orderResponseData.paymentUrl;
-        // Không cần reset hay làm gì khác ở đây, chờ callback từ PayPal
       } else {
-        // Nếu không có paymentUrl (trường hợp Cash)
         setNotification({
           open: true,
           message: orderResponseData.message || 'Order placed successfully!',
           severity: 'success',
         });
-        // Chỉ xóa giỏ hàng và điều hướng khi là thanh toán Cash thành công
         if (selectedPaymentMethod === 'Cash') {
-          clearingCartFn(); // Gọi API xóa giỏ hàng trên server
-          clearCart(); // Xóa giỏ hàng trên client (Zustand)
+          clearingCartFn();
+          clearCart();
           setTimeout(() => {
-            navigate('/'); // Chuyển hướng về trang chủ
-          }, 1500); // Tăng thời gian chờ một chút
+            navigate('/');
+          }, 1500);
         }
       }
-      // Reset mutation state sau khi đã xử lý (dù là redirect hay hiển thị thông báo)
       resetCreateOrder();
     }
   }, [
@@ -157,13 +162,10 @@ const CheckOut = () => {
     selectedPaymentMethod,
   ]);
 
-  // --- Xử lý khi gọi API createOrder bị lỗi ---
   useEffect(() => {
     if (isOrderCreationError) {
-      console.error('Order creation API error:', orderCreationError);
       setNotification({
         open: true,
-        // Hiển thị lỗi chi tiết hơn từ backend nếu có
         message: `Failed to process order: ${
           orderCreationError?.response?.data?.details?.join(', ') ||
           orderCreationError?.message ||
@@ -171,7 +173,7 @@ const CheckOut = () => {
         }`,
         severity: 'error',
       });
-      resetCreateOrder(); // Reset trạng thái mutation
+      resetCreateOrder();
     }
   }, [isOrderCreationError, orderCreationError, resetCreateOrder]);
 
@@ -184,6 +186,22 @@ const CheckOut = () => {
 
   return (
     <>
+      {showAddressModal && (
+        <Dialog open={showAddressModal} onClose={handleCloseAddressModal}>
+          <DialogTitle>Update Address</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              You currently have no valid address. Please update your address to continue.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseAddressModal} variant="contained" color="primary">
+              Update Address
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+
       <section className="section bg-white p-5 relative">
         <div className="container flex flex-col xl:flex-row w-full gap-8 xl:gap-5">
           <div className="leftPart xl:w-[65%] order-2 xl:order-1">
