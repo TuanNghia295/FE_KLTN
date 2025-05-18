@@ -1,7 +1,8 @@
 import axios from 'axios';
 import queryString from 'querystring';
 
-export const baseURL = 'http://localhost:3001/'; // Địa chỉ API của bạn
+// export const baseURL = 'http://localhost:3001/';
+export const baseURL = 'https://be-kltn.onrender.com/';
 
 if (!baseURL) {
   console.error('⚠️ VITE_APP_BASE_URL is not defined. Check your .env file.');

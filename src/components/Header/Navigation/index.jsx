@@ -1,21 +1,21 @@
 import { Button } from '@mui/material';
 import { HiOutlineMenuAlt2 } from 'react-icons/hi';
 import { FaCaretDown } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { MdDiscount } from 'react-icons/md';
 import CategoryPannel from './CategoryPannel';
 import { useState } from 'react';
 import '../Navigation/style.css';
-import useStore from '../../../store/useStore'
-import { normalizeString } from '../../../hook/normalizeString'
+import useStore from '../../../store/useStore';
+import { normalizeString } from '../../../hook/normalizeString';
 
 const Navigation = () => {
   const [isOpenCategory, setIsOpenCategory] = useState(false);
   const toogleCategory = () => setIsOpenCategory(!isOpenCategory);
   // Lấy list Category tu Zustand
   const categoryListZustand = useStore((state) => state.categoryListZustand);
-  const params = normalizeString(categoryListZustand[3]?.type)
-
+  const params = normalizeString(categoryListZustand[3]?.type);
+  const navigate = useNavigate();
   return (
     <>
       <nav>
@@ -49,7 +49,8 @@ const Navigation = () => {
                 >
                   {/* List category */}
                   <ul>
-                    {Array.isArray(categoryListZustand) && categoryListZustand.length > 0 &&
+                    {Array.isArray(categoryListZustand) &&
+                      categoryListZustand.length > 0 &&
                       categoryListZustand
                         .filter((category) => category.type !== 'Sale')
                         .map((category) => (
@@ -60,11 +61,8 @@ const Navigation = () => {
                               </Button>
                             </Link>
                           </li>
-                        ))
-                    }
+                        ))}
                   </ul>
-
-
 
                   {/* <ul>
                     <li className="list-none w-full relative">
@@ -149,16 +147,20 @@ const Navigation = () => {
           </div>
 
           <div className="col_3 hidden xl:block xl:w-[15%] flex items-center justify-end gap-2 ">
-            <Button color="error" variant="text">
+            <Button color="error" variant="text" onClick={() => navigate('/my-orders')}>
               <MdDiscount />
               &nbsp;
-              <p className="text-[14px] font-[500] text-primary">FreeShip</p>
+              <p className="text-[14px] font-[500] text-primary">Order Tracking</p>
             </Button>
           </div>
         </div>
       </nav>
 
-      <CategoryPannel categoryListZustand={categoryListZustand} isOpenCategory={isOpenCategory} toogleCategory={toogleCategory} />
+      <CategoryPannel
+        categoryListZustand={categoryListZustand}
+        isOpenCategory={isOpenCategory}
+        toogleCategory={toogleCategory}
+      />
     </>
   );
 };

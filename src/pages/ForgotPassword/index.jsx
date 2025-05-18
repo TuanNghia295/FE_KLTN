@@ -143,7 +143,7 @@ const ForgotPassword = () => {
               }}
               disabled={isPending}
             >
-              {isPending ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Gửi Email Khôi Phục'}
+              {isPending ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Send'}
             </Button>
 
             {errorMessage && (

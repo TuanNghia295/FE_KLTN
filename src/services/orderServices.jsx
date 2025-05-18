@@ -42,7 +42,7 @@ export const useOrder = () => {
     mutationKey: ['orderDetail'],
     mutationFn: (orderId) => getOrderById(orderId),
     onSuccess: (data) => {
-      console.log('Detail order fetched successfully:', data);
+      // console.log('Detail order fetched successfully:', data);
     },
     onError: (error) => {
       console.error('Error fetching order detail:', error);

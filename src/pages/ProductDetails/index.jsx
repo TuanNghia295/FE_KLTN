@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'; // Import Link as RouterLink
-import { Button, CircularProgress, Box, Snackbar, Alert } from '@mui/material'; // Import CircularProgress for loading and Snackbar for notifications
+import { Button, CircularProgress, Box, Snackbar, Alert, Modal } from '@mui/material'; // Import CircularProgress for loading and Snackbar for notifications
 
 // Giả sử Gallery là component hiển thị ảnh (có thể có zoom tích hợp)
 import Gallery from '../../components/gallery';
@@ -64,6 +64,7 @@ const ProductDetails = () => {
   }, []);
 
   const [showSnackbar, setShowSnackbar] = useState(false); // State for Snackbar
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   // ---- Xử lý trạng thái Loading và Error ----
   if (isLoading) {
@@ -99,7 +100,19 @@ const ProductDetails = () => {
     quantity: 1,
   };
 
+  const handleAddToCartClick = () => {
+    if (!userInfo) {
+      setShowLoginModal(true);
+      return;
+    }
+    handleAddToCart(data);
+  };
+
   const handleBuyNow = async (data) => {
+    if (!userInfo) {
+      setShowLoginModal(true);
+      return;
+    }
     Promise.all([
       handleAddToCart(data), // Thêm vào giỏ hàng
     ]).then(() => {
@@ -185,9 +198,7 @@ const ProductDetails = () => {
                 variant="contained" // Sử dụng variant của MUI cho rõ ràng
                 className="!bg-[#f1f1f1] !text-black !w-full !py-3 !mb-3 !shadow-none hover:!bg-gray-300"
                 disabled={!selectedSize} // Vô hiệu hóa nếu chưa chọn size
-                onClick={() => {
-                  handleAddToCart(data);
-                }} // Thêm logic ở đây
+                onClick={handleAddToCartClick} // Thêm logic ở đây
               >
                 {loadingAddToCart ? 'Loading...' : 'Add To Cart'}
               </Button>
@@ -213,9 +224,61 @@ const ProductDetails = () => {
                 anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
               >
                 <Alert onClose={() => setShowSnackbar(false)} severity="warning" sx={{ width: '100%' }}>
-                  Xin hãy chọn size trước khi mua hàng!
+                  Please select a size before adding to cart.
                 </Alert>
               </Snackbar>
+
+              {/* Modal */}
+              <Modal
+                open={showLoginModal}
+                onClose={() => setShowLoginModal(false)}
+                BackdropProps={{ style: { backgroundColor: 'rgba(0,0,0,0.3)' } }}
+                sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <Box
+                  sx={{
+                    bgcolor: 'background.paper',
+                    p: 4,
+                    borderRadius: 3,
+                    boxShadow: 24,
+                    maxWidth: 350,
+                    width: '90%',
+                    mx: 'auto',
+                    textAlign: 'center',
+                  }}
+                >
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                    You need to log in to use this feature.
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      setShowLoginModal(false);
+                      navigate('/login');
+                    }}
+                    sx={{
+                      bgcolor: 'black',
+                      color: 'white',
+                      py: 1.2,
+                      px: 2,
+                      width: '100%',
+                      mb: 1.5,
+                      fontWeight: 600,
+                      fontSize: 16,
+                      '&:hover': { bgcolor: '#333' },
+                    }}
+                  >
+                    Log in now
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={() => setShowLoginModal(false)}
+                    sx={{ width: '100%', fontWeight: 600, fontSize: 16 }}
+                  >
+                    Cancel
+                  </Button>
+                </Box>
+              </Modal>
 
               {/* Mô tả sản phẩm */}
               <div className="mt-6 border-t pt-4">
@@ -228,7 +291,7 @@ const ProductDetails = () => {
           <section className="mt-10">
             {' '}
             {/* Thêm khoảng cách trên */}
-            <h2 className="text-2xl font-semibold mb-4 pl-4 md:pl-0">Sản phẩm liên quan</h2>
+            <h2 className="text-2xl font-semibold mb-4 pl-4 md:pl-0">Related Products</h2>
             {/* Truyền slidesPerView từ state */}
             <HomeCartSlider
               slidesPerView={slidesPerView}

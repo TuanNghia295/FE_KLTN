@@ -30,6 +30,7 @@ const MyAccount = () => {
 
   // Sử dụng selector để chỉ lấy các trạng thái cần thiết
   const userInfo = useStore((state) => state.userInfo);
+
   const getInfo = useStore((state) => state.getInfo);
   const { mutate: updateUserInfo } = useUpdateUser(); // Sử dụng hook để cập nhật thông tin người dùng
 
@@ -79,7 +80,11 @@ const MyAccount = () => {
         delete updatedValues.password;
       }
       if (!values.bankInfo.bankName && !values.bankInfo.accountNumber && !values.bankInfo.accountHolderName) {
-        delete updatedValues.bankInfo; // Không gửi bankInfo nếu không có dữ liệu
+        updatedValues.bankInfo = {
+          bankName: '',
+          accountNumber: '',
+          accountHolderName: '',
+        };
       }
       updateUserInfo(updatedValues, {
         onSuccess: (response) => {
@@ -88,6 +93,11 @@ const MyAccount = () => {
       });
     },
   });
+
+  // Lấy object ngân hàng ban đầu nếu có
+  const initialBank = useMemo(() => {
+    return userInfo?.bankInfo?.bankName ? banks.find((b) => b.name === userInfo.bankInfo.bankName) || null : null;
+  }, [banks, userInfo]);
 
   // Nếu userInfo chưa có, hiển thị loading trong JSX
   if (!userInfo) {
@@ -191,10 +201,8 @@ const MyAccount = () => {
                     value={formik.values.address[0] || ''}
                     error={formik.touched.address && Boolean(formik.errors.address)}
                     helperText={formik.touched.address && formik.errors.address}
+                    disabled
                   />
-                  <div className="mt-2">
-                    <p>Current Addresses: {userInfo?.address?.join(', ') || 'None'}</p>
-                  </div>
                 </div>
               </div>
               <div className="flex flex-col md:flex-row items-center gap-5 my-4">
@@ -219,7 +227,19 @@ const MyAccount = () => {
                     value={selectedBank}
                     onChange={(event, newValue) => {
                       setSelectedBank(newValue);
-                      formik.setFieldValue('bankInfo.bankName', newValue?.name || '');
+                      formik.setFieldValue('bankInfo.bankName', newValue ? newValue.name : '');
+                      if (!newValue) {
+                        formik.setFieldValue('bankInfo.accountNumber', '');
+                        formik.setFieldValue('bankInfo.accountHolderName', '');
+                      }
+                    }}
+                    onInputChange={(event, newInputValue) => {
+                      if (newInputValue === '') {
+                        setSelectedBank(null);
+                        formik.setFieldValue('bankInfo.bankName', '');
+                        formik.setFieldValue('bankInfo.accountNumber', '');
+                        formik.setFieldValue('bankInfo.accountHolderName', '');
+                      }
                     }}
                     filterOptions={(options, { inputValue }) =>
                       options.filter(

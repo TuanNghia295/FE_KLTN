@@ -25,8 +25,6 @@ const OrderDetails = () => {
     }
   }, [id, getOrderDetail]);
 
-  console.log('orderDetail', orderDetail);
-
   if (isLoadingDetail) {
     return <div>Loading...</div>;
   }
@@ -37,22 +35,6 @@ const OrderDetails = () => {
 
   if (!orderDetail) {
     return <div>No order details found.</div>;
-  }
-
-  if (orderDetail.status === 'Cancelled') {
-    return (
-      <section className="container mx-auto py-10 px-4 lg:px-8">
-        <div className="bg-red-100 text-red-600 p-6 rounded-lg shadow-md text-center">
-          <h2 className="text-2xl font-bold">Order Cancelled</h2>
-          <p className="text-lg mt-4">This order has been cancelled and is no longer available.</p>
-          <Link to="/my-orders">
-            <button className="mt-6 bg-black text-white px-6 py-2 rounded-lg shadow-md hover:bg-gray-800 transition">
-              Back to My Orders
-            </button>
-          </Link>
-        </div>
-      </section>
-    );
   }
 
   const slidesPerView = window.innerWidth > 1024 ? 4 : window.innerWidth > 600 ? 4 : 3;
@@ -92,7 +74,7 @@ const OrderDetails = () => {
     : 'N/A';
 
   return (
-    <>
+    <div>
       <section className="container mx-auto py-10 px-4 lg:px-8">
         <section className="statusOrder flex bg-red-500 p-6 items-center rounded-t-lg text-white gap-6 shadow-md">
           <div className="icon text-[50px]">
@@ -126,7 +108,7 @@ const OrderDetails = () => {
         </section>
 
         <section className="bg-white p-6 rounded-lg shadow-md">
-          <OrderStatus status={orderDetail.status} />
+          <OrderStatus status={orderDetail.status === 'Cancelled' ? 'Cancelled' : orderDetail.status} />
           <div className="flex flex-col xl:flex-row gap-6">
             <div className="leftPart w-full xl:w-1/2 flex justify-center items-center">
               <img
@@ -139,6 +121,9 @@ const OrderDetails = () => {
               <div className="flex flex-col gap-4">
                 <h2 className="text-[24px] font-bold text-black">{orderDetail.items[0]?.name}</h2>
                 <p className="text-sm text-gray-600">
+                  <span className="font-bold">Order ID:</span> {orderDetail._id}
+                </p>
+                <p className="text-sm text-gray-600">
                   <span className="font-bold">Size:</span> {orderDetail.items[0]?.size || 'N/A'}
                 </p>
                 <p className="text-sm text-gray-600">
@@ -150,23 +135,20 @@ const OrderDetails = () => {
                 <p className="text-sm text-gray-600">
                   <span className="font-bold">Price:</span> {formatPrice} đ
                 </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-bold">Total Price:</span> {formattedTotalPrice} đ
-                </p>
+
                 <p className="text-sm text-gray-600">
                   <span className="font-bold">Shipping Fee:</span> {shippingFee} đ
                 </p>
                 <p className="text-sm text-gray-600">
                   <span className="font-bold">Distance:</span> {distance}
                 </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-bold">Order ID:</span> {orderDetail._id}
-                </p>
+
                 <p className="text-sm text-gray-600">
                   <span className="font-bold">Date:</span> {new Date(orderDetail.createdAt).toLocaleDateString()}
                 </p>
+
                 <p className="text-sm text-gray-600">
-                  <span className="font-bold">Description:</span> Order placed successfully
+                  <span className="font-bold">Total Price:</span> {formattedTotalPrice} đ
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row justify-end gap-4 mt-6">
@@ -179,30 +161,27 @@ const OrderDetails = () => {
                     <span className="sm:hidden">Back</span>
                   </button>
                 </Link>
-                <button
-                  className={`border px-6 py-2 rounded-lg shadow-md transition font-medium min-w-[160px] flex items-center justify-center
-                    ${
-                      orderDetail.status === 'Pending' && !orderDetail.cancelRequest
-                        ? 'border-red-500 text-red-500 hover:bg-red-100 active:bg-red-200 focus:ring-2 focus:ring-red-300'
-                        : orderDetail.cancelRequest
-                        ? 'border-yellow-500 text-yellow-700 bg-yellow-50 cursor-not-allowed'
-                        : 'border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed'
-                    }
-                  `}
-                  disabled={orderDetail.status !== 'Pending' || orderDetail.cancelRequest}
-                  onClick={() => setIsCancelModalOpen(true)}
-                  style={{ transition: 'all 0.2s', fontWeight: 500 }}
-                >
-                  {orderDetail.cancelRequest ? <>Processing cancellation...</> : 'Cancel Order'}
-                </button>
+                {orderDetail.status !== 'Cancelled' && (
+                  <button
+                    className={`border px-6 py-2 rounded-lg shadow-md transition font-medium min-w-[160px] flex items-center justify-center
+                      ${
+                        orderDetail.status === 'Pending' && !orderDetail.cancelRequest
+                          ? 'border-red-500 text-red-500 hover:bg-red-100 active:bg-red-200 focus:ring-2 focus:ring-red-300'
+                          : orderDetail.cancelRequest
+                          ? 'border-yellow-500 text-yellow-700 bg-yellow-50 cursor-not-allowed'
+                          : 'border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed'
+                      }
+                    `}
+                    disabled={orderDetail.status !== 'Pending' || orderDetail.cancelRequest}
+                    onClick={() => setIsCancelModalOpen(true)}
+                    style={{ transition: 'all 0.2s', fontWeight: 500 }}
+                  >
+                    {orderDetail.cancelRequest ? <>Processing cancellation...</> : 'Cancel Order'}
+                  </button>
+                )}
               </div>
             </div>
           </div>
-        </section>
-
-        <section className="mt-10">
-          <h2 className="text-[20px] font-bold mb-6">Related Products</h2>
-          <HomeCartSlider slidesPerView={slidesPerView} />
         </section>
       </section>
 
@@ -234,16 +213,15 @@ const OrderDetails = () => {
         aria-labelledby="bank-info-dialog-title"
         aria-describedby="bank-info-dialog-description"
       >
-        <DialogTitle id="bank-info-dialog-title">Cập nhật thông tin ngân hàng</DialogTitle>
+        <DialogTitle id="bank-info-dialog-title">Update Bank Account</DialogTitle>
         <DialogContent>
           <DialogContentText id="bank-info-dialog-description">
-            Bạn cần cập nhật đầy đủ thông tin ngân hàng để thực hiện yêu cầu hủy đơn hàng. Vui lòng cập nhật trong trang
-            tài khoản cá nhân.
+            Your bank account information is incomplete. Please update your bank account information to proceed with the
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setShowBankModal(false)} color="primary">
-            Để sau
+            Cancel
           </Button>
           <Button
             onClick={() => {
@@ -253,11 +231,11 @@ const OrderDetails = () => {
             color="secondary"
             autoFocus
           >
-            Cập nhật ngay
+            Ok
           </Button>
         </DialogActions>
       </Dialog>
-    </>
+    </div>
   );
 };
 

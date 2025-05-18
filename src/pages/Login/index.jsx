@@ -186,16 +186,16 @@ const Login = () => {
             </Box>
 
             {/* Divider */}
-            <Box sx={{ display: 'flex', alignItems: 'center', my: 3 }}>
+            {/* <Box sx={{ display: 'flex', alignItems: 'center', my: 3 }}>
               <Box sx={{ flexGrow: 1, height: '1px', bgcolor: 'grey.300' }} />
               <Typography variant="body2" sx={{ px: 2, color: 'text.secondary' }}>
                 Or continue with
               </Typography>
               <Box sx={{ flexGrow: 1, height: '1px', bgcolor: 'grey.300' }} />
-            </Box>
+            </Box> */}
 
             {/* Google Login Button */}
-            <Button
+            {/* <Button
               fullWidth
               variant="outlined"
               startIcon={<FcGoogle size={24} />}
@@ -211,7 +211,7 @@ const Login = () => {
               }}
             >
               Sign In with Google
-            </Button>
+            </Button> */}
           </form>
         </Box>
       </Box>
