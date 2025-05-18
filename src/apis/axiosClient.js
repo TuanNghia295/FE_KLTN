@@ -38,7 +38,7 @@ axiosClient.interceptors.response.use(
   async (error) => {
     if (error.response.status === 401) {
       try {
-        const response = await axios.post(`http://localhost:3001/auth/refresh_token`, {}, { withCredentials: true });
+        const response = await axios.post(`${baseURL}auth/refresh_token`, {}, { withCredentials: true });
         console.log('🚀 Token mới:', response.data.accessToken);
         const newAccessToken = response.data.accessToken;
         localStorage.setItem('accessToken', newAccessToken);
