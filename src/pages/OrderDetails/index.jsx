@@ -45,6 +45,7 @@ const OrderDetails = () => {
     // Kiểm tra thông tin ngân hàng trong userInfo
     if (
       !userInfo ||
+      !userInfo.bankInfo ||
       !userInfo.bankInfo.accountHolderName ||
       !userInfo.bankInfo.accountNumber ||
       !userInfo.bankInfo.bankName
@@ -199,10 +200,10 @@ const OrderDetails = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsCancelModalOpen(false)} color="primary">
-            No
+            Cancel
           </Button>
           <Button onClick={handleCancelOrder} color="secondary" autoFocus>
-            Yes, Cancel
+            Ok
           </Button>
         </DialogActions>
       </Dialog>
