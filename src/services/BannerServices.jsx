@@ -3,7 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 // get banner list
 const getBanners = async () => {
   try {
-    const res = await axiosClient.get('/banners/getAll');
+    // const res = await axiosClient.get('/banners/getAll');
+    const res = {
+      data: null,
+    };
     return res.data;
   } catch (error) {
     console.log('Error fetching banners:', error);

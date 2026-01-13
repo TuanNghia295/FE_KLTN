@@ -17,6 +17,8 @@
     "@mui/styled-engine-sc": "^6.4.3",
     "@tanstack/react-query": "^5.71.1",
     "axios": "^1.8.2",
+    "baseline-browser-mapping": "^2.9.14",
+    "caniuse-lite": "^1.0.30001764",
     "date-fns": "^4.1.0",
     "formik": "^2.4.6",
     "framer-motion": "^12.4.7",
