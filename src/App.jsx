@@ -33,7 +33,7 @@ import ChatBoxCoze from './components/ChatboxCoze/index.jsx';
 export const MainLayout = ({ children }) => (
   <>
     <Header />
-    <ChatBoxCoze/>
+    <ChatBoxCoze />
     <main>{children}</main>
     <Footer />
   </>
@@ -52,14 +52,14 @@ export default function App() {
   const setCartItems = useStore((state) => state.setCartItems); // Dùng useEffect để bỏ sản phẩm từ database lưu trữ vào Zustand
 
   //Call API Get Danh Muc
-  const { categoryList } = useGetCategory();
+  // const { categoryList } = useGetCategory();
   const setCategoryListZustand = useStore((state) => state.setCategoryListZustand);
 
-  useEffect(() => {
-    if (categoryList && categoryList.length > 0) {
-      setCategoryListZustand(categoryList);
-    }
-  }, [categoryList]);
+  // useEffect(() => {
+  //   if (categoryList && categoryList.length > 0) {
+  //     setCategoryListZustand(categoryList);
+  //   }
+  // }, [categoryList]);
 
   useEffect(() => {
     fetchUserInfo();

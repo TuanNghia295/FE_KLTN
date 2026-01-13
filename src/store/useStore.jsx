@@ -12,6 +12,7 @@ const useStore = create((set) => ({
   // Hàm để xóa thông tin người dùng
   clearInfo: () => {
     localStorage.removeItem('accesstoken');
+    localStorage.removeItem('refreshtoken');
     set({ userInfo: null });
   },
 

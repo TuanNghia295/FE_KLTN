@@ -2,11 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { TextField, Button, Box, Typography, CircularProgress } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { getAuth, verifyPasswordResetCode, confirmPasswordReset } from 'firebase/auth';
 import { useUpdatePassword } from '../../services/authServices';
-import app from '../../firebase';
-
-const auth = getAuth(app);
 
 const ResetPassword = () => {
   const [newPassword, setNewPassword] = useState('');
@@ -19,32 +15,18 @@ const ResetPassword = () => {
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
-    const actionCode = query.get('oobCode');
-    const continueUrl = query.get('continueUrl');
+    const token = query.get('token');
+    const emailParam = query.get('email');
 
-    console.log('Action code:', actionCode);
-    console.log('Continue URL:', continueUrl);
+    console.log('Reset token:', token);
+    console.log('Email:', emailParam);
 
-    if (!actionCode || !continueUrl) {
+    if (!token || !emailParam) {
       setError('Liên kết không hợp lệ.');
       return;
     }
 
-    // Giải mã continueUrl để lấy email
-    try {
-      const decodedUrl = decodeURIComponent(continueUrl);
-      const emailParam = new URL(decodedUrl).searchParams.get('email');
-      console.log('Extracted email:', emailParam);
-      setEmail(emailParam);
-    } catch {
-      console.error('Error decoding continueUrl');
-      setError('Liên kết không hợp lệ.');
-    }
-
-    // Xác minh action code
-    verifyPasswordResetCode(auth, actionCode).catch(() => {
-      setError('Liên kết không hợp lệ hoặc đã hết hạn.');
-    });
+    setEmail(emailParam);
   }, [location]);
 
   const handleSubmit = async (e) => {
@@ -53,14 +35,12 @@ const ResetPassword = () => {
     setIsPending(true);
 
     const query = new URLSearchParams(location.search);
-    const actionCode = query.get('oobCode');
+    const token = query.get('token');
 
     try {
-      await confirmPasswordReset(auth, actionCode, newPassword);
-
-      // Đồng bộ mật khẩu với MongoDB
+      // Update password with MongoDB backend
       updatePassword(
-        { email, newPassword },
+        { email, newPassword, token },
         {
           onSuccess: () => {
             toast.success('Mật khẩu đã được cập nhật! Vui lòng đăng nhập lại.');

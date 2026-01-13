@@ -6,10 +6,6 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import Banner1 from '../../assets/log-reg/1.jpg';
 import { toast } from 'react-toastify';
-import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
-import app from '../../firebase'; // Đảm bảo đã khởi tạo firebase app ở file này
-
-const auth = getAuth(app);
 
 const ForgotPassword = () => {
   const [isPending, setIsPending] = useState(false);
@@ -27,10 +23,10 @@ const ForgotPassword = () => {
       setErrorMessage('');
 
       try {
-        await sendPasswordResetEmail(auth, values.email, {
-          url: `https://iuhshoes.netlify.app/reset-password?email=${encodeURIComponent(values.email)}`,
-        });
+        // TODO: Implement backend API call for password reset
+        // Example: await axios.post('/api/auth/forgot-password', { email: values.email });
         toast.success('Email đặt lại mật khẩu đã được gửi! Vui lòng kiểm tra hộp thư.');
+        console.log('Password reset requested for:', values.email);
       } catch (error) {
         console.error('Reset email error:', error);
         setErrorMessage('Không thể gửi email khôi phục. Vui lòng kiểm tra email và thử lại.');

@@ -13,11 +13,9 @@ export const register = async (values) => {
 
 // API đăng nhập
 export const login = async (values) => {
-  const response = await axiosClient.post(`/auth/login`, values, {
-    withCredentials: true,
-  });
-  localStorage.setItem('accesstoken', response.data.accessToken);
-  return response.data;
+  const response = await axiosClient.post(`/auth/login`, values);
+  console.log('RES', response);
+  return response;
 };
 
 // API reset mật khẩu
@@ -73,7 +71,13 @@ export function useLogin() {
     mutationKey: ['login'],
     mutationFn: login,
     onSuccess: (data) => {
-      getInfo(data);
+      // Store tokens in localStorage
+      localStorage.setItem('accesstoken', data.access_token);
+      localStorage.setItem('refreshtoken', data.refresh_token);
+
+      // Store user info in zustand
+      getInfo(data.user);
+
       toast.success('Sign in successfully !', {
         position: 'top-center',
         autoClose: 3000,
@@ -87,7 +91,7 @@ export function useLogin() {
     },
     onError: (error) => {
       console.log('error', error);
-      toast.error(error.response?.data?.message || 'Sign in unsuccessfully !', {
+      toast.error(error.message || 'Sign in unsuccessfully !', {
         position: 'top-center',
         autoClose: 3000,
         hideProgressBar: false,
@@ -145,8 +149,12 @@ export const getUserInfo = async () => {
 
 // API đăng xuất
 export const logout = async () => {
-  const response = await axiosClient.post('/auth/logout');
+  const refreshToken = localStorage.getItem('refreshtoken');
+  const response = await axiosClient.post('/auth/logout', {
+    refresh_token: refreshToken,
+  });
   localStorage.removeItem('accesstoken');
+  localStorage.removeItem('refreshtoken');
   return response;
 };
 

@@ -1,42 +1,23 @@
 import { Fragment, useState } from 'react';
 import { TextField, Button, Box, Typography, CircularProgress } from '@mui/material';
 import { IoMdEye, IoMdEyeOff } from 'react-icons/io';
-import { FcGoogle } from 'react-icons/fc';
 import { SiNike } from 'react-icons/si';
 import { Link } from 'react-router-dom';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import app from '../../firebase';
 import Banner1 from '../../assets/log-reg/1.jpg';
 import { useLogin } from '../../services/authServices';
 
-const auth = getAuth(app);
-
 const Login = () => {
   const [isShowPassword, setIsShowPassword] = useState(false);
-  const [isPending, setIsPending] = useState(false);
-  const [error, setError] = useState('');
-  const { mutate: login } = useLogin();
+  const { mutate: login, isPending } = useLogin();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setIsPending(true);
 
     const email = e.target.email.value;
     const password = e.target.password.value;
 
-    try {
-      // Đăng nhập với Firebase Authentication
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const firebaseUid = userCredential.user.uid;
-
-      // Gửi firebaseUid đến backend
-      login({ firebaseUid });
-    } catch (err) {
-      console.error('Lỗi đăng nhập:', err);
-      setError('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
-    } finally {
-      setIsPending(false);
-    }
+    // Send login request to backend
+    login({ email, password });
   };
 
   return (
@@ -167,13 +148,6 @@ const Login = () => {
                 'Sign In'
               )}
             </Button>
-
-            {/* Hiển thị lỗi nếu có */}
-            {error && (
-              <Typography variant="body2" color="error" sx={{ mt: 2, textAlign: 'center' }}>
-                {error}
-              </Typography>
-            )}
 
             {/* Links Forgot Password / Sign Up */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, fontSize: '0.9rem' }}>
