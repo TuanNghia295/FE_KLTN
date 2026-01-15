@@ -90,7 +90,6 @@ export function useLogin() {
       navigate('/');
     },
     onError: (error) => {
-      console.log('error', error);
       toast.error(error.message || 'Sign in unsuccessfully !', {
         position: 'top-center',
         autoClose: 3000,
