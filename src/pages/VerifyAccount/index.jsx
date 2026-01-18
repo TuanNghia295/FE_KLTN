@@ -6,6 +6,7 @@ import { SiNike } from 'react-icons/si';
 import OtpInput from 'react-otp-input';
 import { Button } from '@mui/material';
 import '../VerifyAccount/style.css';
+import AxiosClient from '../../apis/axiosClient';
 
 const VerifyAccount = () => {
   //     const [otp, setOtp] = useState("");
@@ -51,8 +52,22 @@ const VerifyAccount = () => {
   //   )
 
   const navigate = useNavigate();
+  // React example
   useEffect(() => {
-    navigate('/login');
+    const verifyEmail = async () => {
+      const token = new URLSearchParams(window.location.search).get('token');
+      if (!token) return;
+
+      try {
+        await AxiosClient.get(`/auth/verify?token=${token}`);
+        navigate('/login');
+      } catch (error) {
+        console.error('Verify failed', error);
+        navigate('/login');
+      }
+    };
+
+    verifyEmail();
   }, []);
 };
 
