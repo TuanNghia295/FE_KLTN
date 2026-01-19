@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import useStore from '../store/useStore';
+import AxiosClient from '../apis/axiosClient';
 
 // API đăng ký
 export const register = async (values) => {
@@ -20,7 +21,7 @@ export const login = async (values) => {
 
 // API: gửi email reset password
 export const forgotPassword = async ({ email }) => {
-  const response = await axiosClient.post('/auth/forgot-password', {
+  const response = await axiosClient.post('/users/forgot_password', {
     email,
   });
   return response.data;
