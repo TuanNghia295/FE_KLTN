@@ -18,21 +18,30 @@ export const login = async (values) => {
   return response;
 };
 
-// API reset mật khẩu
-export const resetPassword = async (email) => {
-  const response = await axiosClient.post(`/auth/reset-password`, { email });
-  console.log('response', response);
-
-  return response;
+// API: gửi email reset password
+export const forgotPassword = async ({ email }) => {
+  const response = await axiosClient.post('/auth/forgot-password', {
+    email,
+  });
+  return response.data;
 };
 
-// API cập nhật mật khẩu
-export const updatePassword = async ({ email, newPassword }) => {
-  const response = await axiosClient.post(`/auth/update-password`, {
-    email,
-    newPassword,
+// API: verify reset token
+export const verifyResetToken = async ({ token }) => {
+  const response = await axiosClient.get('/auth/reset-password/verify', {
+    params: { token },
   });
-  return response;
+  return response.data;
+};
+
+// API: reset password bằng token
+export const resetPasswordWithToken = async ({ token, password, password_confirmation }) => {
+  const response = await axiosClient.post('/auth/reset-password', {
+    token,
+    password,
+    password_confirmation,
+  });
+  return response.data;
 };
 
 // Hook đăng ký
@@ -103,28 +112,36 @@ export function useLogin() {
   });
 }
 
-// Hook reset mật khẩu
-export function useResetPassword() {
+// Hook forgot password
+export function useForgotPassword() {
   return useMutation({
-    mutationKey: ['resetPassword'],
-    mutationFn: resetPassword,
+    mutationKey: ['forgotPassword'],
+    mutationFn: forgotPassword,
     onSuccess: () => {
-      console.log('Gửi email thành công!');
-    },
-    onError: (error) => {
-      toast.error(error.response?.data?.message || 'Gửi email thất bại', {
+      toast.success('Vui lòng kiểm tra email để đặt lại mật khẩu', {
         position: 'top-center',
         autoClose: 3000,
       });
     },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Gửi email thất bại', { position: 'top-center', autoClose: 3000 });
+    },
   });
 }
 
-// Hook cập nhật mật khẩu
-export function useUpdatePassword() {
+// Hook verify reset token
+export function useVerifyResetToken() {
   return useMutation({
-    mutationKey: ['updatePassword'],
-    mutationFn: updatePassword,
+    mutationKey: ['verifyResetToken'],
+    mutationFn: verifyResetToken,
+  });
+}
+
+// Hook reset password
+export function useResetPasswordWithToken() {
+  return useMutation({
+    mutationKey: ['resetPasswordWithToken'],
+    mutationFn: resetPasswordWithToken,
     onSuccess: () => {
       toast.success('Mật khẩu đã được cập nhật thành công!', {
         position: 'top-center',

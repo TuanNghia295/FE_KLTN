@@ -1,62 +1,83 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TextField, Button, Box, Typography, CircularProgress } from '@mui/material';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { useUpdatePassword } from '../../services/authServices';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useResetPasswordWithToken } from '../../services/authServices';
+import AxiosClient from '../../apis/axiosClient';
 
 const ResetPassword = () => {
-  const [newPassword, setNewPassword] = useState('');
-  const [isPending, setIsPending] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
+  const [token, setToken] = useState('');
   const [error, setError] = useState('');
-  const [email, setEmail] = useState('');
-  const navigate = useNavigate();
+
   const location = useLocation();
-  const { mutate: updatePassword } = useUpdatePassword();
+  const navigate = useNavigate();
+
+  const { mutate: resetPassword, isPending } = useResetPasswordWithToken();
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
-    const token = query.get('token');
-    const emailParam = query.get('email');
+    const tokenParam = query.get('token');
 
-    console.log('Reset token:', token);
-    console.log('Email:', emailParam);
-
-    if (!token || !emailParam) {
-      setError('Liên kết không hợp lệ.');
+    if (!tokenParam) {
+      setError('Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.');
       return;
     }
 
-    setEmail(emailParam);
-  }, [location]);
-
-  const handleSubmit = async (e) => {
+    setToken(tokenParam);
+  }, [location.search]);
+  const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
-    setIsPending(true);
 
-    const query = new URLSearchParams(location.search);
-    const token = query.get('token');
-
-    try {
-      // Update password with MongoDB backend
-      updatePassword(
-        { email, newPassword, token },
-        {
-          onSuccess: () => {
-            toast.success('Mật khẩu đã được cập nhật! Vui lòng đăng nhập lại.');
-            navigate('/login');
-          },
-          onError: (updateError) => {
-            setError(updateError.response?.data?.message || 'Cập nhật mật khẩu thất bại.');
-          },
-        }
-      );
-    } catch (err) {
-      setError('Liên kết không hợp lệ hoặc đã hết hạn.');
-    } finally {
-      setIsPending(false);
+    if (!password || !passwordConfirmation) {
+      setError('Vui lòng nhập đầy đủ thông tin.');
+      return;
     }
+
+    if (password.length < 8) {
+      setError('Mật khẩu phải có ít nhất 8 ký tự.');
+      return;
+    }
+
+    if (password !== passwordConfirmation) {
+      setError('Mật khẩu xác nhận không khớp.');
+      return;
+    }
+
+    resetPassword(
+      {
+        token,
+        password,
+        password_confirmation: passwordConfirmation,
+      },
+      {
+        onSuccess: () => {
+          navigate('/login');
+        },
+        onError: (err) => {
+          setError(err.response?.data?.message || 'Cập nhật mật khẩu thất bại.');
+        },
+      }
+    );
   };
+
+  useEffect(() => {
+    const verifyResetToken = async () => {
+      const token = new URLSearchParams(window.location.search).get('token');
+      if (!token) return;
+
+      try {
+        await AxiosClient.get(`/auth/reset-password/verify?token=${token}`);
+        // navigate('/login');
+      } catch (error) {
+        console.error('Verify failed', error);
+        // navigate('/login');
+      }
+    };
+
+    verifyResetToken();
+  }, []);
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'grey.100' }}>
@@ -76,25 +97,50 @@ const ResetPassword = () => {
             borderRadius: 2,
             boxShadow: 3,
             width: '100%',
-            maxWidth: '450px',
+            maxWidth: 450,
           }}
         >
-          <Typography variant="h6" component="h3" sx={{ fontWeight: 'bold', textAlign: 'center', mb: 3 }}>
+          <Typography
+            variant="h6"
+            component="h3"
+            sx={{
+              fontWeight: 'bold',
+              textAlign: 'center',
+              mb: 3,
+            }}
+          >
             ĐẶT LẠI MẬT KHẨU
           </Typography>
+
+          {error && (
+            <Typography color="error" variant="body2" sx={{ mb: 1 }}>
+              {error}
+            </Typography>
+          )}
 
           <form onSubmit={handleSubmit} noValidate>
             <TextField
               fullWidth
               margin="normal"
-              id="newPassword"
-              name="newPassword"
               label="Mật khẩu mới"
               type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              error={Boolean(error)}
-              helperText={error}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError('');
+              }}
+            />
+
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Xác nhận mật khẩu mới"
+              type="password"
+              value={passwordConfirmation}
+              onChange={(e) => {
+                setPasswordConfirmation(e.target.value);
+                setError('');
+              }}
             />
 
             <Button
@@ -106,7 +152,10 @@ const ResetPassword = () => {
                 py: 1.5,
                 bgcolor: 'black',
                 '&:hover': { bgcolor: 'grey.800' },
-                '&.Mui-disabled': { bgcolor: 'grey.500', color: 'white' },
+                '&.Mui-disabled': {
+                  bgcolor: 'grey.500',
+                  color: 'white',
+                },
               }}
               disabled={isPending}
             >
