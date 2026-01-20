@@ -59,7 +59,7 @@ const VerifyAccount = () => {
       if (!token) return;
 
       try {
-        await AxiosClient.get(`/auth/verify?token=${token}`);
+        await AxiosClient.post(`/auth/verify?token=${token}`);
         navigate('/login');
       } catch (error) {
         console.error('Verify failed', error);

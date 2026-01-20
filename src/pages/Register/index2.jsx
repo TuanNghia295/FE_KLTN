@@ -1,283 +1,165 @@
-import React, { Fragment, useState } from 'react';
-import { TextField, Button, Box, Typography, CircularProgress } from '@mui/material';
+import { useState } from 'react';
+import TextField from '@mui/material/TextField';
+import { Button } from '@mui/material';
 import { IoMdEye, IoMdEyeOff } from 'react-icons/io';
-import { SiNike } from 'react-icons/si';
 import { Link } from 'react-router-dom';
+import '../Register/style.css';
+import Banner1 from '../../assets/log-reg/1.jpg';
+import { SiNike } from 'react-icons/si';
+
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { useRegister } from '../../services/authServices';
-import Banner1 from '../../assets/log-reg/1.jpg';
+import { useRegister } from '../../services/authServices.jsx';
 
-const Reg = () => {
-    const [isShowPassword, setIsShowPassword] = useState(false);
-    const { mutate, isPending } = useRegister();
+const Register = () => {
+  const [isShowPassword, setIsShowPassword] = useState(true);
+  const { mutate } = useRegister();
 
-    const formik = useFormik({
-        initialValues: {
-            userName: '',
-            fullName: '',
-            phone: '',
-            email: '',
-            password: '',
-            confirmPassword: '',
-            role: 'USER',
-            address: 'Default',
-        },
-        validationSchema: Yup.object({
-            userName: Yup.string().required('Username is required'),
-            fullName: Yup.string().required('Username is required'),
-            phone: Yup.string().required('Phone is required'),
-            email: Yup.string().email('Invalid Email').required('Email is required'),
-            password: Yup.string().min(6, 'Password must be as least 6 characters'),
-            confirmPassword: Yup.string()
-                .required('Confirm Password is required')
-                .oneOf([Yup.ref('password'), null], 'Password does not match'),
-        }),
-        onSubmit: (values) => {
-            console.log(values)
-            mutate(values);
-        },
-    });
+  const formik = useFormik({
+    initialValues: {
+      full_name: '',
+      email: '',
+      password: '',
+      password_confirmation: '',
+    },
+    validationSchema: Yup.object({
+      full_name: Yup.string().required('Full name is required'),
+      email: Yup.string().email('Invalid email').required('Email is required'),
+      password: Yup.string().min(6, 'Minimum 6 characters').required('Password is required'),
+      password_confirmation: Yup.string()
+        .oneOf([Yup.ref('password')], 'Passwords do not match')
+        .required('Confirm password is required'),
+    }),
+    onSubmit: (values) => {
+      console.log('values', values);
+      mutate({ auth: values });
+    },
+  });
 
-    const togglePasswordVisibility = () => {
-        setIsShowPassword(!isShowPassword);
-    };
+  return (
+    <section className="section py-10 xl:py-0">
+      <div className="container-fuild flex xl:bg-white xl:h-screen">
+        {/* LEFT BANNER */}
+        <div className="hidden xl:block relative">
+          <img className="h-screen" src={Banner1} />
+          <div className="absolute bg-black opacity-90 w-full h-full top-0"></div>
+          <div className="absolute top-[20%] p-10">
+            <SiNike className="text-white text-[100px]" />
+            <h1 className="text-white text-[50px]">Hi, everyone!</h1>
+            <p className="text-[#f1f1f1] mt-5 w-[80%] text-justify">
+              Nike is a global sportswear brand known for its athletic shoes, apparel, and equipment.
+            </p>
+          </div>
+        </div>
 
-    return (
-        <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: { xs: 'grey.100', xl: 'white' } }}>
-            {/* Cột Banner */}
-            <Box
-                sx={{
-                    display: { xs: 'none', xl: 'block' },
-                    width: '50%',
-                    position: 'relative',
-                    '& img': {
-                        position: 'absolute',
-                        height: '100%',
-                        width: '100%',
-                        objectFit: 'cover',
-                    },
-                    '& .overlay': {
-                        position: 'absolute',
-                        inset: 0,
-                        bgcolor: 'rgba(0, 0, 0, 0.7)',
-                    },
-                    '& .content': {
-                        position: 'relative',
-                        zIndex: 1,
-                        color: 'white',
-                        p: 8,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        height: '100%',
-                    },
-                }}
-            >
-                <img src={Banner1} alt="Nike Banner" />
-                <div className="overlay" />
-                <div className="content">
-                    <Link to="/">
-                        <SiNike style={{ fontSize: 100, marginBottom: 20 }} />
-                    </Link>
-                    <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
-                        Welcome Back!
-                    </Typography>
-                    <Typography variant="body1" sx={{ maxWidth: '80%', textAlign: 'justify', color: 'grey.300' }}>
-                        Sign in to access your account, track orders, and enjoy a seamless shopping experience with Nike.
-                    </Typography>
-                </div>
-            </Box>
+        {/* REGISTER FORM */}
+        <div className="card p-4 w-[90%] md:w-[55%] xl:w-[35%] m-auto bg-white">
+          <div className="flex justify-between xl:justify-center items-center">
+            <Link to="/" className="block xl:hidden text-[30px]">
+              <SiNike />
+            </Link>
+            <h3 className="text-center text-[30px] font-bold text-black">SIGN UPppp</h3>
+          </div>
 
-            {/* Cột Form */}
-            <Box
-                sx={{
-                    width: { xs: '100%', xl: '50%' },
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    p: { xs: 2, md: 4 },
-                }}
-            >
-                <Box
-                    sx={{
-                        bgcolor: 'white',
-                        p: { xs: 3, md: 5 },
-                        borderRadius: 2,
-                        boxShadow: { xs: 3, xl: 'none' },
-                        width: '100%',
-                        maxWidth: '450px',
-                    }}
-                >
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                        <Link to="/" style={{ display: { xs: 'block', xl: 'none' }, color: 'black' }}>
-                            <SiNike size={30} />
-                        </Link>
-                        <Typography
-                            variant="h4"
-                            component="h3"
-                            sx={{ fontWeight: 'bold', textAlign: { xs: 'right', xl: 'center' }, width: '100%' }}
-                        >
-                            SIGN UP
-                        </Typography>
-                    </Box>
+          <form onSubmit={formik.handleSubmit} className="w-full mt-5">
+            {/* FULL NAME */}
+            <div className="form-group w-full mb-5">
+              <TextField
+                fullWidth
+                id="full_name"
+                name="full_name"
+                label="Full Name"
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                value={formik.values.full_name}
+              />
+              {formik.touched.full_name && formik.errors.full_name && (
+                <p className="text-red-500 text-sm">{formik.errors.full_name}</p>
+              )}
+            </div>
 
-                    <form onSubmit={formik.handleSubmit}>
-                        {/* Full Name input */}
-                        <TextField
-                            fullWidth
-                            margin='normal'
-                            id="text"
-                            name="fullName"
-                            label="Full Name"
-                            variant="outlined"
-                            value={formik.values.fullName}
-                            onBlur={formik.handleBlur}
-                            onChange={formik.handleChange}
-                            error={formik.touched.fullName && Boolean(formik.errors.fullName)}
-                            helperText={formik.touched.fullName && formik.errors.fullName}
-                        />
+            {/* EMAIL */}
+            <div className="form-group w-full mb-5">
+              <TextField
+                fullWidth
+                id="email"
+                name="email"
+                label="Email"
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                value={formik.values.email}
+              />
+              {formik.touched.email && formik.errors.email && (
+                <p className="text-red-500 text-sm">{formik.errors.email}</p>
+              )}
+            </div>
 
-                        {/* Username input */}
-                        <TextField
-                            fullWidth
-                            margin="normal"
-                            id="userName"
-                            name="userName"
-                            label="Username"
-                            variant="outlined"
-                            value={formik.values.userName}
-                            onBlur={formik.handleBlur}
-                            onChange={formik.handleChange}
-                            error={formik.touched.userName && Boolean(formik.errors.userName)}
-                            helperText={formik.touched.userName && formik.errors.userName}
-                        />
+            {/* PASSWORD */}
+            <div className="form-group w-full mb-5 relative">
+              <TextField
+                fullWidth
+                id="password"
+                name="password"
+                label="Password"
+                type={isShowPassword ? 'password' : 'text'}
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                value={formik.values.password}
+              />
+              <Button
+                type="button"
+                className="!absolute !text-black top-[8px] right-[5px]"
+                onClick={() => setIsShowPassword(!isShowPassword)}
+              >
+                {isShowPassword ? <IoMdEye /> : <IoMdEyeOff />}
+              </Button>
 
-                        {/* Email input */}
-                        <TextField
-                            fullWidth
-                            margin="normal"
-                            id="email"
-                            name="email"
-                            label="Email"
-                            type="email"
-                            variant="outlined"
-                            value={formik.values.email}
-                            onBlur={formik.handleBlur}
-                            onChange={formik.handleChange}
-                            error={formik.touched.email && Boolean(formik.errors.email)}
-                            helperText={formik.touched.email && formik.errors.email}
-                        />
+              {formik.touched.password && formik.errors.password && (
+                <p className="text-red-500 text-sm">{formik.errors.password}</p>
+              )}
+            </div>
 
-                        {/* Phone Input */}
-                        <TextField
-                            fullWidth
-                            margin="normal"
-                            id="phone"
-                            name="phone"
-                            label="Số điện thoại"
-                            variant="outlined"
-                            value={formik.values.phone}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                            error={formik.touched.phone && Boolean(formik.errors.phone)}
-                            helperText={formik.touched.phone && formik.errors.phone}
-                        />
+            {/* CONFIRM PASSWORD */}
+            <div className="form-group w-full mb-5 relative">
+              <TextField
+                fullWidth
+                id="password_confirmation"
+                name="password_confirmation"
+                label="Confirm Password"
+                type={isShowPassword ? 'password' : 'text'}
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                value={formik.values.password_confirmation}
+              />
+              <Button
+                type="button"
+                className="!absolute !text-black top-[8px] right-[5px]"
+                onClick={() => setIsShowPassword(!isShowPassword)}
+              >
+                {isShowPassword ? <IoMdEye /> : <IoMdEyeOff />}
+              </Button>
 
-                        {/* Password Input */}
-                        <TextField
-                            fullWidth
-                            margin="normal"
-                            id="password"
-                            name="password"
-                            label="Mật khẩu"
-                            variant="outlined"
-                            type={isShowPassword ? 'text' : 'password'}
-                            value={formik.values.password}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                            error={formik.touched.password && Boolean(formik.errors.password)}
-                            helperText={formik.touched.password && formik.errors.password}
-                            InputProps={{
-                                endAdornment: (
-                                    <Button
-                                        aria-label={isShowPassword ? 'Hide password' : 'Show password'}
-                                        onClick={togglePasswordVisibility}
-                                        sx={{ minWidth: 'auto', padding: '5px', color: 'text.secondary' }}
-                                    >
-                                        {isShowPassword ? <IoMdEyeOff size={20} /> : <IoMdEye size={20} />}
-                                    </Button>
-                                ),
-                            }}
-                        />
+              {formik.touched.password_confirmation && formik.errors.password_confirmation && (
+                <p className="text-red-500 text-sm">{formik.errors.password_confirmation}</p>
+              )}
+            </div>
 
-                        {/* Confirm Password Input */}
-                        <TextField
-                            fullWidth
-                            margin="normal"
-                            id="confirmPassword"
-                            name="confirmPassword"
-                            label="Xác nhận mật khẩu"
-                            variant="outlined"
-                            type={isShowPassword ? 'text' : 'password'}
-                            value={formik.values.confirmPassword}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                            error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
-                            helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
-                            InputProps={{
-                                endAdornment: (
-                                    <Button
-                                        aria-label={isShowPassword ? 'Hide password' : 'Show password'}
-                                        onClick={togglePasswordVisibility}
-                                        sx={{ minWidth: 'auto', padding: '5px', color: 'text.secondary' }}
-                                    >
-                                        {isShowPassword ? <IoMdEyeOff size={20} /> : <IoMdEye size={20} />}
-                                    </Button>
-                                ),
-                            }}
-                        />
+            {/* SUBMIT */}
+            <Button type="submit" className="btn-Login w-full">
+              Register
+            </Button>
 
-
-
-                        {/* Submit Button */}
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            sx={{
-                                mt: 3,
-                                py: 1.5,
-                                bgcolor: 'black',
-                                '&:hover': { bgcolor: 'grey.800' },
-                                '&.Mui-disabled': { bgcolor: 'grey.500', color: 'white' },
-                            }}
-                        >
-                            {isPending ? (<Fragment><CircularProgress size={24} sx={{ color: 'white' }} /></Fragment>) : ('Sign Up')}
-                        </Button>
-
-                        {/* Hiển thị lỗi nếu có
-                        {isError && (
-                            <Typography variant="body2" color="error" sx={{ mt: 2, textAlign: 'center' }}>
-                                Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.
-                            </Typography>
-                        )} */}
-
-                        {/* Links Forgot Password / Sign Up */}
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, fontSize: '0.9rem' }}>
-                            <Link to="/forgot-password" style={{ color: 'inherit', textDecoration: 'underline' }}>
-                                Forgot Password?
-                            </Link>
-                            <Link to="/login" style={{ color: 'red', fontWeight: 600, textDecoration: 'underline' }}>
-                                Sign In
-                            </Link>
-                        </Box>
-
-                    </form>
-                </Box>
-            </Box>
-        </Box>
-    );
+            <div className="flex w-full items-center mt-5">
+              <Link to="/">Forgot Password?</Link>
+              <div className="ml-auto text-[#ff2f2f] font-semibold">
+                <Link to="/login">Sign In</Link>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  );
 };
 
-export default Reg;
+export default Register;
