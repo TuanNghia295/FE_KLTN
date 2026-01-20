@@ -21,39 +21,35 @@ import { useNavigate } from 'react-router-dom';
 import FilterProduct from '../../components/FilterProduct';
 import CircularProgress from '@mui/material/CircularProgress';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import debounce from 'lodash.debounce'; // Thư viện debounce
+import debounce from 'lodash.debounce';
 
 const normalizeString = (str) => {
   if (!str) return '';
   return str
-    .normalize('NFD') // tách dấu ra khỏi chữ
-    .replace(/[\u0300-\u036f]/g, '') // xóa dấu
-    .toLowerCase() // chuyển về thường
-    .replace(/\s+/g, '-'); // thay khoảng trắng = dấu gạch ngang nếu cần
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, '-');
 };
 
 const ProductListing = () => {
-  const { categoryName } = useParams(); // Lấy params. Ví dụ /nam, /nu, /tre-em,...
+  const { categoryName } = useParams();
   const navigate = useNavigate();
-  // Lấy list Category tu Zustand
   const categoryListZustand = useStore((state) => state.categoryListZustand);
-  // Set Open Filter Product
   const openFilterProduct = useStore((state) => state.openFilterProduct);
   const setOpenFilterProduct = useStore((state) => state.setOpenFilterProduct);
+
   const toogleFilterProduct = (newOpen) => () => {
     setOpenFilterProduct(newOpen);
   };
 
-  const getCategory = categoryName //Tìm category từ params trong Zustand
+  const getCategory = categoryName
     ? categoryListZustand.find((c) => normalizeString(c.name) === normalizeString(categoryName))
     : null;
 
-  console.log(getCategory);
-
-  // Phân trang
   const isMobile = useMediaQuery('(max-width:768px)');
-  const [search, setSearch] = useState(''); // State để lưu giá trị tìm kiếm
-  const [searchCate, setSearchCate] = useState(''); // State để lưu giá trị tìm kiếm
+  const [search, setSearch] = useState('');
+  const [searchCate, setSearchCate] = useState('');
   const [perPage, setPerPage] = useState(8);
   const [page, setPage] = useState(1);
 
@@ -66,6 +62,9 @@ const ProductListing = () => {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
 
+  // THAY ĐỔI QUAN TRỌNG: Thay vì selectedCateParams là string/number, giờ là array
+  const [selectedCategories, setSelectedCategories] = useState([]);
+
   const { productList, total, loadingProductList } = useProducts(
     perPage,
     page,
@@ -74,8 +73,9 @@ const ProductListing = () => {
     sortDir,
     minPrice,
     maxPrice,
-    ''
+    selectedCategories // THAY ĐỔI: Gửi array trực tiếp thay vì string
   );
+
   const { productCateList, totalCate, loadingProductCateList } = useProductsCategory(
     getCategory?.id,
     perPage,
@@ -86,57 +86,80 @@ const ProductListing = () => {
     minPrice,
     maxPrice
   );
-  const totalPage = getCategory ? totalCate : total;
 
-  const [selectedCateParams, setSelectedCateParams] = useState(getCategory?.id);
+  const totalPage = selectedCategories.length > 0 ? total : getCategory ? totalCate : total;
 
   useEffect(() => {
-    setSelectedCateParams(getCategory?.id);
+    if (getCategory?.id) {
+      setSelectedCategories([getCategory.id]);
+    } else {
+      setSelectedCategories([]);
+    }
   }, [getCategory?.id]);
 
   const [itemView, setItemView] = useState('grid');
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose = () => {
     setAnchorEl(null);
   };
 
-  // Nếu có dữ liệu category thì gọi api category còn không thì hiển thị all
   const [allProducts, setAllProducts] = useState([]);
-  const isLoading = getCategory ? loadingProductCateList : loadingProductList;
+  const isLoading =
+    selectedCategories.length > 0 ? loadingProductList : getCategory ? loadingProductCateList : loadingProductList;
   const hasMore = page < totalPage;
 
-  // Handle Change Catgegory
-  const handleChangeCategory = (slug) => {
-    const params = normalizeString(slug);
-    if (params === categoryName) {
-      // Nếu đã được chọn rồi, bỏ chọn (quay về tất cả sản phẩm)
-      navigate('/listing');
-    } else {
-      navigate(`/listing/${params}`);
-    }
+  // Handle Toggle Category (thêm/bỏ category khỏi selection)
+  const handleToggleCategory = (categoryId) => {
+    setSelectedCategories((prev) => {
+      if (prev.includes(categoryId)) {
+        // Nếu đã được chọn, bỏ chọn
+        return prev.filter((id) => id !== categoryId);
+      } else {
+        // Nếu chưa được chọn, thêm vào
+        return [...prev, categoryId];
+      }
+    });
   };
 
-  // Reset sản phẩm khi đổi category hoac perPage
+  // Reset sản phẩm khi đổi category, perPage, hoặc filters
   useEffect(() => {
-    setAllProducts([]); // Xóa toàn bộ sản phẩm cũ
-    setPage(1); // Reset về trang đầu
-  }, [categoryName, perPage, isMobile, sortBy, sortDir, minPrice, maxPrice]);
+    setAllProducts([]);
+    setPage(1);
+  }, [categoryName, perPage, isMobile, sortBy, sortDir, minPrice, maxPrice, selectedCategories.length]);
 
   useEffect(() => {
-    let sourceProducts = getCategory ? productCateList : productList;
+    let sourceProducts = selectedCategories.length > 0 ? productList : getCategory ? productCateList : productList;
 
-    // Kiểm tra và giảm giá nếu sản phẩm thuộc category "Sale"
+    // Kiểm tra và xử lý sản phẩm
     const newProducts = sourceProducts?.map((product) => {
-      if (product?.categoryId?.type === 'Sale') {
+      // Lấy category_id từ product (có thể là string hoặc object)
+      const productCategoryId =
+        typeof product?.category_id === 'object'
+          ? product?.category_id?._id || product?.category_id?.id
+          : product?.category_id;
+
+      // Tìm thông tin category từ categoryListZustand
+      const productCategory = categoryListZustand.find(
+        (cat) => cat.id === productCategoryId || cat._id === productCategoryId
+      );
+
+      // Kiểm tra nếu category có type là 'Sale' hoặc tên là 'Sale'
+      const isSaleCategory =
+        productCategory?.type === 'Sale' || productCategory?.name === 'Sale' || productCategoryId === 'Sale';
+
+      if (isSaleCategory) {
         return {
           ...product,
           priceNew: product.price * 0.9, // Giảm 10%
         };
       }
+
       return product;
     });
 
@@ -153,21 +176,19 @@ const ProductListing = () => {
         setAllProducts(newProducts);
       }
     }
-  }, [productList, productCateList, isMobile, search, getCategory]);
+  }, [productList, productCateList, isMobile, search, getCategory, selectedCategories, categoryListZustand]);
 
-  // Hàm xử lý tìm kiếm với debounce
   const handleSearchChange = useMemo(
     () =>
       debounce((e) => {
         setSearch(e.target.value);
-        setSearchCate(e.target.value); // Cập nhật giá trị tìm kiếm neu khong phai category
+        setSearchCate(e.target.value);
         setPage(1);
         setAllProducts([]);
       }, 500),
     []
-  ); // Delay 500ms sau khi người dùng ngừng nhập
+  );
 
-  // Hàm xử lý sort
   const handleSort = (label, field, direction) => {
     setSortLabel(label);
     setSortBy(field);
@@ -177,7 +198,6 @@ const ProductListing = () => {
     handleClose();
   };
 
-  // Hàm xử lý filter theo giá
   const handlePriceChange = (min, max) => {
     setMinPrice(min);
     setMaxPrice(max);
@@ -189,24 +209,22 @@ const ProductListing = () => {
     <section className="pt-3 sm:pt-5">
       <div className="container !text-center">
         <div className="flex justify-center p-3 sm:p-4 bg-gray-100 rounded-md">
-          {' '}
-          {/* Thêm nền cho dễ nhìn */}
           <Breadcrumbs aria-label="breadcrumb" className="text-xs sm:text-sm">
             <RouterLink to="/" className="hover:underline text-inherit">
-              {' '}
-              {/* Sử dụng RouterLink */}
               Home Page
             </RouterLink>
             <RouterLink to="/listing" className="hover:underline text-inherit">
-              {' '}
-              {/* Sử dụng RouterLink */}
               Listing
             </RouterLink>
             {getCategory ? <Typography sx={{ color: 'text.primary' }}>{getCategory?.name}</Typography> : ''}
           </Breadcrumbs>
         </div>
         <h3 className="font-bold text-black text-[20px] sm:text-[24px] md:text-[30px] mt-3 sm:mt-4 px-2">
-          {getCategory ? `${getCategory.name.toUpperCase()} COLLECTION` : 'ALL COLLECTION'}
+          {selectedCategories.length > 0
+            ? `FILTERED COLLECTION (${selectedCategories.length} ${selectedCategories.length === 1 ? 'Category' : 'Categories'})`
+            : getCategory
+              ? `${getCategory.name.toUpperCase()} COLLECTION`
+              : 'ALL COLLECTION'}
         </h3>
       </div>
       <div className="bg-white p-2 sm:p-3 mt-3 sm:mt-4">
@@ -214,13 +232,12 @@ const ProductListing = () => {
           <div className="slidebarWrapper hidden md:block sm:w-[100%] md:w-[40%] xl:w-[20%] h-full bg-white">
             <SlideBar
               categoryListZustand={categoryListZustand}
-              selectedCate={selectedCateParams}
-              onCategorySelect={handleChangeCategory}
+              selectedCategories={selectedCategories}
+              onCategoryToggle={handleToggleCategory}
               minPrice={minPrice}
               maxPrice={maxPrice}
               onPriceChange={handlePriceChange}
             />
-            {/*<FilterProduct perPage={perPage} setPerPage={setPerPage} />*/}
           </div>
           <div className="rightContent w-[100%] xl:w-[80%]">
             <div className="bg-[#f1f1f1] p-2 md:p-3 w-full mb-3 rounded-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
@@ -296,7 +313,6 @@ const ProductListing = () => {
                     Date, new to old
                   </MenuItem>
                 </Menu>
-                {/* Input tìm kiếm */}
                 <input
                   type="text"
                   placeholder="Search products..."
@@ -305,7 +321,24 @@ const ProductListing = () => {
                 />
               </div>
             </div>
-            {/* Phần hiển thị */}
+
+            {/* Hiển thị các category đã chọn */}
+            {selectedCategories.length > 0 && (
+              <div className="mb-3 flex flex-wrap gap-2">
+                {selectedCategories.map((catId) => {
+                  const category = categoryListZustand.find((c) => c.id === catId);
+                  return category ? (
+                    <div key={catId} className="bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                      <span>{category.name}</span>
+                      <button onClick={() => handleToggleCategory(catId)} className="text-gray-600 hover:text-black">
+                        ✕
+                      </button>
+                    </div>
+                  ) : null;
+                })}
+              </div>
+            )}
+
             <div
               className={`grid ${itemView === 'grid' ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'} gap-3 md:gap-4`}
             >
@@ -364,8 +397,8 @@ const ProductListing = () => {
         <FilterProduct
           perPage={perPage}
           setPerPage={setPerPage}
-          selectedCate={selectedCateParams}
-          onCategorySelect={handleChangeCategory}
+          selectedCategories={selectedCategories}
+          onCategoryToggle={handleToggleCategory}
           minPrice={minPrice}
           maxPrice={maxPrice}
           onPriceChange={handlePriceChange}

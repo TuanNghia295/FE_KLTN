@@ -16,7 +16,15 @@ const normalizeString = (str) => {
     .replace(/\s+/g, '-'); // thay khoảng trắng = dấu gạch ngang nếu cần
 };
 
-const FilterProduct = ({ perPage, setPerPage, selectedCate, onCategorySelect, minPrice, maxPrice, onPriceChange }) => {
+const FilterProduct = ({
+  perPage,
+  setPerPage,
+  selectedCategories, // THAY ĐỔI: từ selectedCate thành selectedCategories
+  onCategoryToggle, // THAY ĐỔI: từ onCategorySelect thành onCategoryToggle
+  minPrice,
+  maxPrice,
+  onPriceChange,
+}) => {
   const location = useLocation();
   const currentPath = location.pathname; // ví dụ: "/listing/nam"
   const setOpenFilterProduct = useStore((state) => state.setOpenFilterProduct);
@@ -41,8 +49,8 @@ const FilterProduct = ({ perPage, setPerPage, selectedCate, onCategorySelect, mi
         <ul className="flex flex-col gap-3"></ul>
         <SlideBar
           categoryListZustand={categoryListZustand}
-          selectedCate={selectedCate}
-          onCategorySelect={onCategorySelect}
+          selectedCategories={selectedCategories}
+          onCategoryToggle={onCategoryToggle}
           minPrice={minPrice}
           maxPrice={maxPrice}
           onPriceChange={onPriceChange}

@@ -138,11 +138,11 @@ const Navigation = () => {
                 </Link>
               </li> */}
 
-              <li className="list-none">
+              {/* <li className="list-none">
                 <Link to={'/listing/sale'} className="link transition text-[16px] font-[500]">
                   <Button className="link transition font-[500] hover:!text-primary !py-4">Sale</Button>
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
 

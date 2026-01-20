@@ -8,7 +8,14 @@ import { FaAngleUp } from 'react-icons/fa';
 import 'react-range-slider-input/dist/style.css';
 import PropTypes from 'prop-types';
 
-const SlideBar = ({ categoryListZustand, selectedCate, onCategorySelect, minPrice, maxPrice, onPriceChange }) => {
+const SlideBar = ({
+  categoryListZustand,
+  selectedCategories = [], // THAY ĐỔI: từ selectedCate thành selectedCategories (array)
+  onCategoryToggle, // THAY ĐỔI: từ onCategorySelect thành onCategoryToggle
+  minPrice,
+  maxPrice,
+  onPriceChange,
+}) => {
   const [isOpenCategoryFilter, setIsOpenCategoryFilter] = useState(true);
   const [isOpenPriceFilter, setIsOpenPriceFilter] = useState(true);
 
@@ -45,10 +52,22 @@ const SlideBar = ({ categoryListZustand, selectedCate, onCategorySelect, minPric
     }));
   };
 
+  // Helper function để kiểm tra xem category hoặc bất kỳ child nào có được chọn không
+  const isCategoryOrChildSelected = (category) => {
+    if (selectedCategories.includes(category.id)) {
+      return true;
+    }
+    if (category.children && category.children.length > 0) {
+      return category.children.some((child) => isCategoryOrChildSelected(child));
+    }
+    return false;
+  };
+
   const renderCategory = (category, isSubcategory = false, level = 0) => {
     const hasChildren = category.children && category.children.length > 0;
     const isExpanded = expandedCategories[category.id];
-    const isChecked = selectedCate === category.id;
+    const isChecked = selectedCategories.includes(category.id); // THAY ĐỔI: Kiểm tra có trong array không
+    const hasSelectedChild = hasChildren && isCategoryOrChildSelected(category);
 
     return (
       <div key={category.id} className="w-full">
@@ -56,8 +75,8 @@ const SlideBar = ({ categoryListZustand, selectedCate, onCategorySelect, minPric
           className={`
             flex items-center justify-between w-full
             ${isSubcategory ? 'pl-4 md:pl-6' : ''}
-            ${isChecked ? 'bg-gray-100 rounded-md' : ''}
-            hover:bg-gray-50 transition-colors
+            ${isChecked ? 'bg-gray-100 border-l-2 border-black' : hasSelectedChild ? 'bg-gray-50' : ''}
+            hover:bg-gray-100 transition-colors
             py-0.5
           `}
         >
@@ -68,10 +87,14 @@ const SlideBar = ({ categoryListZustand, selectedCate, onCategorySelect, minPric
                 size="small"
                 checked={isChecked}
                 value={category.id}
-                onChange={() => onCategorySelect(category.name)}
+                onChange={() => onCategoryToggle(category.id)} // THAY ĐỔI: Toggle bằng ID
                 sx={{
                   padding: '4px',
                   '& .MuiSvgIcon-root': { fontSize: isSubcategory ? 16 : 18 },
+                  color: isChecked ? '#3b82f6' : undefined,
+                  '&.Mui-checked': {
+                    color: 'black',
+                  },
                 }}
               />
             }
@@ -79,6 +102,7 @@ const SlideBar = ({ categoryListZustand, selectedCate, onCategorySelect, minPric
               <span
                 className={`
                   ${isSubcategory ? 'text-[13px] md:text-sm text-gray-700' : 'text-sm md:text-base text-black font-medium'}
+                  ${isChecked ? 'font-semibold text-neutral-600' : ''}
                 `}
               >
                 {category.name}
@@ -109,12 +133,18 @@ const SlideBar = ({ categoryListZustand, selectedCate, onCategorySelect, minPric
     );
   };
 
+  // Đếm số lượng category đã chọn
+  const selectedCount = selectedCategories.length;
+
   return (
     <aside className="slidebar w-full">
       {/* Category Filter */}
       <div className="box mb-3 md:mb-4">
         <h1 className="flex mb-2 md:mb-3 !text-black text-[14px] md:text-[16px] font-[600] items-center">
           Category
+          {selectedCount > 0 && (
+            <span className="ml-2 bg-red-600 text-white text-xs px-2 py-0.5 rounded-full">{selectedCount}</span>
+          )}
           <Button
             className="!text-black !ml-auto !min-w-[30px] !p-1"
             onClick={() => setIsOpenCategoryFilter(!isOpenCategoryFilter)}
@@ -123,6 +153,21 @@ const SlideBar = ({ categoryListZustand, selectedCate, onCategorySelect, minPric
           </Button>
         </h1>
         <Collapse isOpened={isOpenCategoryFilter}>
+          {/* Clear all button */}
+          {selectedCount > 0 && (
+            <div className="mb-2">
+              <Button
+                onClick={() => {
+                  // Clear tất cả selections
+                  selectedCategories.forEach((catId) => onCategoryToggle(catId));
+                }}
+                className="!text-xs !text-neutral-600 !underline !p-0 !min-w-0 hover:!text-red-800"
+                size="small"
+              >
+                Clear all ({selectedCount})
+              </Button>
+            </div>
+          )}
           <div className="scroll max-h-[180px] sm:max-h-[200px] md:max-h-[250px] lg:max-h-[300px] relative overflow-y-auto">
             {Array.isArray(categoryListZustand) && categoryListZustand?.length > 0 ? (
               categoryListZustand?.map((category) => renderCategory(category))
@@ -132,38 +177,6 @@ const SlideBar = ({ categoryListZustand, selectedCate, onCategorySelect, minPric
           </div>
         </Collapse>
       </div>
-
-      {/* Availability Filter */}
-      {/* <div className="box mb-3 md:mb-4">
-        <h1 className="flex mb-2 md:mb-3 !text-black text-[14px] md:text-[16px] font-[600] items-center">
-          Availability
-          <Button
-            className="!text-black !ml-auto !min-w-[30px] !p-1"
-            onClick={() => setIsOpenAvailFilter(!isOpenAvailFilter)}
-          >
-            {isOpenAvailFilter === true ? <FaAngleUp /> : <FaAngleDown />}
-          </Button>
-        </h1>
-        <Collapse isOpened={isOpenAvailFilter}>
-          <div className="scroll max-h-[180px] sm:max-h-[200px] md:max-h-[250px] relative overflow-y-auto">
-            <FormControlLabel
-              className="w-full !text-sm md:!text-base"
-              control={<Checkbox size="small" />}
-              label="Available (17)"
-            />
-            <FormControlLabel
-              className="w-full !text-sm md:!text-base"
-              control={<Checkbox size="small" />}
-              label="In Stock (15)"
-            />
-            <FormControlLabel
-              className="w-full !text-sm md:!text-base"
-              control={<Checkbox size="small" />}
-              label="Not Available (1)"
-            />
-          </div>
-        </Collapse>
-      </div> */}
 
       {/* Price Filter */}
       <div className="box mb-3 md:mb-4">
@@ -217,8 +230,8 @@ const SlideBar = ({ categoryListZustand, selectedCate, onCategorySelect, minPric
 
 SlideBar.propTypes = {
   categoryListZustand: PropTypes.array.isRequired,
-  selectedCate: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  onCategorySelect: PropTypes.func.isRequired,
+  selectedCategories: PropTypes.array,
+  onCategoryToggle: PropTypes.func.isRequired,
   minPrice: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   maxPrice: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onPriceChange: PropTypes.func,

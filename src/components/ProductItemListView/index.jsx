@@ -1,21 +1,22 @@
-import React, { useState } from 'react'
-import "../ProductItemListView/style.css"
+/* eslint-disable react/prop-types */
+import React, { useState } from 'react';
+import '../ProductItemListView/style.css';
 import { Link } from 'react-router-dom';
 import Tooltip from '@mui/material/Tooltip';
 import { formatCash } from '../../hook/formatCash';
 import useStore from '../../store/useStore';
-import { useAddToCart } from '../../services/cartServices';;
+import { useAddToCart } from '../../services/cartServices';
 import CircularProgress from '@mui/material/CircularProgress';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 import Divider from '@mui/material/Divider';
-import { FaCartPlus } from "react-icons/fa";
-import { FaCheck } from "react-icons/fa";
+import { FaCartPlus } from 'react-icons/fa';
+import { FaCheck } from 'react-icons/fa';
 
 const ProductItemListView = ({ product, normalizeString }) => {
   const userInfo = useStore((state) => state.userInfo);
-  const [productId, setProductId] = useState('') // State lưu productID
+  const [productId, setProductId] = useState(''); // State lưu productID
   const [selectedSize, setSelectedSize] = useState(null); // State lưu size đã chọn
   const [selectedColor, setSelectedColor] = useState(null); // State lưu color đã chọn
   const [startIndex, setStartIndex] = useState(0);
@@ -30,7 +31,7 @@ const ProductItemListView = ({ product, normalizeString }) => {
   };
 
   const data = {
-    userId: userInfo?._id,
+    userId: userInfo?.id,
     productId: productId,
     size: selectedSize,
     color: selectedColor,
@@ -40,31 +41,23 @@ const ProductItemListView = ({ product, normalizeString }) => {
   const { mutate: handleAddToCart, isPending: loadingAddToCart } = useAddToCart();
 
   return (
-    <div className='productItem rounded-md w-[100%] overflow-hidden bg-white text-black shadow-lg flex items-center justify-between p-2 md:p-0'>
-      <div className='group imgWrapper w-[15%] md:w-[10%] overflow-hidden  relative'>
-        <Link to={`/products/${product._id}`}>
+    <div className="productItem rounded-md w-[100%] overflow-hidden bg-white text-black shadow-lg flex items-center justify-between p-2 md:p-0">
+      <div className="group imgWrapper w-[15%] md:w-[10%] overflow-hidden  relative">
+        <Link to={`/products/${product.id}`}>
           <div className="img overflow-hidden relative group rounded-full md:rounded-none">
-            {Array.isArray(product?.images) && product.images.length >= 2 ? (
+            {Array.isArray(product?.image_thumbnails) && product.image_thumbnails.length >= 2 ? (
               <>
                 {/* Ảnh chính */}
-                <img
-                  src={product.images[0].url}
-                  className="w-full h-full object-cover"
-                  alt={product.name}
-                />
+                <img src={product.image_thumbnails[0]} className="w-full h-full object-cover" alt={product.name} />
                 {/* Ảnh hover */}
                 <img
-                  src={product.images[1].url}
+                  src={product.image_thumbnails[1]}
                   className="w-full h-full object-cover absolute top-0 left-0 opacity-0 transition-all duration-1000 group-hover:opacity-100"
                   alt={product.name}
                 />
               </>
-            ) : product?.images?.length === 1 ? (
-              <img
-                src={product.images[0].url}
-                className="w-full h-full object-cover"
-                alt={product.name}
-              />
+            ) : product?.image_thumbnails?.length === 1 ? (
+              <img src={product.image_thumbnails[0]} className="w-full h-full object-cover" alt={product.name} />
             ) : (
               <p>No images available</p>
             )}
@@ -82,18 +75,22 @@ const ProductItemListView = ({ product, normalizeString }) => {
         </div> */}
       </div>
 
-      <div className='info p-3 w-[40%]'>
+      <div className="info p-3 w-[40%]">
         {/* <h6 className='text-[14px]'><Link to={`/listing/${normalizeString(product.categoryId?.type)}`} className='link transition-all'>{product.categoryId?.type}</Link></h6> */}
-        <h3 className='text-[16px] title font-[500]'>
-          <Link to={`/products/${product._id}`} className='link transition-all'>{product?.name.length > 15 ? product?.name.slice(0, 10) + '...' : product?.name}</Link>
+        <h3 className="text-[16px] title font-[500]">
+          <Link to={`/products/${product.id}`} className="link transition-all">
+            {product?.name.length > 15 ? product?.name.slice(0, 10) + '...' : product?.name}
+          </Link>
         </h3>
       </div>
 
-      <div className='info-col2 w-[35%] text-center'>
-        <span className='newPrice font-bold border border-[#ccc] py-1 px-3 bg-[#f0f0f0] text-black rounded-md'>{formatCash(product?.price)}</span>
+      <div className="info-col2 w-[35%] text-center">
+        <span className="newPrice font-bold border border-[#ccc] py-1 px-3 bg-[#f0f0f0] text-black rounded-md">
+          {formatCash(product?.price)}
+        </span>
       </div>
 
-      <div className='info-col3 w-[15%] text-center'>
+      <div className="info-col3 w-[15%] text-center">
         <Tooltip title="Add to Cart">
           <IconButton
             onClick={handleClick}
@@ -103,7 +100,7 @@ const ProductItemListView = ({ product, normalizeString }) => {
             aria-haspopup="true"
             aria-expanded={open ? 'true' : undefined}
           >
-            <FaCartPlus className='text-black text-[20px]' />
+            <FaCartPlus className="text-black text-[20px]" />
           </IconButton>
         </Tooltip>
         <Menu
@@ -142,21 +139,23 @@ const ProductItemListView = ({ product, normalizeString }) => {
           transformOrigin={{ horizontal: 'right', vertical: 'top' }}
           anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         >
-          <p className='p-2'>Choose Size</p>
+          <p className="p-2">Choose Size</p>
           <Divider />
-          <div className='w-full'>
+          <div className="w-full">
             {/* flex-wrap để xuống dòng nếu nhiều size */}
             {Array.isArray(product.variations) && product.variations.length > 0 ? (
               product.variations.map((variation) => (
-                <MenuItem key={variation._id} className={`flex flex-col items-center ${selectedSize === variation.size ? '!bg-[#f1f1f1]' : '!bg-white'}`}
+                <MenuItem
+                  key={variation.id}
+                  className={`flex flex-col items-center ${selectedSize === variation.size ? '!bg-[#f1f1f1]' : '!bg-white'}`}
                   onClick={() => {
                     setSelectedSize(variation.size);
                     setSelectedColor(variation.color);
-                    setProductId(product.productId)
+                    setProductId(product.productId);
                   }}
                 >
                   {/* // Đặt key vào div ngoài cùng của mỗi item trong map */}
-                      {variation.size}
+                  {variation.size}
                 </MenuItem>
               ))
             ) : (
@@ -165,19 +164,23 @@ const ProductItemListView = ({ product, normalizeString }) => {
           </div>
           <Divider />
           <MenuItem
-            className='!flex !items-center !flex-col'
+            className="!flex !items-center !flex-col"
             onClick={() => {
-              handleClose()
+              handleClose();
               handleAddToCart(data);
-              setSelectedSize(null)
+              setSelectedSize(null);
             }} // Thêm logic ở đây
           >
-            {loadingAddToCart ? <CircularProgress className='!w-6 !h-6' color="inherit" /> : <FaCheck className='!text-[20px] text-black' />}
+            {loadingAddToCart ? (
+              <CircularProgress className="!w-6 !h-6" color="inherit" />
+            ) : (
+              <FaCheck className="!text-[20px] text-black" />
+            )}
           </MenuItem>
         </Menu>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default ProductItemListView;

@@ -1,19 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../apis/axiosClient';
 
-const getListCategory = async () => {
-  const response = await axiosClient.get('/categories');
-  console.log('response', response);
+// q, status, parent_id, category_ids, page, per_page
+const getListCategory = async (params) => {
+  const response = await axiosClient.get('/categories', { params });
 
   return response;
 };
 
-//Hook Use GetListCategory
-export const useGetCategory = () => {
+export const useGetCategory = (params = {}) => {
   const { data: categoryList, isLoading: loadingCategoryList } = useQuery({
-    queryKey: ['categoryList'],
-    queryFn: getListCategory,
+    queryKey: ['categoryList', params], // cache theo params
+    queryFn: () => getListCategory(params),
   });
+
   return {
     categoryList,
     loadingCategoryList,

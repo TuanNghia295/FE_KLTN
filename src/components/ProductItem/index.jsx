@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import PropTypes from 'prop-types'; // Import thư viện prop-types
 import '../ProductItem/style.css';
 import { Link } from 'react-router-dom';
@@ -14,19 +15,19 @@ const ProductItem = ({ product }) => {
       <div className="group imgWrapper overflow-hidden rounded-none relative">
         <Link to={`/products/${product._id}`}>
           <div className="img h-full  md:h-[250px] overflow-hidden relative group">
-            {Array.isArray(product?.images) && product.images.length >= 2 ? (
+            {Array.isArray(product?.image_thumbnails) && product?.image_thumbnails.length >= 2 ? (
               <>
                 {/* Ảnh chính */}
-                <img src={product.images[0].url} className="w-full h-full object-cover" alt={product.name} />
+                <img src={product?.image_thumbnails[0]} className="w-full h-full object-cover" alt={product.name} />
                 {/* Ảnh hover */}
                 <img
-                  src={product.images[1].url}
+                  src={product?.image_thumbnails[1]}
                   className="w-full h-full object-cover absolute top-0 left-0 opacity-0 transition-all duration-1000 group-hover:opacity-100"
                   alt={product.name}
                 />
               </>
-            ) : product?.images?.length === 1 ? (
-              <img src={product.images[0].url} className="w-full h-full object-cover" alt={product.name} />
+            ) : product?.image_thumbnails?.length === 1 ? (
+              <img src={product?.image_thumbnails[0]} className="w-full h-full object-cover" alt={product.name} />
             ) : (
               <p className="text-center mt-[50%] text-red-600">No images available</p>
             )}

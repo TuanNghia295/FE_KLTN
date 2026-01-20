@@ -2,7 +2,16 @@ import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../apis/axiosClient';
 
 // API: Lấy tất cả sản phẩm
-const getAllProducts = async ({ perPage, page, search = '', sortBy = '', sortDir = '', minPrice = '', maxPrice = '', categoryId = '' }) => {
+const getAllProducts = async ({
+  perPage,
+  page,
+  search = '',
+  sortBy = '',
+  sortDir = '',
+  minPrice = '',
+  maxPrice = '',
+  categoryIds = [], // THAY ĐỔI: từ categoryId thành categoryIds (array)
+}) => {
   const params = new URLSearchParams({
     per_page: perPage.toString(),
     page: page.toString(),
@@ -13,9 +22,15 @@ const getAllProducts = async ({ perPage, page, search = '', sortBy = '', sortDir
   if (sortDir) params.append('sort_dir', sortDir);
   if (minPrice) params.append('min_price', minPrice);
   if (maxPrice) params.append('max_price', maxPrice);
-  if (categoryId) params.append('category_id', categoryId);
+
+  // Gửi categoryIds dưới dạng comma-separated string
+  if (categoryIds && categoryIds.length > 0) {
+    params.append('category_id', categoryIds.join(','));
+  }
 
   const response = await axiosClient.get(`/products?${params}`);
+  console.log(response);
+
   return {
     data: response.data,
     total: response.meta?.total_pages || Math.ceil(response.totalPage / perPage),
@@ -23,10 +38,19 @@ const getAllProducts = async ({ perPage, page, search = '', sortBy = '', sortDir
 };
 
 // Hook: Lấy danh sách sản phẩm
-export const useProducts = (perPage = 8, page = 1, search = '', sortBy = '', sortDir = '', minPrice = '', maxPrice = '', categoryId = '') => {
+export const useProducts = (
+  perPage = 8,
+  page = 1,
+  search = '',
+  sortBy = '',
+  sortDir = '',
+  minPrice = '',
+  maxPrice = '',
+  categoryIds = [] // THAY ĐỔI: từ categoryId thành categoryIds (array)
+) => {
   const { data, isLoading: loadingProductList } = useQuery({
-    queryKey: ['productList', perPage, page, search, sortBy, sortDir, minPrice, maxPrice, categoryId],
-    queryFn: () => getAllProducts({ perPage, page, search, sortBy, sortDir, minPrice, maxPrice, categoryId }),
+    queryKey: ['productList', perPage, page, search, sortBy, sortDir, minPrice, maxPrice, categoryIds],
+    queryFn: () => getAllProducts({ perPage, page, search, sortBy, sortDir, minPrice, maxPrice, categoryIds }),
     keepPreviousData: true,
     enabled: !!page,
   });
@@ -40,7 +64,7 @@ export const useProducts = (perPage = 8, page = 1, search = '', sortBy = '', sor
 
 // API: Lấy danh sách sản phẩm theo danh mục
 const getProductsByCategoryID = async ({ queryKey }) => {
-  const [_key, _id, perPage, page, search, sortBy, sortDir, minPrice, maxPrice] = queryKey;
+  const [_id, perPage, page, search, sortBy, sortDir, minPrice, maxPrice] = queryKey;
   const params = new URLSearchParams({
     per_page: perPage.toString(),
     page: page.toString(),
@@ -60,7 +84,16 @@ const getProductsByCategoryID = async ({ queryKey }) => {
 };
 
 // Hook: Lấy danh sách sản phẩm theo danh mục
-export const useProductsCategory = (_id, perPage, page, search, sortBy = '', sortDir = '', minPrice = '', maxPrice = '') => {
+export const useProductsCategory = (
+  _id,
+  perPage,
+  page,
+  search,
+  sortBy = '',
+  sortDir = '',
+  minPrice = '',
+  maxPrice = ''
+) => {
   const { data, isLoading: loadingProductCateList } = useQuery({
     queryKey: ['productListCategory', _id, perPage, page, search, sortBy, sortDir, minPrice, maxPrice],
     queryFn: getProductsByCategoryID,
