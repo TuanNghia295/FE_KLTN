@@ -4,7 +4,7 @@ import { IoClose } from 'react-icons/io5';
 import { useState } from 'react';
 import CategoryCollapse from '../../CatergoryCollapse';
 
-const CategoryPannel = ({categoryListZustand, isOpenCategory, toogleCategory }) => {
+const CategoryPannel = ({ categoryListZustand, isOpenCategory, toogleCategory }) => {
   const DrawerList = (
     <Box sx={{ width: 250 }} role="presentation" className="category-pannel">
       <h3 className="text-[18px] p-3 font-[500] flex items-center justify-between">

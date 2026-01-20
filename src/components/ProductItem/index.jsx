@@ -13,15 +13,11 @@ const ProductItem = ({ product }) => {
     <div className="productItem rounded-md w-[100%] overflow-hidden bg-white text-black shadow-lg relative">
       <div className="group imgWrapper overflow-hidden rounded-none relative">
         <Link to={`/products/${product._id}`}>
-          <div className="img h-full md:h-[250px] overflow-hidden relative group">
+          <div className="img h-full  md:h-[250px] overflow-hidden relative group">
             {Array.isArray(product?.images) && product.images.length >= 2 ? (
               <>
                 {/* Ảnh chính */}
-                <img
-                  src={product.images[0].url}
-                  className="w-full h-full object-cover"
-                  alt={product.name}
-                />
+                <img src={product.images[0].url} className="w-full h-full object-cover" alt={product.name} />
                 {/* Ảnh hover */}
                 <img
                   src={product.images[1].url}
@@ -30,13 +26,9 @@ const ProductItem = ({ product }) => {
                 />
               </>
             ) : product?.images?.length === 1 ? (
-              <img
-                src={product.images[0].url}
-                className="w-full h-full object-cover"
-                alt={product.name}
-              />
+              <img src={product.images[0].url} className="w-full h-full object-cover" alt={product.name} />
             ) : (
-              <p>No images available</p>
+              <p className="text-center mt-[50%] text-red-600">No images available</p>
             )}
           </div>
         </Link>
@@ -64,20 +56,19 @@ const ProductItem = ({ product }) => {
         </h3>
 
         <div className="flex items-center gap-4">
-          {product?.priceNew ? (
+          {/* {product?.priceNew ? (
             <>
-              <div className='flex gap-2'>
+              <div className="flex gap-2">
                 <span className="newPrice text-black line-through text-[18px]">{formatCash(product?.price)}</span>
                 <span className="newPrice text-red-500 text-[18px]">{formatCash(product?.priceNew)}</span>
               </div>
             </>
           ) : (
-            <span className="newPrice text-black text-[18px]">{formatCash(product?.price)}</span>
-          )
-          }
+          )} */}
+          <span className="newPrice text-black text-[18px]">{formatCash(product?.price)}</span>
         </div>
       </div>
-    </div >
+    </div>
   );
 };
 

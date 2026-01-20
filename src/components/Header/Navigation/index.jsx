@@ -53,11 +53,11 @@ const Navigation = () => {
                       categoryListZustand.length > 0 &&
                       categoryListZustand
                         .filter((category) => category.type !== 'Sale')
-                        .map((category) => (
-                          <li key={category.type} className="list-none w-full">
+                        .map((category, index) => (
+                          <li key={index} className="list-none w-full">
                             <Link to={`/listing/${normalizeString(category?.type)}`}>
                               <Button className="!text-textPrimary w-full !justify-start !rounded-none">
-                                {category?.type}
+                                {category?.name}
                               </Button>
                             </Link>
                           </li>
