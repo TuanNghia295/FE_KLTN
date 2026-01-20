@@ -124,7 +124,7 @@ export function useForgotPassword() {
       });
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Gửi email thất bại', { position: 'top-center', autoClose: 3000 });
+      toast.error(error?.message || 'Error', { position: 'top-center', autoClose: 3000 });
     },
   });
 }

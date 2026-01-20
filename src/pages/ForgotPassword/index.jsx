@@ -22,10 +22,6 @@ const ForgotPassword = () => {
           onSuccess: () => {
             formik.resetForm();
           },
-          onError: (error) => {
-            const message = error?.response?.data?.message || 'Không thể gửi email khôi phục. Vui lòng thử lại.';
-            toast.error(message);
-          },
         }
       );
     },
@@ -81,9 +77,9 @@ const ForgotPassword = () => {
         }}
       >
         <Box sx={{ maxWidth: 420, width: '100%' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <Link to="/" style={{ color: 'black' }}>
-              <SiNike size={28} />
+              <SiNike size={32} />
             </Link>
             <Typography fontWeight="bold" ml={2}>
               FORGOT PASSWORD
