@@ -1,15 +1,15 @@
 import axiosClient from '../apis/axiosClient';
 import { useQuery } from '@tanstack/react-query';
-// get banner list
+
+// Get banner list from API
 const getBanners = async () => {
   try {
-    // const res = await axiosClient.get('/banners/getAll');
-    const res = {
-      data: null,
-    };
+    const res = await axiosClient.get('/banners');
+    // Backend trả về { data: [...] }
     return res.data;
   } catch (error) {
     console.log('Error fetching banners:', error);
+    return [];
   }
 };
 

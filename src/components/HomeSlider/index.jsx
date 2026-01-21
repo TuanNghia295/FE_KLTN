@@ -75,9 +75,9 @@ const HomeSlider = () => {
     >
       {banners.length > 0
         ? banners.map((banner) => (
-            <SwiperSlide key={banner._id}>
+            <SwiperSlide key={banner.id}>
               <Link to="/listing">
-                <img src={banner.url} alt={banner.alt || 'Banner'} className="w-full h-full object-cover" />
+                <img src={banner.image} alt={banner.title || 'Banner'} className="w-full h-full object-cover" />
               </Link>
             </SwiperSlide>
           ))

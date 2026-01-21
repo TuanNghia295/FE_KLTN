@@ -1,6 +1,4 @@
 import { Button } from '@mui/material';
-import { HiOutlineMenuAlt2 } from 'react-icons/hi';
-import { FaCaretDown } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { MdDiscount } from 'react-icons/md';
 import CategoryPannel from './CategoryPannel';
@@ -14,7 +12,7 @@ const Navigation = () => {
   const toogleCategory = () => setIsOpenCategory(!isOpenCategory);
   // Lấy list Category tu Zustand
   const categoryListZustand = useStore((state) => state.categoryListZustand);
-  const params = normalizeString(categoryListZustand[3]?.type);
+  // const params = normalizeString(categoryListZustand[3]?.type);
   const navigate = useNavigate();
   return (
     <>
@@ -25,7 +23,7 @@ const Navigation = () => {
               className="!text-white gap-2 !bg-black w-full cursor-pointer hover:!bg-gray1"
               onClick={toogleCategory}
             >
-              <HiOutlineMenuAlt2 className="text-[18px]" /> Shop by categories
+              {/* <HiOutlineMenuAlt2 className="text-[18px]" /> Shop by categories */}
             </Button>
           </div>
 

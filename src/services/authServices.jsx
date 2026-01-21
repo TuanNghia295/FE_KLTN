@@ -118,7 +118,7 @@ export function useForgotPassword() {
     mutationKey: ['forgotPassword'],
     mutationFn: forgotPassword,
     onSuccess: () => {
-      toast.success('Vui lòng kiểm tra email để đặt lại mật khẩu', {
+      toast.success('Please check your email to reset password ', {
         position: 'top-center',
         autoClose: 3000,
       });
