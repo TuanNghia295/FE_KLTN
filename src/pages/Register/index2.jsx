@@ -58,7 +58,7 @@ const Register = () => {
             <Link to="/" className="block xl:hidden text-[30px]">
               <SiNike />
             </Link>
-            <h3 className="text-center text-[30px] font-bold text-black">SIGN UPppp</h3>
+            <h3 className="text-center text-[30px] font-bold text-black">SIGN UP</h3>
           </div>
 
           <form onSubmit={formik.handleSubmit} className="w-full mt-5">
