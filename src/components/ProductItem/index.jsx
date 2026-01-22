@@ -51,7 +51,7 @@ const ProductItem = ({ product }) => {
 
       <div className="info p-3">
         <h3 className="text-[16px] title mt-2 font-[500] mb-2">
-          <Link to={`/products/${product?._id}`} className="link transition-all truncate">
+          <Link to={`/products/${product.id}`} className="link transition-all truncate">
             {product?.name}
           </Link>
         </h3>
