@@ -19,12 +19,12 @@ const Navigation = () => {
       <nav>
         <div className="container flex items-center justify-center gap-8">
           <div className="col_1 hidden xl:block xl:w-[16%]">
-            <Button
+            {/* <Button
               className="!text-white gap-2 !bg-black w-full cursor-pointer hover:!bg-gray1"
               onClick={toogleCategory}
             >
-              {/* <HiOutlineMenuAlt2 className="text-[18px]" /> Shop by categories */}
-            </Button>
+              <HiOutlineMenuAlt2 className="text-[18px]" /> Shop by categories
+            </Button> */}
           </div>
 
           {/* Điều hướng chính */}

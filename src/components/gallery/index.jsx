@@ -30,8 +30,8 @@ export default function Gallery({ imageProduct }) {
         lazyPreloadPrevNext={true}
       >
         {Array.isArray(imageProduct) && imageProduct.length > 0 ? (
-          imageProduct.map((image) => (
-            <SwiperSlide key={image._id}>
+          imageProduct.map((image, index) => (
+            <SwiperSlide key={index}>
               {' '}
               {/* Sử dụng `_id` làm key duy nhất */}
               <ProductZoom img={image.url} />
@@ -53,8 +53,8 @@ export default function Gallery({ imageProduct }) {
         className="mySwiper mt-2"
       >
         {Array.isArray(imageProduct) && imageProduct.length > 0 ? (
-          imageProduct.map((image) => (
-            <SwiperSlide key={image._id}>
+          imageProduct.map((image, index) => (
+            <SwiperSlide key={index}>
               {' '}
               {/* Sử dụng `_id` làm key duy nhất */}
               <img src={image.url} alt="Thumbnail" className="thumbnail-image" />

@@ -1,72 +1,79 @@
 import React, { useState, useEffect } from 'react';
 import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
-import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'; // Import Link as RouterLink
-import { Button, CircularProgress, Box, Snackbar, Alert, Modal } from '@mui/material'; // Import CircularProgress for loading and Snackbar for notifications
+import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom';
+import { Button, CircularProgress, Box, Snackbar, Alert, Modal } from '@mui/material';
 
-// Giả sử Gallery là component hiển thị ảnh (có thể có zoom tích hợp)
 import Gallery from '../../components/gallery';
 import HomeCartSlider from '../../components/HomeCartSlider';
-import { useProductDetail, useProducts } from '../../services/productsService'; // Hook lấy dữ liệu
+import { useProductDetail, useProducts } from '../../services/productsService';
 
 import '../ProductDetails/style.css';
 
-//Call API Add To Cart (Setup & Tich Hop)
-import useStore from '../../store/useStore'; //Gọi Zustand useStore (Lưu trữ thông tin người dùng)
+import useStore from '../../store/useStore';
 import { useAddToCart } from '../../services/cartServices';
 
-// Hàm định dạng tiền tệ (Ví dụ)
 const formatCurrency = (value) => {
   if (value === undefined || value === null) return '';
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
 };
 
 const ProductDetails = () => {
-  //Call Api
   const { mutate: handleAddToCart, isPending: loadingAddToCart } = useAddToCart();
-  const navigate = useNavigate(); // Sử dụng useNavigate để điều hướng
+  const navigate = useNavigate();
   const { id } = useParams();
-  //Lấy ra thông tin người dùng ở useStore Zustand
-  const userInfo = useStore((state) => state.userInfo);
-  // console.log('User Info:', userInfo); // Kiểm tra thông tin người dùng
 
-  //Lấy thông tin sản phẩm
-  const { productDetail, isLoading, error } = useProductDetail(id); // Giả sử hook trả về cả trạng thái loading và error
+  const userInfo = useStore((state) => state.userInfo);
+
+  const { productDetail, isLoading, error } = useProductDetail(id);
   const { productList, loadingProductList } = useProducts();
 
-  // console.log('Product Detail', productDetail)
-  // console.log('Product List:', productList);
+  // Transform image_thumbnails array into the format Gallery expects
+  const formattedImages =
+    productDetail?.image_thumbnails?.map((url, index) => ({
+      _id: `${productDetail.id}-${index}`,
+      url: url,
+    })) || [];
 
-  const relativeProductList =
-    Array.isArray(productList) && productList.length > 0
-      ? productList.filter(
-          (product) => product?.categoryId?._id === productDetail?.categoryId?._id && product._id !== id
-        )
-      : []; // Lọc sản phẩm liên quan
-
-  const [selectedSize, setSelectedSize] = useState(null); // State lưu size đã chọn
-  const [selectedColor, setSelectedColor] = useState(null); // State lưu color đã chọn
-
-  // Lấy ra tỉ lệ màn hình hiện tại để xác định số lượng slide hiển thị
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedColor, setSelectedColor] = useState(null);
   const [slidesPerView, setSlidesPerView] = useState(() => {
     const width = window.innerWidth;
     return width > 1024 ? 4 : width > 600 ? 3 : 3;
   });
 
-  // Cập nhật slidesPerView khi resize (Tùy chọn, nếu cần responsive thực sự)
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
       setSlidesPerView(width > 1024 ? 4 : width > 600 ? 3 : 3);
     };
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize); // Cleanup listener
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const [showSnackbar, setShowSnackbar] = useState(false); // State for Snackbar
-  const [showLoginModal, setShowLoginModal] = useState(false);
+  // Filter related products based on the new data structure
+  const relativeProductList =
+    Array.isArray(productList) && productList.length > 0
+      ? productList.filter(
+          (product) => product?.category_id === productDetail?.category_id && product.id !== Number(id)
+        )
+      : [];
 
-  // ---- Xử lý trạng thái Loading và Error ----
+  // Transform products data to match HomeCartSlider expected format
+  const formattedRelativeProducts = relativeProductList.map((product) => ({
+    _id: product.id.toString(),
+    name: product.name,
+    price: parseFloat(product.price),
+    images:
+      product.image_thumbnails?.map((url, index) => ({
+        url: url,
+        isPrimary: index === 0, // First image is primary
+      })) || [],
+  }));
+
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
@@ -83,7 +90,6 @@ const ProductDetails = () => {
     );
   }
 
-  // ---- Xử lý khi không tìm thấy sản phẩm ----
   if (!productDetail) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
@@ -94,7 +100,7 @@ const ProductDetails = () => {
 
   const data = {
     userId: userInfo?._id,
-    productId: productDetail?.productId,
+    productId: productDetail?.id,
     size: selectedSize,
     color: selectedColor,
     quantity: 1,
@@ -113,92 +119,68 @@ const ProductDetails = () => {
       setShowLoginModal(true);
       return;
     }
-    Promise.all([
-      handleAddToCart(data), // Thêm vào giỏ hàng
-    ]).then(() => {
-      navigate('/checkout'); // Chuyển hướng đến thanh toán
+    Promise.all([handleAddToCart(data)]).then(() => {
+      navigate('/checkout');
     });
   };
 
-  // ---- Render khi có dữ liệu ----
   return (
     <div className="h-full">
-      {/* Breadcrumbs động */}
       <div className="flex justify-center p-4 bg-gray-100">
-        {' '}
-        {/* Thêm nền cho dễ nhìn */}
         <Breadcrumbs aria-label="breadcrumb">
           <RouterLink to="/" className="hover:underline text-inherit">
-            {' '}
-            {/* Sử dụng RouterLink */}
             Home Page
           </RouterLink>
-          {/* Bạn có thể thêm link Category ở đây nếu có */}
-          {/* <RouterLink to={`/category/${productDetail.categoryId?._id}`} className="hover:underline text-inherit">
-            {productDetail.categoryId?.type || 'Category'}
-          </RouterLink> */}
           <Typography sx={{ color: 'text.primary' }}>{productDetail.name}</Typography>
         </Breadcrumbs>
       </div>
 
       <section className="bg-white py-5">
         <div className="container mx-auto px-4 flex flex-col gap-8">
-          {' '}
           <div className="flex justify-center xl:justify-evenly flex-col xl:flex-row gap-8 xl:gap-4">
             <div className="productZoomContainer custom-scrollbar w-full xl:w-[45%] xl:max-w-[600px] mx-auto xl:mx-0 overflow-x-auto xl:overflow-x-hidden">
-              {productDetail.images && productDetail.images.length > 0 ? (
-                <Gallery imageProduct={productDetail.images} />
+              {formattedImages.length > 0 ? (
+                <Gallery imageProduct={formattedImages} />
               ) : (
                 <div className="w-full h-96 bg-gray-200 flex items-center justify-center">No Images Available</div>
               )}
             </div>
 
-            {/* Thông tin sản phẩm, size, addtoCart và description */}
             <div className="p-5 w-full xl:w-[40%]">
               <h1 className="text-3xl font-semibold text-black mb-2">{productDetail.name}</h1>
               <p className="text-2xl font-semibold text-red-600 mb-4">{formatCurrency(productDetail.price)}</p>
 
-              {/* Size component logic */}
               <h2 className="text-lg font-medium mb-2 text-black">Choose Size</h2>
               <div className="flex flex-wrap gap-3 mb-5">
-                {' '}
-                {/* flex-wrap để xuống dòng nếu nhiều size */}
-                {Array.isArray(productDetail.variations) && productDetail.variations.length > 0 ? (
-                  productDetail.variations.map((variation) => (
-                    // Đặt key vào div ngoài cùng của mỗi item trong map
-                    <div key={variation._id} className="flex flex-col items-center">
+                {Array.isArray(productDetail.variants) && productDetail.variants.length > 0 ? (
+                  productDetail.variants.map((variant) => (
+                    <div key={variant.id} className="flex flex-col items-center">
                       <button
-                        // Không cần class 'size-button' nữa vì dùng Tailwind hết
                         className={`border min-w-14 text-center px-4 py-2 rounded transition duration-300
                                     ${
-                                      selectedSize === variation.size
-                                        ? 'bg-black text-white border-black' // Style khi được chọn
-                                        : 'bg-white text-black border-gray-300 hover:border-black' // Style mặc định
+                                      selectedSize === variant.size
+                                        ? 'bg-black text-white border-black'
+                                        : 'bg-white text-black border-gray-300 hover:border-black'
                                     }`}
                         onClick={() => {
-                          setSelectedSize(variation.size);
-                          setSelectedColor(variation.color);
+                          setSelectedSize(variant.size);
+                          setSelectedColor(variant.color);
                         }}
                       >
-                        {variation.size}
+                        {variant.size}
                       </button>
-                      {/* Hiển thị màu nếu cần */}
-                      {/* <p className="text-xs mt-1 text-gray-500">{variation.color}</p> */}
-                      {/* Hiển thị số lượng nếu cần */}
-                      {/* <p className="text-xs text-gray-400">Còn: {variation.amount}</p> */}
                     </div>
                   ))
                 ) : (
-                  <p className="text-gray-500">Size not found !</p>
+                  <p className="text-gray-500">Size not found!</p>
                 )}
               </div>
 
-              {/* Nút bấm */}
               <Button
-                variant="contained" // Sử dụng variant của MUI cho rõ ràng
+                variant="contained"
                 className="!bg-[#f1f1f1] !text-black !w-full !py-3 !mb-3 !shadow-none hover:!bg-gray-300"
-                disabled={!selectedSize} // Vô hiệu hóa nếu chưa chọn size
-                onClick={handleAddToCartClick} // Thêm logic ở đây
+                disabled={!selectedSize}
+                onClick={handleAddToCartClick}
               >
                 {loadingAddToCart ? 'Loading...' : 'Add To Cart'}
               </Button>
@@ -216,7 +198,6 @@ const ProductDetails = () => {
                 Buy Now
               </Button>
 
-              {/* Snackbar */}
               <Snackbar
                 open={showSnackbar}
                 autoHideDuration={3000}
@@ -228,7 +209,6 @@ const ProductDetails = () => {
                 </Alert>
               </Snackbar>
 
-              {/* Modal */}
               <Modal
                 open={showLoginModal}
                 onClose={() => setShowLoginModal(false)}
@@ -280,26 +260,21 @@ const ProductDetails = () => {
                 </Box>
               </Modal>
 
-              {/* Mô tả sản phẩm */}
               <div className="mt-6 border-t pt-4">
                 <h3 className="text-lg font-medium mb-2 text-black">Description</h3>
                 <p className="text-gray-700 leading-relaxed">{productDetail.description}</p>
               </div>
             </div>
           </div>
-          {/* Sản phẩm liên quan */}
+
           <section className="mt-10">
-            {' '}
-            {/* Thêm khoảng cách trên */}
             <h2 className="text-2xl font-semibold mb-4 pl-4 md:pl-0">Related Products</h2>
-            {/* Truyền slidesPerView từ state */}
             <HomeCartSlider
               slidesPerView={slidesPerView}
-              data={relativeProductList}
-              categoryId={productDetail.categoryId?._id}
-              currentProductId={productDetail._id}
-            />{' '}
-            {/* Truyền categoryId và productId hiện tại để lọc */}
+              data={formattedRelativeProducts}
+              categoryId={productDetail.category_id}
+              currentProductId={productDetail.id}
+            />
           </section>
         </div>
       </section>

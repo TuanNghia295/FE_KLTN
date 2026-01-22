@@ -109,14 +109,14 @@ export const useProductsCategory = (
 
 // API: Lấy chi tiết sản phẩm
 const getDetailProducts = async (_id) => {
-  console.log('_id', _id);
-
   const response = await axiosClient.get(`/products/${_id}`);
-  return response.data;
+  return response;
 };
 
 // Hook: Lấy chi tiết sản phẩm
 export const useProductDetail = (_id) => {
+  console.log('_id', _id);
+
   const { data: productDetail, isLoading: loadingProductDetail } = useQuery({
     queryKey: ['productDetail', _id], // Truyền `_id` vào queryKey để cache theo từng sản phẩm
     queryFn: () => getDetailProducts(_id), // Truyền `_id` vào hàm API

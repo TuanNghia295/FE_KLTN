@@ -13,7 +13,7 @@ const ProductItem = ({ product }) => {
   return (
     <div className="productItem rounded-md w-[100%] overflow-hidden bg-white text-black shadow-lg relative">
       <div className="group imgWrapper overflow-hidden rounded-none relative">
-        <Link to={`/products/${product._id}`}>
+        <Link to={`/products/${product.id}`}>
           <div className="img h-full  md:h-[250px] overflow-hidden relative group">
             {Array.isArray(product?.image_thumbnails) && product?.image_thumbnails.length >= 2 ? (
               <>
