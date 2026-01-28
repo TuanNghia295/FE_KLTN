@@ -19,6 +19,7 @@ const ProductItemListView = ({ product, normalizeString }) => {
   const [productId, setProductId] = useState(''); // State lưu productID
   const [selectedSize, setSelectedSize] = useState(null); // State lưu size đã chọn
   const [selectedColor, setSelectedColor] = useState(null); // State lưu color đã chọn
+  const [selectedVariantId, setSelectedVariantId] = useState(null);
   const [startIndex, setStartIndex] = useState(0);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -31,11 +32,24 @@ const ProductItemListView = ({ product, normalizeString }) => {
   };
 
   const data = {
-    userId: userInfo?.id,
+    userId: userInfo?._id,
     productId: productId,
+    product_variant_id: selectedVariantId,
     size: selectedSize,
     color: selectedColor,
     quantity: 1,
+    product: {
+      _id: product?.id?.toString(),
+      productId: product?.productId,
+      name: product?.name,
+      price: parseFloat(product?.price),
+      images:
+        product?.image_thumbnails?.map((url, index) => ({
+          url,
+          isPrimary: index === 0,
+        })) || [],
+      variations: product?.variations || [],
+    },
   };
 
   const { mutate: handleAddToCart, isPending: loadingAddToCart } = useAddToCart();
@@ -151,6 +165,7 @@ const ProductItemListView = ({ product, normalizeString }) => {
                   onClick={() => {
                     setSelectedSize(variation.size);
                     setSelectedColor(variation.color);
+                    setSelectedVariantId(variation.id);
                     setProductId(product.productId);
                   }}
                 >

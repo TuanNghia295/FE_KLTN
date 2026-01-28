@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom';
@@ -19,7 +19,7 @@ const formatCurrency = (value) => {
 };
 
 const ProductDetails = () => {
-  const { mutate: handleAddToCart, isPending: loadingAddToCart } = useAddToCart();
+  const { mutateAsync: handleAddToCart, isPending: loadingAddToCart } = useAddToCart();
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -37,6 +37,7 @@ const ProductDetails = () => {
 
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
+  const [selectedVariantId, setSelectedVariantId] = useState(null);
   const [slidesPerView, setSlidesPerView] = useState(() => {
     const width = window.innerWidth;
     return width > 1024 ? 4 : width > 600 ? 3 : 3;
@@ -101,22 +102,32 @@ const ProductDetails = () => {
   const data = {
     userId: userInfo?._id,
     productId: productDetail?.id,
+    product_variant_id: selectedVariantId,
     size: selectedSize,
     color: selectedColor,
     quantity: 1,
+    product: {
+      _id: productDetail?.id?.toString(),
+      productId: productDetail?.id,
+      name: productDetail?.name,
+      price: parseFloat(productDetail?.price),
+      images:
+        productDetail?.image_thumbnails?.map((url, index) => ({
+          url,
+          isPrimary: index === 0,
+        })) || [],
+      variations: productDetail?.variants || [],
+    },
   };
 
   const handleAddToCartClick = () => {
-    if (!userInfo) {
-      setShowLoginModal(true);
-      return;
-    }
     handleAddToCart(data);
   };
 
   const handleBuyNow = async (data) => {
     if (!userInfo) {
       setShowLoginModal(true);
+      sessionStorage.setItem('returnTo', '/checkout');
       return;
     }
     Promise.all([handleAddToCart(data)]).then(() => {
@@ -165,6 +176,7 @@ const ProductDetails = () => {
                         onClick={() => {
                           setSelectedSize(variant.size);
                           setSelectedColor(variant.color);
+                          setSelectedVariantId(variant.id);
                         }}
                       >
                         {variant.size}
@@ -180,7 +192,7 @@ const ProductDetails = () => {
                 variant="contained"
                 className="!bg-[#f1f1f1] !text-black !w-full !py-3 !mb-3 !shadow-none hover:!bg-gray-300"
                 disabled={!selectedSize}
-                onClick={handleAddToCartClick}
+                onClick={() => handleAddToCartClick()}
               >
                 {loadingAddToCart ? 'Loading...' : 'Add To Cart'}
               </Button>
@@ -234,6 +246,7 @@ const ProductDetails = () => {
                     variant="contained"
                     onClick={() => {
                       setShowLoginModal(false);
+                      sessionStorage.setItem('returnTo', '/checkout');
                       navigate('/login');
                     }}
                     sx={{

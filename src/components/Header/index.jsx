@@ -39,7 +39,9 @@ const CustomTooltip = styled(({ className, ...props }) => <Tooltip {...props} cl
 export default function Header() {
   // Lấy trạng thái và hàm từ Zustand store
   const userInfo = useStore((state) => state.userInfo);
-  const cartItems = useStore((state) => state.cartItems);
+  const cartItems = useStore((state) => (state.cartSource === 'user' ? state.cartItems : state.guestCartItems));
+  console.log('cartItems', cartItems);
+
   const setOpenCartPanel = useStore((state) => state.setOpenCartPanel);
 
   const { mutate: logout } = useLogout();

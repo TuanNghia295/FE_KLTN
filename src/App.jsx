@@ -19,7 +19,7 @@ import { ToastContainer } from 'react-toastify';
 import OrderDetails from './pages/OrderDetails/index.jsx';
 import ScrollToTop from './components/Scroll/ScrollToTop.jsx';
 import useStore from './store/useStore.jsx';
-import { useGetCartByUserID } from '../src/services/cartServices.jsx';
+import { useGetCart } from '../src/services/cartServices.jsx';
 import { useGetCategory } from './services/categoryServices.jsx';
 import PaymentError from './pages/CheckOut/PaymentError.jsx';
 import PaymentSuccess from './pages/CheckOut/PaymentSuccess.jsx';
@@ -48,8 +48,13 @@ export default function App() {
 
   // Lấy thông tin giỏ hàng từ database (React Query vào Zustand)
   const userInfo = useStore((state) => state.userInfo); // Lấy ra user id từ fetchUserInfo ở Zustand
-  const { listCart } = useGetCartByUserID(userInfo?._id); // List ra danh sách bằng user id
+  const hydrated = useStore((state) => state.hydrated);
+  const setLoadingCart = useStore((state) => state.setLoadingCart);
+  const userId = userInfo?._id ?? userInfo?.id;
+  const { cart, loadingCart } = useGetCart(hydrated && !!userId); // List ra danh sách bằng user id
   const setCartItems = useStore((state) => state.setCartItems); // Dùng useEffect để bỏ sản phẩm từ database lưu trữ vào Zustand
+  const setCartSource = useStore((state) => state.setCartSource);
+  const guestCartItems = useStore((state) => state.guestCartItems);
 
   //Call API Get Danh Muc
   const { categoryList } = useGetCategory();
@@ -62,14 +67,32 @@ export default function App() {
   }, [categoryList]);
 
   useEffect(() => {
+    if (!hydrated) return;
     fetchUserInfo();
-  }, [fetchUserInfo]);
+  }, [fetchUserInfo, hydrated]);
 
   useEffect(() => {
-    if (listCart && listCart.length > 0) {
-      setCartItems(listCart);
+    if (!hydrated) return;
+    console.log('cart', cart);
+
+    if (cart && typeof cart === 'object') {
+      if (cart?.id) {
+        setCartSource('user');
+        setCartItems(cart.items || []);
+      } else if (userInfo) {
+        setCartSource('user');
+        setCartItems([]);
+      } else {
+        setCartSource('guest');
+      }
+    } else if (!userInfo && guestCartItems.length > 0) {
+      setCartSource('guest');
     }
-  }, [listCart]);
+  }, [cart, userInfo, guestCartItems.length, setCartItems, setCartSource, hydrated]);
+
+  useEffect(() => {
+    setLoadingCart(loadingCart);
+  }, [loadingCart, setLoadingCart]);
 
   // useEffect(() => {
   //   if (Array.isArray(listCart) && listCart.length > 0) {

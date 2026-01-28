@@ -241,7 +241,7 @@ function ChatBoxCoze() {
     //         { userId, productId, size, color, quantity: 1 }
     //     ]);
     // };
-    const handleChooseSize = (e, productId, variations) => {
+    const handleChooseSize = (e, productId, variations, product) => {
         const size = e.target.value;
         const userId = user_id;
 
@@ -256,9 +256,11 @@ function ChatBoxCoze() {
         setCart({
             userId,
             productId,
+            product_variant_id: variation.id,
             size,
             color,
-            quantity: 1
+            quantity: 1,
+            product
         });
     };
 
@@ -326,7 +328,14 @@ function ChatBoxCoze() {
                                                         <select
                                                             className='bg-[#f1f1f1] p-1 rounded-md'
                                                             value={selectedSizes[product.productId] || ''}
-                                                            onChange={(e) => handleChooseSize(e, product.productId, product.variations)}
+                                                            onChange={(e) => handleChooseSize(e, product.productId, product.variations, {
+                                                                _id: product._id?.toString() || product.productId?.toString(),
+                                                                productId: product.productId,
+                                                                name: product.name,
+                                                                price: parseFloat(product.price),
+                                                                images: product.images ? [{ url: product.images, isPrimary: true }] : [],
+                                                                variations: product.variations || [],
+                                                            })}
                                                         >
                                                             <option value="">Choose Size</option>
                                                             {[...new Set(product.variations.map(v => v.size))].map(size => (

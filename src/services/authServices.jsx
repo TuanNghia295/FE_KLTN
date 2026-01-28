@@ -3,7 +3,9 @@ import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useQueryClient } from '@tanstack/react-query';
 import useStore from '../store/useStore';
+import { mergeCart, useMergeCart } from './cartServices.jsx';
 
 // API đăng ký
 export const register = async (values) => {
@@ -14,7 +16,6 @@ export const register = async (values) => {
 // API đăng nhập
 export const login = async (values) => {
   const response = await axiosClient.post(`/auth/login`, values);
-  console.log('RES', response);
   return response;
 };
 
@@ -74,18 +75,38 @@ export function useRegister() {
 // Hook đăng nhập
 export function useLogin() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const getInfo = useStore((state) => state.getInfo);
+  const guestCartItems = useStore((state) => state.guestCartItems);
+  const clearGuestCart = useStore((state) => state.clearGuestCart);
+  const setCartSource = useStore((state) => state.setCartSource);
+  const { mutateAsync: mergeCartMutate } = useMergeCart();
 
   return useMutation({
     mutationKey: ['login'],
     mutationFn: login,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       // Store tokens in localStorage
       localStorage.setItem('accesstoken', data.access_token);
       localStorage.setItem('refreshtoken', data.refresh_token);
 
       // Store user info in zustand
       getInfo(data.user);
+
+      setCartSource('user');
+
+      if (guestCartItems.length > 0) {
+        try {
+          await mergeCartMutate(guestCartItems);
+          clearGuestCart();
+          queryClient.invalidateQueries({ queryKey: ['cart'] });
+        } catch (error) {
+          toast.error(error.response?.data?.message || 'Failed to merge guest cart!', {
+            position: 'top-center',
+            autoClose: 3000,
+          });
+        }
+      }
 
       toast.success('Sign in successfully !', {
         position: 'top-center',
@@ -97,6 +118,12 @@ export function useLogin() {
         theme: 'colored',
       });
       navigate('/');
+
+      const returnTo = sessionStorage.getItem('returnTo');
+      if (returnTo) {
+        sessionStorage.removeItem('returnTo');
+        navigate(returnTo);
+      }
     },
     onError: (error) => {
       toast.error(error.message || 'Sign in unsuccessfully !', {
@@ -160,7 +187,7 @@ export function useResetPasswordWithToken() {
 // API lấy thông tin người dùng
 export const getUserInfo = async () => {
   const response = await axiosClient.get('/users/userInfo');
-  return response.data;
+  return response;
 };
 
 // API đăng xuất

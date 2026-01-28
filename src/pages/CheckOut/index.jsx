@@ -26,8 +26,10 @@ const paymentOptions = [
 
 const CheckOut = () => {
   const navigate = useNavigate();
-  const cartItems = useStore((state) => state.cartItems);
+  const cartItems = useStore((state) => (state.cartSource === 'user' ? state.cartItems : state.guestCartItems));
+  const cartSource = useStore((state) => state.cartSource);
   const userInfo = useStore((state) => state.userInfo);
+  const loadingCart = useStore((state) => state.loadingCart);
   const clearCart = useStore((state) => state.clearCart);
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('Cash');
@@ -62,14 +64,19 @@ const CheckOut = () => {
   const shippingFee = shippingData?.totalFee ?? 0;
   const distance = shippingData?.distance ?? '';
   const totalAmount = subtotal + shippingFee;
+  const isCartLoading = loadingCart && cartSource === 'user';
 
   useEffect(() => {
-    console.log('userInfo', userInfo);
+    if (!userInfo && cartSource === 'guest') {
+      sessionStorage.setItem('returnTo', '/checkout');
+      navigate('/login');
+      return;
+    }
 
     if (userInfo && (!userInfo.address || userInfo.address.length === 0 || userInfo.address.includes('Default'))) {
       setShowAddressModal(true);
     }
-  }, [userInfo]);
+  }, [userInfo, cartSource, navigate]);
 
   const handleCloseAddressModal = () => {
     setShowAddressModal(false);
@@ -110,19 +117,27 @@ const CheckOut = () => {
       customerName: userInfo.fullName,
       customerPhone: userInfo.phone,
       toAddress: selectedAddress,
-      items: cartItems.map((item) => ({
-        productId: item.product.productId,
-        images: item.product.images.map((image) => ({
-          url: image.url,
-          isPrimary: image.isPrimary || false,
-          order: image.order || null,
-          publicId: image.publicId || null,
-        })),
-        name: item.product.name,
-        size: item.size,
-        color: item.color,
-        quantity: item.quantity,
-      })),
+      items: cartItems.map((item) => {
+        const selectedVariation = item.product?.variations?.find(
+          (variation) => variation.id === item.product_variant_id
+        );
+        const displaySize = item.size ?? selectedVariation?.size;
+        const displayColor = item.color ?? selectedVariation?.color;
+
+        return {
+          productId: item.product.productId,
+          images: item.product.images.map((image) => ({
+            url: image.url,
+            isPrimary: image.isPrimary || false,
+            order: image.order || null,
+            publicId: image.publicId || null,
+          })),
+          name: item.product.name,
+          size: displaySize,
+          color: displayColor,
+          quantity: item.quantity,
+        };
+      }),
       paymentMethod: selectedPaymentMethod,
       isReturn: false,
       shippingFee: shippingFee,
@@ -333,35 +348,47 @@ const CheckOut = () => {
             {/* Your Order */}
             <h2 className="text-[18px] text-black font-[600] mb-4 border-b pb-2">YOUR ORDER</h2>
             <div className="order-items flex-grow max-h-60 overflow-y-auto space-y-3 pr-2 mb-4 custom-scrollbar">
-              {cartItems.length > 0 ? (
-                cartItems.map((item, index) => (
-                  <div key={item._id || index} className="itemCheckout flex items-center gap-3 text-sm">
-                    {' '}
-                    {/* Use item._id if available */}
-                    <img
-                      className="rounded w-16 h-16 object-cover border" // Kích thước cố định hơn
-                      src={item?.product?.images[0]?.url || '/placeholder-image.png'} // Thêm ảnh placeholder
-                      alt={item.name || 'Product Image'}
-                      onError={(e) => (e.target.src = '/placeholder-image.png')} // Xử lý lỗi ảnh
-                    />
-                    <div className="info flex-grow min-w-0">
+              {isCartLoading ? (
+                <Box className="flex items-center justify-center py-8">
+                  <CircularProgress size={24} />
+                </Box>
+              ) : cartItems.length > 0 ? (
+                cartItems.map((item, index) => {
+                  const selectedVariation = item.product?.variations?.find(
+                    (variation) => variation.id === item.product_variant_id
+                  );
+                  const displaySize = item.size ?? selectedVariation?.size;
+                  const displayColor = item.color ?? selectedVariation?.color;
+
+                  return (
+                    <div key={item._id || index} className="itemCheckout flex items-center gap-3 text-sm">
                       {' '}
-                      {/* Thêm min-w-0 */}
-                      <Tooltip title={item.product?.name || 'N/A'} placement="top">
-                        <h4 className="font-medium text-black truncate">{item.product?.name || 'N/A'}</h4>{' '}
-                        {/* Sử dụng truncate */}
-                      </Tooltip>
-                      <p className="text-gray-500 text-xs">Size: {item.size}</p>
-                      <p className="text-gray-500 text-xs">Color: {item.color}</p> {/* Hiển thị màu */}
-                      <p className="text-gray-500 text-xs">Qty: {item.quantity}</p>
+                      {/* Use item._id if available */}
+                      <img
+                        className="rounded w-16 h-16 object-cover border" // Kích thước cố định hơn
+                        src={item?.product?.images[0]?.url || '/placeholder-image.png'} // Thêm ảnh placeholder
+                        alt={item.name || 'Product Image'}
+                        onError={(e) => (e.target.src = '/placeholder-image.png')} // Xử lý lỗi ảnh
+                      />
+                      <div className="info flex-grow min-w-0">
+                        {' '}
+                        {/* Thêm min-w-0 */}
+                        <Tooltip title={item.product?.name || 'N/A'} placement="top">
+                          <h4 className="font-medium text-black truncate">{item.product?.name || 'N/A'}</h4>{' '}
+                          {/* Sử dụng truncate */}
+                        </Tooltip>
+                        <p className="text-gray-500 text-xs">Size: {displaySize}</p>
+                        <p className="text-gray-500 text-xs">Color: {displayColor}</p> {/* Hiển thị màu */}
+                        <p className="text-gray-500 text-xs">Qty: {item.quantity}</p>
+                      </div>
+                      <div className="ml-auto font-medium text-black text-right whitespace-nowrap">
+                        {' '}
+                        {/* Thêm text-right và whitespace-nowrap */}
+                        {formatCurrency(item?.product?.price * item.quantity)}
+                      </div>
                     </div>
-                    <div className="ml-auto font-medium text-black text-right whitespace-nowrap">
-                      {' '}
-                      {/* Thêm text-right và whitespace-nowrap */}
-                      {formatCurrency(item?.product?.price * item.quantity)}
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <Typography variant="body2" color="textSecondary" align="center" sx={{ py: 4 }}>
                   Your cart is empty.
@@ -373,30 +400,38 @@ const CheckOut = () => {
             <div className="price-details space-y-2 border-t pt-4 mt-auto">
               {' '}
               {/* Thêm mt-auto */}
-              <div className="flex items-center justify-between text-sm">
-                <p className="text-gray-600">Subtotal</p>
-                <p className="text-gray-800 font-medium">{formatCurrency(subtotal)}</p>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <Tooltip title={distance ? `Distance: ${distance}` : ''} placement="top">
-                  <p className="text-gray-600">Shipping ({distance ?? null})</p>
-                </Tooltip>
-                {isLoadingShippingFee ? (
-                  <CircularProgress size={16} color="inherit" />
-                ) : isErrorShippingFee ? (
-                  <Tooltip title={shippingError?.message || 'Error calculating shipping'} placement="top">
-                    <span className="text-red-500 cursor-help font-medium">Error</span>
-                  </Tooltip>
-                ) : (
-                  <p className="text-gray-800 font-medium">{formatCurrency(shippingFee)}</p>
-                )}
-              </div>
-              <div className="flex items-center justify-between text-lg my-3 border-t border-gray-200 pt-3 font-bold text-black">
-                <h4>Total</h4>
-                <h4 className={`${isErrorShippingFee ? 'text-red-500' : ''}`}>
-                  {isErrorShippingFee ? 'N/A' : formatCurrency(totalAmount)}
-                </h4>
-              </div>
+              {isCartLoading ? (
+                <Box className="flex items-center justify-center py-4">
+                  <CircularProgress size={20} />
+                </Box>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between text-sm">
+                    <p className="text-gray-600">Subtotal</p>
+                    <p className="text-gray-800 font-medium">{formatCurrency(subtotal)}</p>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <Tooltip title={distance ? `Distance: ${distance}` : ''} placement="top">
+                      <p className="text-gray-600">Shipping ({distance ?? null})</p>
+                    </Tooltip>
+                    {isLoadingShippingFee ? (
+                      <CircularProgress size={16} color="inherit" />
+                    ) : isErrorShippingFee ? (
+                      <Tooltip title={shippingError?.message || 'Error calculating shipping'} placement="top">
+                        <span className="text-red-500 cursor-help font-medium">Error</span>
+                      </Tooltip>
+                    ) : (
+                      <p className="text-gray-800 font-medium">{formatCurrency(shippingFee)}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between text-lg my-3 border-t border-gray-200 pt-3 font-bold text-black">
+                    <h4>Total</h4>
+                    <h4 className={`${isErrorShippingFee ? 'text-red-500' : ''}`}>
+                      {isErrorShippingFee ? 'N/A' : formatCurrency(totalAmount)}
+                    </h4>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Order Button */}

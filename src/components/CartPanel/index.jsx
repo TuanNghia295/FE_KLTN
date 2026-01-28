@@ -13,9 +13,12 @@ import { useUpdateCartByUserID } from '../../services/cartServices';
 
 const CartPanel = () => {
   // Lấy các trạng thái và hàm từ Zustand store
-  const cartItems = useStore((state) => state.cartItems);
+  const cartSource = useStore((state) => state.cartSource);
+  const cartItems = useStore((state) => (state.cartSource === 'user' ? state.cartItems : state.guestCartItems));
   const setCartItems = useStore((state) => state.setCartItems);
+  const setGuestCartItems = useStore((state) => state.setGuestCartItems);
   const updateItemSize = useStore((state) => state.updateItemSize);
+  const updateGuestItemSize = useStore((state) => state.updateGuestItemSize);
   const setOpenCartPanel = useStore((state) => state.setOpenCartPanel);
   const userInfo = useStore((state) => state.userInfo);
   const navigate = useNavigate();
@@ -42,6 +45,12 @@ const CartPanel = () => {
     if (!itemToRemove) return;
 
     const updatedCartItems = cartItems.filter((item) => item._id !== itemId);
+
+    if (cartSource === 'guest') {
+      setGuestCartItems(updatedCartItems);
+      return;
+    }
+
     setCartItems(updatedCartItems);
 
     // Call updateCartByUserID to update the server with quantity 0 (or remove it)
@@ -77,90 +86,108 @@ const CartPanel = () => {
             </Link>
           </div>
         ) : (
-          cartItems?.map((item) => (
-            <div key={item._id} className="cartItem flex items-center gap-4 mb-4 border-b pb-4">
-              {/* Hình ảnh sản phẩm */}
-              <div className="img w-[25%]">
-                <img
-                  className="w-full rounded-md object-cover"
-                  src={
-                    Array.isArray(item.product.images) && item.product.images.length > 0
-                      ? item.product?.images[0]?.url
-                      : ''
-                  }
-                  alt={item?.name}
-                />
-              </div>
+          cartItems?.map((item) => {
+            const selectedVariation = item.product?.variations?.find(
+              (variation) => variation.id === item.product_variant_id
+            );
+            const displaySize = item.size ?? selectedVariation?.size;
+            const displayColor = item.color ?? selectedVariation?.color;
 
-              {/* Thông tin sản phẩm */}
-              <div className="info w-[70%] flex flex-col gap-2">
-                <div className="flex justify-between">
-                  <h4 className="text-black font-semibold text-[16px] leading-tight">
-                    <Link to={`/products/${item.product._id}`} className="hover:underline">
-                      {item.product?.name || 'Nike Dunk 2025'}
-                    </Link>
-                  </h4>
-                  <p className="text-gray-600 text-[14px]">
-                    {item.product.price ? `${formatCurrency(item.product.price)}` : 'Null'}
-                  </p>
+            return (
+              <div key={item._id} className="cartItem flex items-center gap-4 mb-4 border-b pb-4">
+                {/* Hình ảnh sản phẩm */}
+                <div className="img w-[25%]">
+                  <img
+                    className="w-full rounded-md object-cover"
+                    src={
+                      Array.isArray(item.product.images) && item.product.images.length > 0
+                        ? item.product?.images[0]?.url
+                        : ''
+                    }
+                    alt={item?.name}
+                  />
                 </div>
 
-                {/* {console.log('item', item)} */}
+                {/* Thông tin sản phẩm */}
+                <div className="info w-[70%] flex flex-col gap-2">
+                  <div className="flex justify-between">
+                    <h4 className="text-black font-semibold text-[16px] leading-tight">
+                      <Link to={`/products/${item.product._id}`} className="hover:underline">
+                        {item.product?.name || 'Nike Dunk 2025'}
+                      </Link>
+                    </h4>
+                    <p className="text-gray-600 text-[14px]">
+                      {item.product.price ? `${formatCurrency(item.product.price)}` : 'Null'}
+                    </p>
+                  </div>
 
-                <div className="flex items-center justify-between border border-[#ccc] py-2 px-3 rounded-md">
-                  {/* Chọn size */}
-                  <div className="text-gray-700 text-[14px] flex items-center gap-2">
-                    <span className="font-medium">Size:</span>
-                    {item.size ? (
-                      <ChooseSizeList
-                        sizeDefault={item.size}
-                        sizeChoose={item.product.variations}
-                        onChange={(selectedVariation) => {
-                          // Gọi API để cập nhật size
+                  {/* {console.log('item', item)} */}
+
+                  <div className="flex items-center justify-between border border-[#ccc] py-2 px-3 rounded-md">
+                    {/* Chọn size */}
+                    <div className="text-gray-700 text-[14px] flex items-center gap-2">
+                      <span className="font-medium">Size:</span>
+                      {(displaySize || item.product_variant_id) ? (
+                        <ChooseSizeList
+                          sizeDefault={displaySize}
+                          sizeChoose={item.product.variations}
+                          onChange={(selectedVariation) => {
+                            // Gọi API để cập nhật size
+                            if (cartSource === 'guest') {
+                              updateGuestItemSize(item._id, selectedVariation);
+                            } else {
+                              updateCart({
+                                userId: userId,
+                                productId: item.product?.productId,
+                                size: selectedVariation?.size,
+                                color: selectedVariation?.color, // Nếu biến thể có thuộc tính color
+                                quantity: item?.quantity, // Giữ nguyên số lượng hiện tại
+                              });
+                              // Cập nhật luôn Zustand
+                              updateItemSize(item._id, selectedVariation?.size);
+                            }
+                          }}
+                        />
+                      ) : (
+                        <span className="text-gray-500">Null</span>
+                      )}
+                    </div>
+
+                    {/* Chọn số lượng */}
+                    <div className="text-gray-700 text-[14px] flex items-center gap-2">
+                      <span className="font-medium">Quantity:</span>
+                      <ChooseQuantity
+                        quantity={item?.quantity}
+                        onQuantityZero={() => handleQuantityZero(item._id)}
+                        onUpdateQuantity={(newQuantity) => {
+                          // Cập nhật số lượng trong Zustand
+                          const updatedCartItems = cartItems.map((cartItem) =>
+                            cartItem._id === item._id ? { ...cartItem, quantity: newQuantity } : cartItem
+                          );
+
+                          if (cartSource === 'guest') {
+                            setGuestCartItems(updatedCartItems);
+                            return;
+                          }
+
+                          setCartItems(updatedCartItems);
+
+                          // Gọi API để cập nhật giỏ hàng mới
                           updateCart({
                             userId: userId,
                             productId: item.product?.productId,
-                            size: selectedVariation?.size,
-                            color: selectedVariation?.color, // Nếu biến thể có thuộc tính color
-                            quantity: item?.quantity, // Giữ nguyên số lượng hiện tại
+                            size: item.size,
+                            color: item.color,
+                            quantity: newQuantity, // Cập nhật số lượng mới
                           });
-                          // Cập nhật luôn Zustand
-                          updateItemSize(item._id, selectedVariation?.size);
                         }}
                       />
-                    ) : (
-                      <span className="text-gray-500">Null</span>
-                    )}
-                  </div>
-
-                  {/* Chọn số lượng */}
-                  <div className="text-gray-700 text-[14px] flex items-center gap-2">
-                    <span className="font-medium">Quantity:</span>
-                    <ChooseQuantity
-                      quantity={item?.quantity}
-                      onQuantityZero={() => handleQuantityZero(item._id)}
-                      onUpdateQuantity={(newQuantity) => {
-                        // Cập nhật số lượng trong Zustand
-                        const updatedCartItems = cartItems.map((cartItem) =>
-                          cartItem._id === item._id ? { ...cartItem, quantity: newQuantity } : cartItem
-                        );
-                        setCartItems(updatedCartItems);
-
-                        // Gọi API để cập nhật giỏ hàng mới
-                        updateCart({
-                          userId: userId,
-                          productId: item.product?.productId,
-                          size: item.size,
-                          color: item.color,
-                          quantity: newQuantity, // Cập nhật số lượng mới
-                        });
-                      }}
-                    />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
       {/* Phần tính tiền */}
@@ -183,6 +210,11 @@ const CartPanel = () => {
             }`}
             onClick={() => {
               setOpenCartPanel(false);
+              if (!userInfo) {
+                sessionStorage.setItem('returnTo', '/checkout');
+                navigate('/login');
+                return;
+              }
               navigate('/checkout');
             }}
             disabled={cartItems?.length === 0}
