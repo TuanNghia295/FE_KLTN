@@ -9,7 +9,7 @@ import { Button, CircularProgress, Tooltip } from '@mui/material';
 import useStore from '../../store/useStore';
 import ChooseSizeList from '../ChooseSizeList';
 import ChooseQuantity from '../ChooseQuantity';
-import { useUpdateCartByUserID } from '../../services/cartServices';
+import { useUpdateCartItem } from '../../services/cartServices';
 
 const CartPanel = () => {
   // Lấy các trạng thái và hàm từ Zustand store
@@ -22,9 +22,7 @@ const CartPanel = () => {
   const setOpenCartPanel = useStore((state) => state.setOpenCartPanel);
   const userInfo = useStore((state) => state.userInfo);
   const navigate = useNavigate();
-  //Call API Update Cart By User ID
-  const userId = useStore((state) => state.userInfo?._id);
-  const { mutate: updateCart } = useUpdateCartByUserID();
+  const { mutate: updateCart } = useUpdateCartItem();
 
   // Tính toán tổng giá trị (subtotal, shipping, total)
 
@@ -41,10 +39,10 @@ const CartPanel = () => {
   };
 
   const handleQuantityZero = (itemId) => {
-    const itemToRemove = cartItems.find((item) => item._id === itemId);
+    const itemToRemove = cartItems.find((item) => item.id === itemId);
     if (!itemToRemove) return;
 
-    const updatedCartItems = cartItems.filter((item) => item._id !== itemId);
+    const updatedCartItems = cartItems.filter((item) => item.id !== itemId);
 
     if (cartSource === 'guest') {
       setGuestCartItems(updatedCartItems);
@@ -55,11 +53,9 @@ const CartPanel = () => {
 
     // Call updateCartByUserID to update the server with quantity 0 (or remove it)
     updateCart({
-      userId: userId,
-      productId: itemToRemove.productId,
-      size: itemToRemove.size,
-      color: itemToRemove.color,
-      quantity: 0, // Indicate removal or update
+      cartItemId: itemToRemove.id,
+      product_variant_id: itemToRemove.product_variant_id,
+      quantity: 0,
     });
   };
 
@@ -94,13 +90,13 @@ const CartPanel = () => {
             const displayColor = item.color ?? selectedVariation?.color;
 
             return (
-              <div key={item._id} className="cartItem flex items-center gap-4 mb-4 border-b pb-4">
+              <div key={item.id} className="cartItem flex items-center gap-4 mb-4 border-b pb-4">
                 {/* Hình ảnh sản phẩm */}
                 <div className="img w-[25%]">
                   <img
                     className="w-full rounded-md object-cover"
                     src={
-                      Array.isArray(item.product.images) && item.product.images.length > 0
+                      Array.isArray(item.product?.images) && item.product.images.length > 0
                         ? item.product?.images[0]?.url
                         : ''
                     }
@@ -112,7 +108,7 @@ const CartPanel = () => {
                 <div className="info w-[70%] flex flex-col gap-2">
                   <div className="flex justify-between">
                     <h4 className="text-black font-semibold text-[16px] leading-tight">
-                      <Link to={`/products/${item.product._id}`} className="hover:underline">
+                      <Link to={`/products/${item.product.id}`} className="hover:underline">
                         {item.product?.name || 'Nike Dunk 2025'}
                       </Link>
                     </h4>
@@ -127,24 +123,22 @@ const CartPanel = () => {
                     {/* Chọn size */}
                     <div className="text-gray-700 text-[14px] flex items-center gap-2">
                       <span className="font-medium">Size:</span>
-                      {(displaySize || item.product_variant_id) ? (
+                      {displaySize || item.product_variant_id ? (
                         <ChooseSizeList
                           sizeDefault={displaySize}
                           sizeChoose={item.product.variations}
                           onChange={(selectedVariation) => {
                             // Gọi API để cập nhật size
                             if (cartSource === 'guest') {
-                              updateGuestItemSize(item._id, selectedVariation);
+                              updateGuestItemSize(item.id, selectedVariation);
                             } else {
                               updateCart({
-                                userId: userId,
-                                productId: item.product?.productId,
-                                size: selectedVariation?.size,
-                                color: selectedVariation?.color, // Nếu biến thể có thuộc tính color
-                                quantity: item?.quantity, // Giữ nguyên số lượng hiện tại
+                                cartItemId: item.id,
+                                product_variant_id: selectedVariation?.id,
+                                quantity: item?.quantity,
                               });
                               // Cập nhật luôn Zustand
-                              updateItemSize(item._id, selectedVariation?.size);
+                              updateItemSize(item.id, selectedVariation?.size);
                             }
                           }}
                         />
@@ -158,11 +152,11 @@ const CartPanel = () => {
                       <span className="font-medium">Quantity:</span>
                       <ChooseQuantity
                         quantity={item?.quantity}
-                        onQuantityZero={() => handleQuantityZero(item._id)}
+                        onQuantityZero={() => handleQuantityZero(item.id)}
                         onUpdateQuantity={(newQuantity) => {
                           // Cập nhật số lượng trong Zustand
                           const updatedCartItems = cartItems.map((cartItem) =>
-                            cartItem._id === item._id ? { ...cartItem, quantity: newQuantity } : cartItem
+                            cartItem.id === item.id ? { ...cartItem, quantity: newQuantity } : cartItem
                           );
 
                           if (cartSource === 'guest') {
@@ -174,11 +168,9 @@ const CartPanel = () => {
 
                           // Gọi API để cập nhật giỏ hàng mới
                           updateCart({
-                            userId: userId,
-                            productId: item.product?.productId,
-                            size: item.size,
-                            color: item.color,
-                            quantity: newQuantity, // Cập nhật số lượng mới
+                            cartItemId: item.id,
+                            product_variant_id: item.product_variant_id,
+                            quantity: newQuantity,
                           });
                         }}
                       />

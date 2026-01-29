@@ -78,7 +78,8 @@ export default function App() {
     if (cart && typeof cart === 'object') {
       if (cart?.id) {
         setCartSource('user');
-        setCartItems(cart.items || []);
+        const normalizedItems = (cart.items || []).map((item) => ({ ...item, id: item.id ?? item._id }));
+        setCartItems(normalizedItems);
       } else if (userInfo) {
         setCartSource('user');
         setCartItems([]);

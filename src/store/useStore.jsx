@@ -56,14 +56,14 @@ const useStore = create(
       // Update Cart Item Size
       updateItemSize: (id, newSize) => {
         set((state) => ({
-          cartItems: state.cartItems.map((item) => (item._id === id ? { ...item, size: newSize } : item)),
+          cartItems: state.cartItems.map((item) => (item.id === id ? { ...item, size: newSize } : item)),
         }));
       },
 
       // Hàm để xóa sản phẩm khỏi giỏ hàng
-      removeItemFromCart: (_id) =>
+      removeItemFromCart: (id) =>
         set((state) => ({
-          cartItems: state.cartItems.filter((item) => item._id !== _id),
+          cartItems: state.cartItems.filter((item) => item.id !== id),
         })),
 
       // Hàm để xóa toàn bộ giỏ hàng
@@ -79,12 +79,12 @@ const useStore = create(
         })),
       updateGuestQuantity: (id, quantity) =>
         set((state) => ({
-          guestCartItems: state.guestCartItems.map((item) => (item._id === id ? { ...item, quantity } : item)),
+          guestCartItems: state.guestCartItems.map((item) => (item.id === id ? { ...item, quantity } : item)),
         })),
       updateGuestItemSize: (id, variation) =>
         set((state) => ({
           guestCartItems: state.guestCartItems.map((item) =>
-            item._id === id
+            item.id === id
               ? {
                   ...item,
                   product_variant_id: variation?.id ?? item.product_variant_id,
@@ -94,9 +94,9 @@ const useStore = create(
               : item
           ),
         })),
-      removeGuestItem: (_id) =>
+      removeGuestItem: (id) =>
         set((state) => ({
-          guestCartItems: state.guestCartItems.filter((item) => item._id !== _id),
+          guestCartItems: state.guestCartItems.filter((item) => item.id !== id),
         })),
       clearGuestCart: () => set({ guestCartItems: [] }),
 

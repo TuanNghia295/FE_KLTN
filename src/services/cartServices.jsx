@@ -64,6 +64,8 @@ export function useAddToCart() {
       return await addToCart(data);
     },
     onSuccess: async (result, variables) => {
+      console.log('result', result);
+
       if (result?.guest) {
         const existingIndex = guestCartItems.findIndex(
           (item) => item.product_variant_id === variables.product_variant_id
@@ -139,39 +141,35 @@ export const useMergeCart = () => {
 };
 
 //Call API Update Cart by User ID
-const updateCartByUserID = async ({ userId, productId, size, color, quantity }) => {
-  const searchParams = new URLSearchParams({
-    productId,
-    size,
-    color,
-    quantity,
-  }).toString();
-  const response = await axiosClient.put(`/cart/update/${userId}?${searchParams}`);
-  return response.data; // Ensure the response data is returned
+const updateCartItem = async ({ cartItemId, product_variant_id, quantity }) => {
+  const response = await axiosClient.patch(`/cart/items/${cartItemId}`, {
+    cart_item: { product_variant_id, quantity },
+  });
+  return response;
 };
 
 //Hook Update Cart
-export function useUpdateCartByUserID() {
+export function useUpdateCartItem() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: updateCartByUserID,
+    mutationFn: updateCartItem,
     onMutate: async (variables) => {
       await queryClient.cancelQueries({ queryKey: ['cart'] });
       const previousCart = queryClient.getQueryData(['cart']);
       if (previousCart?.items) {
         const updatedItems = previousCart.items
           .map((item) => {
-            if (
-              item.productId === variables.productId &&
-              item.size === variables.size &&
-              item.color === variables.color
-            ) {
-              if (variables.quantity === 0) {
-                return null;
-              }
-              return { ...item, quantity: variables.quantity };
+            if (item.id !== variables.cartItemId) {
+              return item;
             }
-            return item;
+            if (variables.quantity === 0) {
+              return null;
+            }
+            return {
+              ...item,
+              product_variant_id: variables.product_variant_id ?? item.product_variant_id,
+              quantity: variables.quantity,
+            };
           })
           .filter(Boolean);
         queryClient.setQueryData(['cart'], { ...previousCart, items: updatedItems });
