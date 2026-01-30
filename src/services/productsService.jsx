@@ -29,8 +29,6 @@ const getAllProducts = async ({
   }
 
   const response = await axiosClient.get(`/products?${params}`);
-  console.log(response);
-
   return {
     data: response.data,
     total: response.meta?.total_pages || Math.ceil(response.totalPage / perPage),

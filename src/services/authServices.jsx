@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useQueryClient } from '@tanstack/react-query';
 import useStore from '../store/useStore';
-import { mergeCart, useMergeCart } from './cartServices.jsx';
+import { useMergeCart } from './cartServices.jsx';
 
 // API đăng ký
 export const register = async (values) => {
@@ -205,22 +205,22 @@ export const logout = async () => {
 export function useLogout() {
   const clearInfo = useStore((state) => state.clearInfo);
   const clearCart = useStore((state) => state.clearCart);
-
+  const navigate = useNavigate();
   return useMutation({
     mutationFn: logout,
     onSuccess: () => {
       clearInfo();
       clearCart();
-      toast.success('Đăng xuất thành công', {
-        position: 'top-center',
-        autoClose: 3000,
-      });
+      navigate('/', { replace: true });
+      // toast.success('Đăng xuất thành công', {
+      //   position: 'top-center',
+      //   autoClose: 3000,
+      // });
     },
-    onError: (error) => {
-      toast.error(error.response?.data?.message || 'Đăng xuất thất bại', {
-        position: 'top-center',
-        autoClose: 3000,
-      });
+    onError: () => {
+      clearInfo();
+      clearCart();
+      navigate('/');
     },
   });
 }

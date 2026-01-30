@@ -1,11 +1,11 @@
 import { Button } from '@mui/material';
-import React, { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import TextField from '@mui/material/TextField';
 import AccountSlidebar from '../../components/AccountSlidebar';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import useStore from '../../store/useStore';
-import { useUpdateUser } from '../../services/userServices';
+import { useGetUserInfo, useUpdateUser } from '../../services/userServices';
 import axios from 'axios';
 import Autocomplete from '@mui/material/Autocomplete';
 import Page404 from '../Page404/index';
@@ -29,8 +29,7 @@ const MyAccount = () => {
   }, []);
 
   // Sử dụng selector để chỉ lấy các trạng thái cần thiết
-  const userInfo = useStore((state) => state.userInfo);
-
+  const { data: userInfo } = useGetUserInfo();
   const getInfo = useStore((state) => state.getInfo);
   const { mutate: updateUserInfo } = useUpdateUser(); // Sử dụng hook để cập nhật thông tin người dùng
 
@@ -38,7 +37,7 @@ const MyAccount = () => {
   const initialValues = useMemo(
     () => ({
       userName: userInfo?.userName || '',
-      fullName: userInfo?.fullName || '',
+      full_name: userInfo?.full_name || '',
       email: userInfo?.email || '',
       phone: userInfo?.phone || '',
       address: userInfo?.address || [], // Mảng địa chỉ
@@ -57,7 +56,7 @@ const MyAccount = () => {
     enableReinitialize: true, // Cho phép formik cập nhật giá trị khi initialValues thay đổi
     validationSchema: Yup.object({
       userName: Yup.string().required('User Name is required'),
-      fullName: Yup.string().required('Full Name is required'),
+      full_name: Yup.string().required('Full Name is required'),
       email: Yup.string().email('Invalid email format').required('Email is required'),
       phone: Yup.string(),
       address: Yup.array().of(Yup.string()),
@@ -88,7 +87,7 @@ const MyAccount = () => {
       }
       updateUserInfo(updatedValues, {
         onSuccess: (response) => {
-          getInfo(response.data); // Cập nhật Zustand state với dữ liệu từ API
+          getInfo(response); // Cập nhật Zustand state với dữ liệu từ API
         },
       });
     },
@@ -132,29 +131,15 @@ const MyAccount = () => {
                 <div className="w-full md:w-[50%]">
                   <TextField
                     className="w-full"
-                    id="userName"
-                    name="userName"
-                    label="User Name"
-                    variant="outlined"
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    value={formik.values.userName}
-                    error={formik.touched.userName && Boolean(formik.errors.userName)}
-                    helperText={formik.touched.userName && formik.errors.userName}
-                  />
-                </div>
-                <div className="w-full md:w-[50%]">
-                  <TextField
-                    className="w-full"
-                    id="fullName"
-                    name="fullName"
+                    id="full_name"
+                    name="full_name"
                     label="Full Name"
                     variant="outlined"
                     onBlur={formik.handleBlur}
                     onChange={formik.handleChange}
-                    value={formik.values.fullName}
-                    error={formik.touched.fullName && Boolean(formik.errors.fullName)}
-                    helperText={formik.touched.fullName && formik.errors.fullName}
+                    value={formik.values.full_name}
+                    error={formik.touched.full_name && Boolean(formik.errors.full_name)}
+                    helperText={formik.touched.full_name && formik.errors.full_name}
                   />
                 </div>
               </div>

@@ -73,8 +73,6 @@ export default function App() {
 
   useEffect(() => {
     if (!hydrated) return;
-    console.log('cart', cart);
-
     if (cart && typeof cart === 'object') {
       if (cart?.id) {
         setCartSource('user');

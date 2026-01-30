@@ -11,12 +11,14 @@ const useStore = create(
       refreshtoken: localStorage.getItem('refreshtoken'),
       hydrated: false,
       loadingCart: false,
+      isUploadingAvatar: false,
 
       // Hàm để cập nhật thông tin người dùng
       getInfo: (data) => set({ userInfo: data }),
       setTokens: (access, refresh) => set({ accesstoken: access, refreshtoken: refresh }),
       setHydrated: (value) => set({ hydrated: value }),
       setLoadingCart: (value) => set({ loadingCart: value }),
+      setIsUploadingAvatar: (value) => set({ isUploadingAvatar: value }),
 
       // Hàm để xóa thông tin người dùng
       clearInfo: () => {
@@ -31,6 +33,8 @@ const useStore = create(
         if (state.userInfo === null && state.accesstoken) {
           try {
             const response = await getUserInfo();
+            console.log('ressssssssssssssssssssss', response);
+
             set({ userInfo: response });
           } catch (error) {
             console.error('Failed to fetch user info:', error);
@@ -73,10 +77,25 @@ const useStore = create(
 
       // Guest cart actions
       setGuestCartItems: (items) => set({ guestCartItems: items }),
-      addGuestItem: (item) =>
-        set((state) => ({
-          guestCartItems: [...state.guestCartItems, item],
-        })),
+      addItemToGuestCart: (newItem) =>
+        set((state) => {
+          const existingIndex = state.guestCartItems.findIndex(
+            (item) => item.product_variant_id === newItem.product_variant_id
+          );
+
+          if (existingIndex !== -1) {
+            // Item exists, update quantity
+            const updatedItems = [...state.guestCartItems];
+            updatedItems[existingIndex] = {
+              ...updatedItems[existingIndex],
+              quantity: updatedItems[existingIndex].quantity + newItem.quantity,
+            };
+            return { guestCartItems: updatedItems };
+          } else {
+            // Item does not exist, add it
+            return { guestCartItems: [...state.guestCartItems, newItem] };
+          }
+        }),
       updateGuestQuantity: (id, quantity) =>
         set((state) => ({
           guestCartItems: state.guestCartItems.map((item) => (item.id === id ? { ...item, quantity } : item)),
@@ -134,7 +153,6 @@ const useStore = create(
   )
 );
 
-export const selectActiveCartItems = (state) =>
-  state.cartSource === 'user' ? state.cartItems : state.guestCartItems;
+export const selectActiveCartItems = (state) => (state.cartSource === 'user' ? state.cartItems : state.guestCartItems);
 
 export default useStore;

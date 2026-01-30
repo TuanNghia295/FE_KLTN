@@ -55,8 +55,6 @@ const clearCart = async (userId) => {
 export function useAddToCart() {
   const queryClient = useQueryClient();
   const userId = useStore((state) => state.userInfo?.id);
-  const addGuestItem = useStore((state) => state.addGuestItem);
-  const guestCartItems = useStore((state) => state.guestCartItems);
 
   return useMutation({
     mutationFn: async (data) => {
@@ -64,30 +62,19 @@ export function useAddToCart() {
       return await addToCart(data);
     },
     onSuccess: async (result, variables) => {
-      console.log('result', result);
-
       if (result?.guest) {
-        const existingIndex = guestCartItems.findIndex(
-          (item) => item.product_variant_id === variables.product_variant_id
-        );
-        if (existingIndex >= 0) {
-          const updatedItems = guestCartItems.map((item, index) =>
-            index === existingIndex ? { ...item, quantity: (item.quantity || 0) + variables.quantity } : item
-          );
-          useStore.setState({ guestCartItems: updatedItems });
-        } else {
-          const product = variables.product;
-          const cartItem = {
-            id: `${variables.productId}-${variables.product_variant_id}`,
-            productId: variables.productId,
-            product_variant_id: variables.product_variant_id,
-            size: variables.size,
-            color: variables.color,
-            quantity: variables.quantity,
-            product,
-          };
-          addGuestItem(cartItem);
-        }
+        const { addItemToGuestCart } = useStore.getState();
+        const product = variables.product;
+        const cartItem = {
+          id: `${variables.productId}-${variables.product_variant_id}`,
+          productId: variables.productId,
+          product_variant_id: variables.product_variant_id,
+          size: variables.size,
+          color: variables.color,
+          quantity: variables.quantity,
+          product,
+        };
+        addItemToGuestCart(cartItem);
         toast.success('Add product to cart successfully !', {
           position: 'top-center',
           autoClose: 3000,
@@ -135,6 +122,9 @@ export const useMergeCart = () => {
   return useMutation({
     mutationFn: mergeCart,
     onSuccess: () => {
+      const { clearGuestCart } = useStore.getState();
+      clearGuestCart();
+      localStorage.removeItem('guest-cart'); // Remove persisted guest cart from localStorage
       queryClient.invalidateQueries({ queryKey: ['cart'] });
     },
   });
@@ -188,7 +178,7 @@ export function useUpdateCartItem() {
     onSuccess: () => {
       toast.success('Cart updated successfully!', {
         position: 'top-center',
-        autoClose: 3000,
+        autoClose: 1000,
       });
     },
     onSettled: () => {

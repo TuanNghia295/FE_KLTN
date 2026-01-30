@@ -11,6 +11,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContentText from '@mui/material/DialogContentText';
+import { useGetUserInfo } from '../../services/userServices.jsx';
 
 // Hàm định dạng tiền tệ
 const formatCurrency = (value) => {
@@ -28,7 +29,7 @@ const CheckOut = () => {
   const navigate = useNavigate();
   const cartItems = useStore((state) => (state.cartSource === 'user' ? state.cartItems : state.guestCartItems));
   const cartSource = useStore((state) => state.cartSource);
-  const userInfo = useStore((state) => state.userInfo);
+  const { data: userInfo } = useGetUserInfo();
   const loadingCart = useStore((state) => state.loadingCart);
   const clearCart = useStore((state) => state.clearCart);
 
@@ -227,7 +228,7 @@ const CheckOut = () => {
                 <TextField
                   fullWidth
                   label="Full Name"
-                  value={userInfo?.fullName || ''}
+                  value={userInfo?.full_name || ''}
                   variant="outlined"
                   size="small"
                   InputProps={{ readOnly: true }}
@@ -236,7 +237,7 @@ const CheckOut = () => {
                   fullWidth
                   label="Phone Number"
                   type="tel"
-                  value={userInfo?.phone || ''}
+                  value={userInfo?.phone}
                   variant="outlined"
                   size="small"
                   InputProps={{ readOnly: true }}
