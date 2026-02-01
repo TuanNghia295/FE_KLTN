@@ -9,6 +9,7 @@ import { useGetUserInfo, useUpdateUser } from '../../services/userServices';
 import axios from 'axios';
 import Autocomplete from '@mui/material/Autocomplete';
 import Page404 from '../Page404/index';
+import { toast } from 'react-toastify';
 
 const MyAccount = () => {
   const [banks, setBanks] = useState([]);
@@ -36,7 +37,6 @@ const MyAccount = () => {
   // Memo hóa initialValues để tránh vòng lặp render
   const initialValues = useMemo(
     () => ({
-      userName: userInfo?.userName || '',
       full_name: userInfo?.full_name || '',
       email: userInfo?.email || '',
       phone: userInfo?.phone || '',
@@ -47,6 +47,7 @@ const MyAccount = () => {
         accountHolderName: userInfo?.bankInfo?.accountHolderName || '',
       },
       password: '',
+      current_password: '',
     }),
     [userInfo]
   );
@@ -55,7 +56,6 @@ const MyAccount = () => {
     initialValues,
     enableReinitialize: true, // Cho phép formik cập nhật giá trị khi initialValues thay đổi
     validationSchema: Yup.object({
-      userName: Yup.string().required('User Name is required'),
       full_name: Yup.string().required('Full Name is required'),
       email: Yup.string().email('Invalid email format').required('Email is required'),
       phone: Yup.string(),
@@ -72,22 +72,51 @@ const MyAccount = () => {
         return true;
       }),
       password: Yup.string(),
+      current_password: Yup.string().when('password', {
+        is: (value) => Boolean(value),
+        then: (schema) => schema.required('Current password is required'),
+        otherwise: (schema) => schema,
+      }),
     }),
-    onSubmit: (values) => {
-      const updatedValues = { ...values };
+    onSubmit: (values, { resetForm }) => {
+      const payload = {
+        full_name: values.full_name,
+        email: values.email,
+        phone: values.phone,
+        password: values.password,
+        current_password: values.current_password,
+      };
+
+      const originalPayload = {
+        full_name: userInfo?.full_name || '',
+        email: userInfo?.email || '',
+        phone: userInfo?.phone || '',
+      };
+
       if (!values.password) {
-        delete updatedValues.password;
+        delete payload.password;
+        delete payload.current_password;
       }
-      if (!values.bankInfo.bankName && !values.bankInfo.accountNumber && !values.bankInfo.accountHolderName) {
-        updatedValues.bankInfo = {
-          bankName: '',
-          accountNumber: '',
-          accountHolderName: '',
-        };
+
+      const hasChanges = values.password
+        ? true
+        : Object.keys(originalPayload).some((key) => payload[key] !== originalPayload[key]);
+
+      if (!hasChanges) {
+        toast.warning('No changes to save', { position: 'top-center', autoClose: 3000 });
+        return;
       }
-      updateUserInfo(updatedValues, {
+
+      updateUserInfo(payload, {
         onSuccess: (response) => {
           getInfo(response); // Cập nhật Zustand state với dữ liệu từ API
+          resetForm({
+            values: {
+              ...values,
+              password: '',
+              current_password: '',
+            },
+          });
         },
       });
     },
@@ -273,9 +302,26 @@ const MyAccount = () => {
                 <div className="w-full">
                   <TextField
                     className="w-full"
+                    id="current_password"
+                    name="current_password"
+                    label="Current Password"
+                    type="password"
+                    variant="outlined"
+                    onBlur={formik.handleBlur}
+                    onChange={formik.handleChange}
+                    value={formik.values.current_password}
+                    error={formik.touched.current_password && Boolean(formik.errors.current_password)}
+                    helperText={formik.touched.current_password && formik.errors.current_password}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col md:flex-row items-center gap-5 my-4">
+                <div className="w-full">
+                  <TextField
+                    className="w-full"
                     id="password"
                     name="password"
-                    label="Password"
+                    label="New Password"
                     type="password"
                     variant="outlined"
                     onBlur={formik.handleBlur}

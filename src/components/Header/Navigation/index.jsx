@@ -30,117 +30,48 @@ const Navigation = () => {
           {/* Điều hướng chính */}
           <div className="col_2 w-[65%]">
             <ul className="flex items-center justify-center gap nav">
-              <li className="list-none">
-                <Link to={'/'} className="link transition text-[16px] font-[500]">
-                  <Button className="link transition font-[500] hover:!text-primary !py-4">Home</Button>
-                </Link>
-              </li>
+              {['Men', 'Women', 'Children'].map((label) => {
+                const normalizedLabel = normalizeString(label);
+                const matchedCategory = Array.isArray(categoryListZustand)
+                  ? categoryListZustand.find((category) => {
+                      const normalizedName = normalizeString(category?.name);
+                      const normalizedType = normalizeString(category?.type);
+                      return normalizedName === normalizedLabel || normalizedType === normalizedLabel;
+                    })
+                  : null;
+                const categorySlug = normalizeString(matchedCategory?.type || matchedCategory?.name || label);
+                const subcategories = Array.isArray(matchedCategory?.children) ? matchedCategory.children : [];
 
-              <li className="list-none relative">
-                <Link to={'/listing'} className="link transition text-[16px] font-[500]">
-                  <Button className="link transition font-[500] hover:!text-primary !py-4">Fashion</Button>
-                </Link>
+                return (
+                  <li key={label} className="list-none relative">
+                    <Link to={`/listing/${categorySlug}`} className="link transition text-[16px] font-[500]">
+                      <Button className="link transition font-[500] hover:!text-primary !py-4">{label}</Button>
+                    </Link>
 
-                <div
-                  className="submenu absolute top-[120%] left-[0] min-w-[150px] bg-white shadow-md 
-                opacity-0  transition-all duration-300"
-                >
-                  {/* List category */}
-                  <ul>
-                    {Array.isArray(categoryListZustand) &&
-                      categoryListZustand.length > 0 &&
-                      categoryListZustand
-                        .filter((category) => category.type !== 'Sale')
-                        .map((category, index) => (
-                          <li key={index} className="list-none w-full">
-                            <Link to={`/listing/${normalizeString(category?.type)}`}>
-                              <Button className="!text-textPrimary w-full !justify-start !rounded-none">
-                                {category?.name}
-                              </Button>
-                            </Link>
-                          </li>
-                        ))}
-                  </ul>
-
-                  {/* <ul>
-                    <li className="list-none w-full relative">
-                      <Link to={'/listing/nam'}>
-                        <Button className="!text-textPrimary w-full !justify-start !rounded-none">Men</Button>
-                      </Link> */}
-
-                  {/* inner menu */}
-                  {/* <div
-                        className="submenu absolute top-[0%] left-[100%] min-w-[150px] bg-white shadow-md 
+                    {subcategories.length > 0 && (
+                      <div
+                        className="submenu absolute top-[120%] left-[0] min-w-[150px] bg-white shadow-md
                 opacity-0  transition-all duration-300"
                       >
                         <ul>
-                          <li className="list-none w-full">
-                            <Link to={'/listing/men/t-shirt'}>
-                              <Button className="!text-textPrimary w-full !justify-start !rounded-none">T-Shirt</Button>
-                            </Link>
-                          </li>
-
-                          <li className="list-none w-full">
-                            <Link to={'/listing/men/jeans'}>
-                              <Button className="!text-textPrimary w-full !justify-start !rounded-none">Jeans</Button>
-                            </Link>
-                          </li>
-
-                          <li className="list-none w-full">
-                            <Link to={'/listing/men/footwear'}>
-                              <Button className="!text-textPrimary w-full !justify-start !rounded-none">
-                                Footwear
-                              </Button>
-                            </Link>
-                          </li>
-
-                          <li className="list-none w-full">
-                            <Link to={'/listing/men/watch'}>
-                              <Button className="!text-textPrimary w-full !justify-start !rounded-none">Watch</Button>
-                            </Link>
-                          </li>
+                          {subcategories.map((subcategory) => {
+                            const subcategorySlug = normalizeString(subcategory?.type || subcategory?.name);
+                            return (
+                              <li key={subcategory?.id || subcategorySlug} className="list-none w-full">
+                                <Link to={`/listing/${categorySlug}/${subcategorySlug}`}>
+                                  <Button className="!text-textPrimary w-full !justify-start !rounded-none">
+                                    {subcategory?.name || subcategory?.type}
+                                  </Button>
+                                </Link>
+                              </li>
+                            );
+                          })}
                         </ul>
-                      </div> */}
-                  {/* </li>
-
-                    <li className="list-none w-full">
-                      <Link to={'/listing/nu'}>
-                        <Button className="!text-textPrimary w-full !justify-start !rounded-none">Women</Button>
-                      </Link>
-                    </li>
-
-                    <li className="list-none w-full">
-                      <Link to={'/listing/tre-em'}>
-                        <Button className="!text-textPrimary w-full !justify-start !rounded-none">Kids</Button>
-                      </Link>
-                    </li>
-
-                    <li className="list-none w-full">
-                      <Link to={'/listing/other'}>
-                        <Button className="!text-textPrimary w-full !justify-start !rounded-none">Other</Button>
-                      </Link>
-                    </li>
-                  </ul> */}
-                </div>
-              </li>
-
-              {/* <li className="list-none">
-                <Link to={'/listing/footwear'} className="link transition text-[16px] font-[500]">
-                  <Button className="link transition font-[500] hover:!text-primary !py-4">Footwear</Button>
-                </Link>
-              </li>
-
-              <li className="list-none">
-                <Link to={'/listing/jewellery'} className="link transition text-[16px] font-[500]">
-                  <Button className="link transition font-[500] hover:!text-primary !py-4">Jewellery</Button>
-                </Link>
-              </li> */}
-
-              {/* <li className="list-none">
-                <Link to={'/listing/sale'} className="link transition text-[16px] font-[500]">
-                  <Button className="link transition font-[500] hover:!text-primary !py-4">Sale</Button>
-                </Link>
-              </li> */}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
 

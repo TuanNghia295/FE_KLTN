@@ -24,7 +24,7 @@ const getColumns = () => (window.innerWidth < 768 ? 1 : window.innerWidth < 1024
 const Home = () => {
   const [columns, setColumns] = useState(getColumns);
   const { listBanner } = useBanner();
-
+  const bannerHeight = 'h-[calc(100vh-80px)]';
   // Lấy 10 sản phẩm gần nhất (theo created_at mới nhất)
   const { productList, loadingProductList } = useProducts(
     10, // perPage: 10 sản phẩm
@@ -66,13 +66,11 @@ const Home = () => {
       <div className="relative">
         <Suspense
           fallback={
-            <div className="w-full h-[60vh] bg-gray-200 flex items-center justify-center">
+            <div className={`w-full ${bannerHeight} bg-gray-200 flex items-center justify-center`}>
               <LoadingComponent />
             </div>
           }
         >
-          {' '}
-          {/* Fallback cho HomeSlider */}
           <HomeSlider />
         </Suspense>
       </div>

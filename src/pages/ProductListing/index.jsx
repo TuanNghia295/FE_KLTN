@@ -33,7 +33,7 @@ const normalizeString = (str) => {
 };
 
 const ProductListing = () => {
-  const { categoryName } = useParams();
+  const { categoryName, category, subcategory } = useParams();
   const navigate = useNavigate();
   const categoryListZustand = useStore((state) => state.categoryListZustand);
   const openFilterProduct = useStore((state) => state.openFilterProduct);
@@ -43,8 +43,19 @@ const ProductListing = () => {
     setOpenFilterProduct(newOpen);
   };
 
-  const getCategory = categoryName
-    ? categoryListZustand.find((c) => normalizeString(c.name) === normalizeString(categoryName))
+  const categoryParam = categoryName || category || '';
+  const getCategory = categoryParam
+    ? categoryListZustand.find(
+        (c) =>
+          normalizeString(c.name) === normalizeString(categoryParam) ||
+          normalizeString(c.type) === normalizeString(categoryParam)
+      )
+    : null;
+
+  const getSubcategory = subcategory
+    ? getCategory?.children?.find(
+        (child) => normalizeString(child?.name || child?.type) === normalizeString(subcategory)
+      )
     : null;
 
   const isMobile = useMediaQuery('(max-width:768px)');
@@ -90,12 +101,14 @@ const ProductListing = () => {
   const totalPage = selectedCategories.length > 0 ? total : getCategory ? totalCate : total;
 
   useEffect(() => {
-    if (getCategory?.id) {
+    if (getSubcategory?.id) {
+      setSelectedCategories([getSubcategory.id]);
+    } else if (getCategory?.id) {
       setSelectedCategories([getCategory.id]);
     } else {
       setSelectedCategories([]);
     }
-  }, [getCategory?.id]);
+  }, [getCategory?.id, getSubcategory?.id]);
 
   const [itemView, setItemView] = useState('grid');
   const [anchorEl, setAnchorEl] = useState(null);
@@ -131,7 +144,7 @@ const ProductListing = () => {
   useEffect(() => {
     setAllProducts([]);
     setPage(1);
-  }, [categoryName, perPage, isMobile, sortBy, sortDir, minPrice, maxPrice, selectedCategories.length]);
+  }, [categoryParam, subcategory, perPage, isMobile, sortBy, sortDir, minPrice, maxPrice, selectedCategories.length]);
 
   useEffect(() => {
     let sourceProducts = selectedCategories.length > 0 ? productList : getCategory ? productCateList : productList;
@@ -216,15 +229,25 @@ const ProductListing = () => {
             <RouterLink to="/listing" className="hover:underline text-inherit">
               Listing
             </RouterLink>
-            {getCategory ? <Typography sx={{ color: 'text.primary' }}>{getCategory?.name}</Typography> : ''}
+            {getCategory && !getSubcategory ? (
+              <Typography sx={{ color: 'text.primary' }}>{getCategory?.name}</Typography>
+            ) : null}
+            {getCategory && getSubcategory ? (
+              <RouterLink to={`/listing/${categoryParam}`} className="hover:underline text-inherit">
+                {getCategory?.name}
+              </RouterLink>
+            ) : null}
+            {getSubcategory ? <Typography sx={{ color: 'text.primary' }}>{getSubcategory?.name}</Typography> : null}
           </Breadcrumbs>
         </div>
         <h3 className="font-bold text-black text-[20px] sm:text-[24px] md:text-[30px] mt-3 sm:mt-4 px-2">
           {selectedCategories.length > 0
             ? `FILTERED COLLECTION (${selectedCategories.length} ${selectedCategories.length === 1 ? 'Category' : 'Categories'})`
-            : getCategory
-              ? `${getCategory.name.toUpperCase()} COLLECTION`
-              : 'ALL COLLECTION'}
+            : getSubcategory
+              ? `${getSubcategory?.name?.toUpperCase()} COLLECTION`
+              : getCategory
+                ? `${getCategory.name.toUpperCase()} COLLECTION`
+                : 'ALL COLLECTION'}
         </h3>
       </div>
       <div className="bg-white p-2 sm:p-3 mt-3 sm:mt-4">

@@ -28,44 +28,59 @@ export default function CategoryCollapse({ categoryListZustand }) {
     <>
       <div className="scroll">
         <ul className="w-full">
-          <li className="list-none flex items-center relative flex-col">
-            <Link to={'/listing'} className="w-full">
-              <Button className="w-full !text-left !justify-start !px-3 !text-textPrimary  hover:!bg-grayf5">
-                Fashion
-              </Button>
-            </Link>
-            {submenuIndex === 0 ? (
-              <CiSquareMinus
-                className="absolute top-[8px] right-[15px] text-[20px] cursor-pointer"
-                onClick={() => openSubmenu(0)}
-              />
-            ) : (
-              <CiSquarePlus
-                className="absolute top-[8px] right-[15px] text-[20px] cursor-pointer"
-                onClick={() => openSubmenu(0)}
-              />
-            )}
-            {/* Danh sách con */}
+          {['Men', 'Women', 'Children'].map((label, index) => {
+            const normalizedLabel = normalizeString(label);
+            const matchedCategory = Array.isArray(categoryListZustand)
+              ? categoryListZustand.find((category) => {
+                  const normalizedName = normalizeString(category?.name);
+                  const normalizedType = normalizeString(category?.type);
+                  return normalizedName === normalizedLabel || normalizedType === normalizedLabel;
+                })
+              : null;
+            const categorySlug = normalizeString(matchedCategory?.type || matchedCategory?.name || label);
+            const subcategories = Array.isArray(matchedCategory?.children) ? matchedCategory.children : [];
 
-            {submenuIndex === 0 && (
-              <ul className="inner_submenu  w-full pl-3 ">
-                {Array.isArray(categoryListZustand) &&
-                  categoryListZustand.length > 0 &&
-                  categoryListZustand.map((category) => (
-                    <li className="list-none relative">
-                      <Link
-                        to={`/listing/${normalizeString(category?.type)}`}
-                        className="!hover:!text-primary !transition"
-                      >
-                        <Button className="w-full hover:!bg-grayf5 !text-left !justify-start !px-3 !text-textPrimary">
-                          {category?.type}
-                        </Button>
-                      </Link>
-                    </li>
-                  ))}
-              </ul>
-            )}
-          </li>
+            return (
+              <li key={label} className="list-none flex items-center relative flex-col">
+                <Link to={`/listing/${categorySlug}`} className="w-full">
+                  <Button className="w-full !text-left !justify-start !px-3 !text-textPrimary  hover:!bg-grayf5">
+                    {label}
+                  </Button>
+                </Link>
+                {submenuIndex === index ? (
+                  <CiSquareMinus
+                    className="absolute top-[8px] right-[15px] text-[20px] cursor-pointer"
+                    onClick={() => openSubmenu(index)}
+                  />
+                ) : (
+                  <CiSquarePlus
+                    className="absolute top-[8px] right-[15px] text-[20px] cursor-pointer"
+                    onClick={() => openSubmenu(index)}
+                  />
+                )}
+
+                {submenuIndex === index && subcategories.length > 0 && (
+                  <ul className="inner_submenu  w-full pl-3 ">
+                    {subcategories.map((subcategory) => {
+                      const subcategorySlug = normalizeString(subcategory?.type || subcategory?.name);
+                      return (
+                        <li key={subcategory?.id || subcategorySlug} className="list-none relative">
+                          <Link
+                            to={`/listing/${categorySlug}/${subcategorySlug}`}
+                            className="!hover:!text-primary !transition"
+                          >
+                            <Button className="w-full hover:!bg-grayf5 !text-left !justify-start !px-3 !text-textPrimary">
+                              {subcategory?.name || subcategory?.type}
+                            </Button>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
     </>

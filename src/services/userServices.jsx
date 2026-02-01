@@ -9,6 +9,8 @@ export const userInfo = async () => {
 };
 
 export const updateUser = async (values) => {
+  console.log('valuies', values);
+
   const response = await axiosClient.patch('/users/userInfo', { user: values });
   return response;
 };
@@ -21,13 +23,13 @@ export function useUpdateUser() {
       if (data?.data?.address.length === 0) {
         return;
       }
-      toast.success('Cập nhật thông tin thành công', {
+      toast.success('Update Successfully', {
         position: 'top-center',
         autoClose: 3000,
       });
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Cập nhật thông tin thất bại', {
+      toast.error(error.response?.data?.message || 'Error', {
         position: 'top-center',
         autoClose: 3000,
       });
