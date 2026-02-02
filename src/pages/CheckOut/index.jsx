@@ -49,7 +49,8 @@ const CheckOut = () => {
 
   const addresses = userInfo?.addresses || [];
   const defaultAddress = addresses.find((address) => address.is_default) || null;
-  const selectedAddressLabel = selectedAddress ? formatAddress(selectedAddress) : '';
+  const effectiveAddress = selectedAddress || defaultAddress || addresses[0] || null;
+  const selectedAddressLabel = effectiveAddress ? formatAddress(effectiveAddress) : '';
 
   const { clearingCartFn } = useClearCart({ userId: userInfo?._id });
   const {
@@ -211,7 +212,7 @@ const CheckOut = () => {
     }
   }, [isOrderCreationError, orderCreationError, resetCreateOrder]);
 
-  const handleCloseNotification = (event, reason) => {
+  const handleCloseNotification = (_event, reason) => {
     if (reason === 'clickaway') {
       return;
     }
@@ -266,7 +267,7 @@ const CheckOut = () => {
                   fullWidth
                   label="Address"
                   value={selectedAddressLabel}
-                  onChange={(e) => setSelectedAddress({ street_address: e.target.value })}
+                  onChange={(event) => setSelectedAddress({ street_address: event.target.value })}
                   variant="outlined"
                   size="small"
                   multiline

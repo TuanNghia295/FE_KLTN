@@ -79,6 +79,11 @@ const setDefaultAddress = async (id) => {
   return response;
 };
 
+const getAddresses = async () => {
+  const response = await axiosClient.get('addresses');
+  return response;
+};
+
 export function useCreateAddress() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -89,6 +94,7 @@ export function useCreateAddress() {
         autoClose: 3000,
       });
       queryClient.invalidateQueries({ queryKey: ['userInfo'] });
+      queryClient.invalidateQueries({ queryKey: ['addresses'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Error', {
@@ -109,6 +115,7 @@ export function useUpdateAddress() {
         autoClose: 3000,
       });
       queryClient.invalidateQueries({ queryKey: ['userInfo'] });
+      queryClient.invalidateQueries({ queryKey: ['addresses'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Error', {
@@ -129,6 +136,7 @@ export function useDeleteAddress() {
         autoClose: 3000,
       });
       queryClient.invalidateQueries({ queryKey: ['userInfo'] });
+      queryClient.invalidateQueries({ queryKey: ['addresses'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Error', {
@@ -149,6 +157,7 @@ export function useSetDefaultAddress() {
         autoClose: 3000,
       });
       queryClient.invalidateQueries({ queryKey: ['userInfo'] });
+      queryClient.invalidateQueries({ queryKey: ['addresses'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Error', {
@@ -156,5 +165,12 @@ export function useSetDefaultAddress() {
         autoClose: 3000,
       });
     },
+  });
+}
+
+export function useGetAddresses() {
+  return useQuery({
+    queryKey: ['addresses'],
+    queryFn: getAddresses,
   });
 }

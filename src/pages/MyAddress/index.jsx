@@ -11,6 +11,7 @@ import ChooseProvinces from '../../components/ChooseProvinces';
 import {
   useCreateAddress,
   useDeleteAddress,
+  useGetAddresses,
   useSetDefaultAddress,
   useUpdateAddress,
 } from '../../services/addressServices';
@@ -18,12 +19,13 @@ import {
 const MyAddress = () => {
   const userInfo = useStore((state) => state.userInfo);
   const getInfo = useStore((state) => state.getInfo);
+  const { data: addressesResponse } = useGetAddresses();
   const { mutate: createAddress, isPending: isCreating } = useCreateAddress();
   const { mutate: updateAddress, isPending: isUpdating } = useUpdateAddress();
   const { mutate: deleteAddress, isPending: isDeleting } = useDeleteAddress();
   const { mutate: setDefaultAddress, isPending: isSettingDefault } = useSetDefaultAddress();
 
-  const addressArray = useMemo(() => userInfo?.addresses || [], [userInfo?.addresses]);
+  const addressArray = useMemo(() => addressesResponse?.addresses || addressesResponse || [], [addressesResponse]);
   const hasDefaultAddress = addressArray.some((address) => address.is_default);
 
   const [editAddressId, setEditAddressId] = useState(null);
@@ -168,28 +170,51 @@ const MyAddress = () => {
                 Add New Address
               </Button>
             </div>
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               {defaultAddress && (
-                <div className="user-address p-4 border rounded-md bg-gray-50">
-                  <h2 className="font-medium text-lg mb-3">Default Address</h2>
-                  <p className="text-gray-700">{formatAddress(defaultAddress)}</p>
+                <div className="user-address p-5 border rounded-lg bg-gradient-to-br from-green-50 to-white">
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="font-semibold text-lg text-black">Default Address</h2>
+                    <span className="text-xs font-medium text-green-700 bg-green-100 px-2 py-1 rounded-full">Default</span>
+                  </div>
+                  <p className="text-gray-800 font-medium">
+                    {defaultAddress.recipient_name || userInfo?.full_name || userInfo?.fullName || 'Recipient'}
+                  </p>
+                  <p className="text-gray-600 text-sm">{defaultAddress.phone || userInfo?.phone || ''}</p>
+                  <p className="text-gray-700 mt-2 leading-relaxed">{formatAddress(defaultAddress)}</p>
                 </div>
               )}
-              <div className="saved-addresses p-4 border rounded-md bg-gray-50">
-                <h2 className="font-medium text-lg mb-3">Saved Addresses</h2>
+              <div className="saved-addresses p-5 border rounded-lg bg-white">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="font-semibold text-lg text-black">Saved Addresses</h2>
+                  <span className="text-xs text-gray-500">{addressArray.length} address(es)</span>
+                </div>
                 {Array.isArray(addressArray) && addressArray.length > 0 ? (
                   <div className="address-list space-y-4">
                     {addressArray.map((address, index) => (
                       <div
                         key={address.id || index}
-                        className={`p-4 border rounded-md flex flex-col gap-2 ${
-                          address.is_default ? 'border-green-500 bg-green-50' : 'border-gray-300'
+                        className={`p-4 border rounded-lg flex flex-col gap-3 shadow-sm transition ${
+                          address.is_default ? 'border-green-400 bg-green-50' : 'border-gray-200 bg-gray-50'
                         }`}
                       >
-                        <div className="flex justify-between items-center">
-                          <h4 className="font-medium text-black">
-                            {address.is_default ? 'Default Address' : `Address ${index + 1}`}
-                          </h4>
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-semibold text-black">
+                                {address.is_default ? 'Default Address' : `Address ${index + 1}`}
+                              </h4>
+                              {address.is_default && (
+                                <span className="text-xs font-medium text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+                                  Default
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-gray-800 font-medium">
+                              {address.recipient_name || userInfo?.full_name || userInfo?.fullName || 'Recipient'}
+                            </p>
+                            <p className="text-gray-600 text-sm">{address.phone || userInfo?.phone || ''}</p>
+                          </div>
                           <div className="flex gap-2">
                             <Button
                               variant="outlined"
@@ -219,12 +244,15 @@ const MyAddress = () => {
                             </Button>
                           </div>
                         </div>
-                        <p className="text-gray-700">{formatAddress(address)}</p>
+                        <p className="text-gray-700 leading-relaxed">{formatAddress(address)}</p>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500">No addresses found. Please add a new address.</p>
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No addresses found.</p>
+                    <p className="text-sm">Please add a new address to get started.</p>
+                  </div>
                 )}
               </div>
             </div>
