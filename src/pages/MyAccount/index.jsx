@@ -40,7 +40,7 @@ const MyAccount = () => {
       full_name: userInfo?.full_name || '',
       email: userInfo?.email || '',
       phone: userInfo?.phone || '',
-      address: userInfo?.address || [], // Mảng địa chỉ
+      address: userInfo?.addresses || [],
       bankInfo: {
         bankName: userInfo?.bankInfo?.bankName || '',
         accountNumber: userInfo?.bankInfo?.accountNumber || '',
@@ -59,7 +59,7 @@ const MyAccount = () => {
       full_name: Yup.string().required('Full Name is required'),
       email: Yup.string().email('Invalid email format').required('Email is required'),
       phone: Yup.string(),
-      address: Yup.array().of(Yup.string()),
+      address: Yup.array(),
       bankInfo: Yup.object({
         bankName: Yup.string(),
         accountNumber: Yup.string(),
@@ -121,6 +121,17 @@ const MyAccount = () => {
       });
     },
   });
+
+  const formatAddress = (address) => {
+    if (!address) return '';
+    const parts = [address.street_address, address.ward, address.district, address.city, address.country]
+      .map((part) => part?.toString().trim())
+      .filter(Boolean);
+    return parts.join(', ');
+  };
+
+  const defaultAddress = userInfo?.addresses?.find((address) => address.is_default);
+  const defaultAddressLabel = defaultAddress ? formatAddress(defaultAddress) : '';
 
   // Lấy object ngân hàng ban đầu nếu có
   const initialBank = useMemo(() => {
@@ -208,13 +219,10 @@ const MyAccount = () => {
                     className="w-full"
                     id="address"
                     name="address"
-                    label="Address (Enter new address to add)"
+                    label="Address"
                     variant="outlined"
                     onBlur={formik.handleBlur}
-                    onChange={(e) => formik.setFieldValue('address', [e.target.value])}
-                    value={formik.values.address[0] || ''}
-                    error={formik.touched.address && Boolean(formik.errors.address)}
-                    helperText={formik.touched.address && formik.errors.address}
+                    value={defaultAddressLabel}
                     disabled
                   />
                 </div>
@@ -239,7 +247,7 @@ const MyAccount = () => {
                       />
                     )}
                     value={selectedBank}
-                    onChange={(event, newValue) => {
+                    onChange={(_event, newValue) => {
                       setSelectedBank(newValue);
                       formik.setFieldValue('bankInfo.bankName', newValue ? newValue.name : '');
                       if (!newValue) {
@@ -247,7 +255,7 @@ const MyAccount = () => {
                         formik.setFieldValue('bankInfo.accountHolderName', '');
                       }
                     }}
-                    onInputChange={(event, newInputValue) => {
+                    onInputChange={(_event, newInputValue) => {
                       if (newInputValue === '') {
                         setSelectedBank(null);
                         formik.setFieldValue('bankInfo.bankName', '');

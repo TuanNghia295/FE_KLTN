@@ -29,7 +29,7 @@ export function useUpdateUser() {
       });
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Error', {
+      toast.error(error?.errors[0] || 'Error', {
         position: 'top-center',
         autoClose: 3000,
       });

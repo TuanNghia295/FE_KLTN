@@ -77,6 +77,7 @@ export function useLogin() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const getInfo = useStore((state) => state.getInfo);
+  const fetchUserInfo = useStore((state) => state.fetchUserInfo);
   const guestCartItems = useStore((state) => state.guestCartItems);
   const clearGuestCart = useStore((state) => state.clearGuestCart);
   const setCartSource = useStore((state) => state.setCartSource);
@@ -92,6 +93,7 @@ export function useLogin() {
 
       // Store user info in zustand
       getInfo(data.user);
+      await fetchUserInfo(true);
 
       setCartSource('user');
 

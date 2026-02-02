@@ -36,8 +36,20 @@ const CheckOut = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('Cash');
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' });
   const [showAddressList, setShowAddressList] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState(userInfo?.address?.[0] || '');
+  const [selectedAddress, setSelectedAddress] = useState(null);
   const [showAddressModal, setShowAddressModal] = useState(false);
+
+  const formatAddress = (address) => {
+    if (!address) return '';
+    const parts = [address.street_address, address.ward, address.district, address.city, address.country]
+      .map((part) => part?.toString().trim())
+      .filter(Boolean);
+    return parts.join(', ');
+  };
+
+  const addresses = userInfo?.addresses || [];
+  const defaultAddress = addresses.find((address) => address.is_default) || null;
+  const selectedAddressLabel = selectedAddress ? formatAddress(selectedAddress) : '';
 
   const { clearingCartFn } = useClearCart({ userId: userInfo?._id });
   const {
@@ -46,7 +58,7 @@ const CheckOut = () => {
     isError: isErrorShippingFee,
     error: shippingError,
     refetch: refetchShippingFee,
-  } = useShippingFee(selectedAddress);
+  } = useShippingFee(selectedAddressLabel);
 
   const {
     mutate: createOrderMutate,
@@ -74,10 +86,16 @@ const CheckOut = () => {
       return;
     }
 
-    if (userInfo && (!userInfo.address || userInfo.address.length === 0 || userInfo.address.includes('Default'))) {
+    if (userInfo && (!userInfo.addresses || userInfo.addresses.length === 0)) {
       setShowAddressModal(true);
     }
   }, [userInfo, cartSource, navigate]);
+
+  useEffect(() => {
+    if (!selectedAddress && defaultAddress) {
+      setSelectedAddress(defaultAddress);
+    }
+  }, [defaultAddress, selectedAddress]);
 
   const handleCloseAddressModal = () => {
     setShowAddressModal(false);
@@ -117,7 +135,7 @@ const CheckOut = () => {
     const payload = {
       customerName: userInfo.fullName,
       customerPhone: userInfo.phone,
-      toAddress: selectedAddress,
+      toAddress: selectedAddressLabel,
       items: cartItems.map((item) => {
         const selectedVariation = item.product?.variations?.find(
           (variation) => variation.id === item.product_variant_id
@@ -247,45 +265,45 @@ const CheckOut = () => {
                 <TextField
                   fullWidth
                   label="Address"
-                  value={selectedAddress}
-                  onChange={(e) => setSelectedAddress(e.target.value)} // Cho phép chỉnh sửa nếu không chọn từ danh sách
+                  value={selectedAddressLabel}
+                  onChange={(e) => setSelectedAddress({ street_address: e.target.value })}
                   variant="outlined"
                   size="small"
                   multiline
                   rows={2}
-                  required // Thêm required
-                  error={!selectedAddress} // Hiển thị lỗi nếu rỗng
-                  helperText={!selectedAddress ? 'Shipping address is required.' : ''}
+                  required
+                  error={!selectedAddressLabel}
+                  helperText={!selectedAddressLabel ? 'Shipping address is required.' : ''}
                 />
-                {userInfo?.address &&
-                  userInfo.address.length > 0 && ( // Chỉ hiển thị nút Change nếu có địa chỉ lưu
-                    <Button variant="text" color="primary" onClick={() => setShowAddressList(!showAddressList)}>
-                      {showAddressList ? 'Hide' : 'Change'}
-                    </Button>
-                  )}
-                {/* Thêm nút để thêm địa chỉ mới nếu cần */}
-                {/* <Button variant="outlined" size="small">Add New Address</Button> */}
+                {addresses.length > 0 && (
+                  <Button variant="text" color="primary" onClick={() => setShowAddressList(!showAddressList)}>
+                    {showAddressList ? 'Hide' : 'Change'}
+                  </Button>
+                )}
               </div>
-              {showAddressList && userInfo?.address && (
+              {showAddressList && addresses.length > 0 && (
                 <div className="address-list mt-3 border p-3 rounded-md bg-gray-50 max-h-40 overflow-y-auto">
                   <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
                     Select a saved address:
                   </Typography>
-                  {userInfo.address.map((addr, index) => (
-                    <Button
-                      key={index}
-                      fullWidth
-                      variant={selectedAddress === addr ? 'contained' : 'outlined'} // Highlight địa chỉ đã chọn
-                      sx={{ mb: 1, textAlign: 'left', textTransform: 'none', justifyContent: 'flex-start' }}
-                      onClick={() => {
-                        setSelectedAddress(addr);
-                        setShowAddressList(false); // Tự đóng khi chọn
-                        refetchShippingFee(); // Refetch phí ship khi đổi địa chỉ
-                      }}
-                    >
-                      {addr}
-                    </Button>
-                  ))}
+                  {addresses.map((addr, index) => {
+                    const formattedAddress = formatAddress(addr);
+                    return (
+                      <Button
+                        key={addr.id || index}
+                        fullWidth
+                        variant={selectedAddress?.id === addr.id ? 'contained' : 'outlined'}
+                        sx={{ mb: 1, textAlign: 'left', textTransform: 'none', justifyContent: 'flex-start' }}
+                        onClick={() => {
+                          setSelectedAddress(addr);
+                          setShowAddressList(false);
+                          refetchShippingFee();
+                        }}
+                      >
+                        {formattedAddress}
+                      </Button>
+                    );
+                  })}
                 </div>
               )}
             </form>

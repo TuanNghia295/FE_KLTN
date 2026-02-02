@@ -28,9 +28,9 @@ const useStore = create(
       },
 
       // Hàm để lấy thông tin người dùng từ API
-      fetchUserInfo: async () => {
+      fetchUserInfo: async (force = false) => {
         const state = get();
-        if (state.userInfo === null && state.accesstoken) {
+        if ((force || state.userInfo === null) && state.accesstoken) {
           try {
             const response = await getUserInfo();
             console.log('ressssssssssssssssssssss', response);
@@ -38,7 +38,9 @@ const useStore = create(
             set({ userInfo: response });
           } catch (error) {
             console.error('Failed to fetch user info:', error);
-            set({ userInfo: null });
+            if (force) {
+              set({ userInfo: null });
+            }
           }
         }
       },
