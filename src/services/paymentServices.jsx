@@ -15,22 +15,24 @@ const fetchShippingFee = async (toAddress) => {
   }
 };
 
-// 2. Tạo đơn hàng (và có thể lấy URL thanh toán PayPal từ backend)
+// 2. Tạo đơn hàng
 const createOrderApi = async (orderPayload) => {
   try {
-    // API endpoint này giờ sẽ xử lý cả việc tạo đơn hàng
-    // và khởi tạo thanh toán PayPal nếu cần
     console.log('Payload being sent to backend:', orderPayload);
-    const response = await axiosClient.post('/payment/createOrder', orderPayload);
-    // Backend sẽ trả về { message, order } hoặc { message, order, paymentUrl }
-    console.log('Order creation/payment initiation response:', response);
+    const response = await axiosClient.post('/orders', orderPayload);
+    console.log('Order creation response:', response);
 
     return response;
   } catch (error) {
-    console.error('Error creating order:', error.response?.data || error.message);
-    // Ném lỗi chi tiết từ backend nếu có
+    const errorPayload = error?.error ? error : error?.response?.data;
+    console.error('Error creating order:', errorPayload || error.message);
+
+    if (errorPayload?.error === 'inventory_locked') {
+      throw new Error(errorPayload.message || 'Inventory is being processed. Please retry.');
+    }
+
     throw new Error(
-      error.response?.data?.details?.join(', ') || error.response?.data?.error || 'Failed to create order'
+      errorPayload?.details?.join(', ') || errorPayload?.message || errorPayload?.error || 'Failed to create order'
     );
   }
 };

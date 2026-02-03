@@ -12,6 +12,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContentText from '@mui/material/DialogContentText';
 import { useGetUserInfo } from '../../services/userServices.jsx';
+import { useGetAddresses } from '../../services/addressServices.jsx';
 
 // Hàm định dạng tiền tệ
 const formatCurrency = (value) => {
@@ -29,7 +30,10 @@ const CheckOut = () => {
   const navigate = useNavigate();
   const cartItems = useStore((state) => (state.cartSource === 'user' ? state.cartItems : state.guestCartItems));
   const cartSource = useStore((state) => state.cartSource);
+  const accesstoken = useStore((state) => state.accesstoken);
+  const hydrated = useStore((state) => state.hydrated);
   const { data: userInfo } = useGetUserInfo();
+  const { data: addressesResponse } = useGetAddresses();
   const loadingCart = useStore((state) => state.loadingCart);
   const clearCart = useStore((state) => state.clearCart);
 
@@ -47,7 +51,10 @@ const CheckOut = () => {
     return parts.join(', ');
   };
 
-  const addresses = userInfo?.addresses || [];
+  const addresses = useMemo(
+    () => addressesResponse?.addresses || addressesResponse || [],
+    [addressesResponse]
+  );
   const defaultAddress = addresses.find((address) => address.is_default) || null;
   const effectiveAddress = selectedAddress || defaultAddress || addresses[0] || null;
   const selectedAddressLabel = effectiveAddress ? formatAddress(effectiveAddress) : '';
@@ -81,16 +88,18 @@ const CheckOut = () => {
   const isCartLoading = loadingCart && cartSource === 'user';
 
   useEffect(() => {
-    if (!userInfo && cartSource === 'guest') {
+    if (!hydrated) return;
+
+    if (!accesstoken && cartSource === 'guest') {
       sessionStorage.setItem('returnTo', '/checkout');
       navigate('/login');
       return;
     }
 
-    if (userInfo && (!userInfo.addresses || userInfo.addresses.length === 0)) {
+    if (userInfo && addresses.length === 0) {
       setShowAddressModal(true);
     }
-  }, [userInfo, cartSource, navigate]);
+  }, [userInfo, cartSource, navigate, addresses.length, hydrated, accesstoken]);
 
   useEffect(() => {
     if (!selectedAddress && defaultAddress) {
@@ -134,34 +143,8 @@ const CheckOut = () => {
     }
 
     const payload = {
-      customerName: userInfo.fullName,
-      customerPhone: userInfo.phone,
-      toAddress: selectedAddressLabel,
-      items: cartItems.map((item) => {
-        const selectedVariation = item.product?.variations?.find(
-          (variation) => variation.id === item.product_variant_id
-        );
-        const displaySize = item.size ?? selectedVariation?.size;
-        const displayColor = item.color ?? selectedVariation?.color;
-
-        return {
-          productId: item.product.productId,
-          images: item.product.images.map((image) => ({
-            url: image.url,
-            isPrimary: image.isPrimary || false,
-            order: image.order || null,
-            publicId: image.publicId || null,
-          })),
-          name: item.product.name,
-          size: displaySize,
-          color: displayColor,
-          quantity: item.quantity,
-        };
-      }),
-      paymentMethod: selectedPaymentMethod,
-      isReturn: false,
-      shippingFee: shippingFee,
-      distance: distance,
+      shipping_address: selectedAddressLabel,
+      payment_method: selectedPaymentMethod,
     };
 
     createOrderMutate(payload);
@@ -202,8 +185,9 @@ const CheckOut = () => {
       setNotification({
         open: true,
         message: `Failed to process order: ${
-          orderCreationError?.response?.data?.details?.join(', ') ||
           orderCreationError?.message ||
+          orderCreationError?.details?.join(', ') ||
+          orderCreationError?.error ||
           'Unknown server error'
         }`,
         severity: 'error',
@@ -243,7 +227,7 @@ const CheckOut = () => {
             {/* Billing Details */}
             <h2 className="text-[18px] text-black font-[600] mb-3">BILLING DETAILS</h2>
             <form className="w-full my-3 space-y-4">
-              <div className="flex items-center gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <TextField
                   fullWidth
                   label="Full Name"
@@ -256,7 +240,7 @@ const CheckOut = () => {
                   fullWidth
                   label="Phone Number"
                   type="tel"
-                  value={userInfo?.phone}
+                  value={userInfo?.phone || ''}
                   variant="outlined"
                   size="small"
                   InputProps={{ readOnly: true }}
