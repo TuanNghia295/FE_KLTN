@@ -2,13 +2,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axiosClient from '../apis/axiosClient';
 
 // 1. Tính phí vận chuyển
-const fetchShippingFee = async (toAddress) => {
-  if (!toAddress) {
+const fetchShippingFee = async ({ lat, lng, total_item_qty }) => {
+  if (lat == null || lng == null || total_item_qty == null) {
     return null;
   }
   try {
-    const { data } = await axiosClient.post('/payment/calculate-shipping-fee', { toAddress });
-    return data;
+    const data = await axiosClient.post('/orders/shipping_fee', null, { params: { lat, lng, total_item_qty } });
+    return data?.data ?? data;
   } catch (error) {
     console.error('Error fetching shipping fee:', error.response?.data || error.message);
     throw new Error(error.response?.data?.details || error.response?.data?.error || 'Failed to calculate shipping fee');
@@ -40,11 +40,11 @@ const createOrderApi = async (orderPayload) => {
 // === React Query Hooks ===
 
 // Hook để lấy phí vận chuyển
-export const useShippingFee = (toAddress) => {
+export const useShippingFee = ({ lat, lng, total_item_qty }) => {
   return useQuery({
-    queryKey: ['shippingFee', toAddress],
-    queryFn: () => fetchShippingFee(toAddress),
-    enabled: !!toAddress,
+    queryKey: ['shippingFee', lat, lng, total_item_qty],
+    queryFn: () => fetchShippingFee({ lat, lng, total_item_qty }),
+    enabled: lat != null && lng != null && total_item_qty != null,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
     retry: 1,

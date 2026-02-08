@@ -58,15 +58,32 @@ const CheckOut = () => {
   const defaultAddress = addresses.find((address) => address.is_default) || null;
   const effectiveAddress = selectedAddress || defaultAddress || addresses[0] || null;
   const selectedAddressLabel = effectiveAddress ? formatAddress(effectiveAddress) : '';
+  const addressLat = effectiveAddress?.lat ?? null;
+  const addressLng = effectiveAddress?.lng ?? null;
+  const hasAddressCoordinates = addressLat != null && addressLng != null;
+
+  const [derivedCoords, setDerivedCoords] = useState({ lat: null, lng: null, loading: false, error: null });
+  const lat = hasAddressCoordinates ? addressLat : derivedCoords.lat;
+  const lng = hasAddressCoordinates ? addressLng : derivedCoords.lng;
+  const hasCoordinates = lat != null && lng != null;
 
   const { clearingCartFn } = useClearCart({ userId: userInfo?._id });
+
+  const subtotal = useMemo(() => {
+    return cartItems.reduce((sum, item) => sum + (item?.product?.price || 0) * (item.quantity || 0), 0);
+  }, [cartItems]);
+
+  const totalItemQty = useMemo(() => {
+    return cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
+  }, [cartItems]);
+
   const {
     data: shippingData,
     isLoading: isLoadingShippingFee,
     isError: isErrorShippingFee,
     error: shippingError,
     refetch: refetchShippingFee,
-  } = useShippingFee(selectedAddressLabel);
+  } = useShippingFee({ lat, lng, total_item_qty: totalItemQty });
 
   const {
     mutate: createOrderMutate,
@@ -78,12 +95,8 @@ const CheckOut = () => {
     data: orderResponseData,
   } = useCreateOrder();
 
-  const subtotal = useMemo(() => {
-    return cartItems.reduce((sum, item) => sum + (item?.product?.price || 0) * (item.quantity || 0), 0);
-  }, [cartItems]);
-
-  const shippingFee = shippingData?.totalFee ?? 0;
-  const distance = shippingData?.distance ?? '';
+  const shippingFee = shippingData?.total_fee ?? 0;
+  const distance = shippingData?.distance_km ?? '';
   const totalAmount = subtotal + shippingFee;
   const isCartLoading = loadingCart && cartSource === 'user';
 
@@ -108,6 +121,48 @@ const CheckOut = () => {
       setSelectedAddress(defaultAddress);
     }
   }, [defaultAddress, selectedAddress]);
+
+  useEffect(() => {
+    if (!selectedAddressLabel || hasAddressCoordinates) {
+      setDerivedCoords({ lat: null, lng: null, loading: false, error: null });
+      return;
+    }
+
+    let canceled = false;
+    const controller = new AbortController();
+
+    const fetchCoordinates = async () => {
+      setDerivedCoords((prev) => ({ ...prev, loading: true, error: null }));
+      try {
+        const encodedAddress = encodeURIComponent(selectedAddressLabel);
+        const response = await fetch(
+          `https://rsapi.goong.io/geocode?address=${encodedAddress}&api_key=VPm5NokrnVUxZcWC3tWKf6ImVSweqe3pPyq47U5S`,
+          { signal: controller.signal }
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch address coordinates.');
+        }
+        const data = await response.json();
+        const location = data?.results?.[0]?.geometry?.location;
+        if (!location || location.lat == null || location.lng == null) {
+          throw new Error('No coordinates found for the selected address.');
+        }
+        if (!canceled) {
+          setDerivedCoords({ lat: location.lat, lng: location.lng, loading: false, error: null });
+        }
+      } catch (error) {
+        if (canceled || error?.name === 'AbortError') return;
+        setDerivedCoords({ lat: null, lng: null, loading: false, error: error?.message || 'Failed to fetch coordinates.' });
+      }
+    };
+
+    fetchCoordinates();
+
+    return () => {
+      canceled = true;
+      controller.abort();
+    };
+  }, [selectedAddressLabel, hasAddressCoordinates]);
 
   const handleCloseAddressModal = () => {
     setShowAddressModal(false);
@@ -140,13 +195,28 @@ const CheckOut = () => {
       return;
     }
     if (!selectedAddress) {
-      setNotification({ open: true, message: 'Please select or provide a shipping address.', severity: 'error' });
+      setNotification({ open: true, message: 'Please select a saved shipping address.', severity: 'error' });
+      return;
+    }
+    if (!hasCoordinates) {
+      setNotification({
+        open: true,
+        message: derivedCoords.loading
+          ? 'Fetching address coordinates. Please wait a moment.'
+          : derivedCoords.error
+          ? derivedCoords.error
+          : 'Selected address is missing coordinates. Please update or choose another address.',
+        severity: 'error',
+      });
       return;
     }
 
     const payload = {
       shipping_address: selectedAddressLabel,
       payment_method: selectedPaymentMethod,
+      lat,
+      lng,
+      total_item_qty: totalItemQty,
     };
 
     createOrderMutate(payload);
@@ -253,14 +323,24 @@ const CheckOut = () => {
                   fullWidth
                   label="Address"
                   value={selectedAddressLabel}
-                  onChange={(event) => setSelectedAddress({ street_address: event.target.value })}
                   variant="outlined"
                   size="small"
                   multiline
                   rows={2}
                   required
-                  error={!selectedAddressLabel}
-                  helperText={!selectedAddressLabel ? 'Shipping address is required.' : ''}
+                  InputProps={{ readOnly: true }}
+                  error={!selectedAddressLabel || (selectedAddressLabel && !hasCoordinates)}
+                  helperText={
+                    !selectedAddressLabel
+                      ? 'Please select a saved address.'
+                      : derivedCoords.loading
+                      ? 'Fetching address coordinates...'
+                      : derivedCoords.error
+                      ? derivedCoords.error
+                      : !hasCoordinates
+                      ? 'Selected address is missing coordinates.'
+                      : ''
+                  }
                 />
                 {addresses.length > 0 && (
                   <Button variant="text" color="primary" onClick={() => setShowAddressList(!showAddressList)}>
@@ -443,9 +523,11 @@ const CheckOut = () => {
             {/* Order Button */}
             <div className="w-full mt-5">
               {/* Thông báo nếu chưa có địa chỉ */}
-              {!selectedAddress && (
+              {(!selectedAddress || (!hasCoordinates && !derivedCoords.loading)) && (
                 <Typography variant="body2" color="error" sx={{ mb: 2, textAlign: 'center' }}>
-                  Please select or enter a shipping address.
+                  {!selectedAddress
+                    ? 'Please select a saved shipping address.'
+                    : 'Selected address is missing coordinates.'}
                 </Typography>
               )}
               <Button
@@ -454,7 +536,14 @@ const CheckOut = () => {
                 size="large"
                 onClick={handlePlaceOrder}
                 // Disable khi đang xử lý, lỗi phí ship, giỏ hàng rỗng, hoặc chưa có địa chỉ
-                disabled={isProcessingOrder || isErrorShippingFee || cartItems.length === 0 || !selectedAddress}
+                disabled={
+                  isProcessingOrder ||
+                  isErrorShippingFee ||
+                  cartItems.length === 0 ||
+                  !selectedAddress ||
+                  !hasCoordinates ||
+                  derivedCoords.loading
+                }
                 sx={{
                   backgroundColor: 'black',
                   color: 'white',
