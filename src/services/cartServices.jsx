@@ -196,10 +196,10 @@ export function useClearCart({ userId }) {
       console.log('Cart cleared successfully!');
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to clear cart!', {
-        position: 'top-center',
-        autoClose: 3000,
-      });
+      // toast.error(error.response?.data?.message || 'Failed to clear cart!', {
+      //   position: 'top-center',
+      //   autoClose: 3000,
+      // });
     },
   });
 

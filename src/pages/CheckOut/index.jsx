@@ -67,7 +67,7 @@ const CheckOut = () => {
   const lng = hasAddressCoordinates ? addressLng : derivedCoords.lng;
   const hasCoordinates = lat != null && lng != null;
 
-  const { clearingCartFn } = useClearCart({ userId: userInfo?._id });
+  const { clearingCartFn } = useClearCart({ userId: userInfo?.id });
 
   const subtotal = useMemo(() => {
     return cartItems.reduce((sum, item) => sum + (item?.product?.price || 0) * (item.quantity || 0), 0);
@@ -174,7 +174,7 @@ const CheckOut = () => {
   };
 
   const handlePlaceOrder = () => {
-    if (!userInfo || !userInfo._id) {
+    if (!userInfo || !userInfo.id) {
       setNotification({ open: true, message: 'User information is missing. Please log in again.', severity: 'error' });
       return;
     }
