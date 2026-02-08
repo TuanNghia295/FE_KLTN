@@ -1,0 +1,11 @@
+# FE_KLTN Frontend Overview
+- **Purpose**: React + Vite frontend (e-commerce style pages: checkout, orders, product listings, etc.).
+- **Stack**: React 19, Vite 6, React Router, Zustand, React Query, MUI, Tailwind CSS, styled-components, axios, Formik/Yup.
+- **Structure**:
+  - `src/App.jsx`, `src/main.jsx`, `src/index.css`
+  - `src/pages/*` route-level pages (Checkout, Orders, ProductDetails, etc.)
+  - `src/components/*` shared UI
+  - `src/services/*` API/service calls
+  - `src/store/*` state (Zustand)
+  - `src/apis/*`, `src/assets/*`, `src/hook/*`
+- **Config**: `.prettierrc`, `eslint.config.js`, `tailwind.config.js`, `vite.config.js`.

@@ -67,27 +67,29 @@ export default function App() {
   }, [categoryList]);
 
   useEffect(() => {
+    console.log('[App] hydrated', hydrated, 'userInfo', userInfo);
     if (!hydrated) return;
     fetchUserInfo();
-  }, [fetchUserInfo, hydrated]);
+  }, [fetchUserInfo, hydrated, userInfo]);
 
   useEffect(() => {
     if (!hydrated) return;
+    if (!userInfo) {
+      setCartSource('guest');
+      setCartItems([]);
+      return;
+    }
     if (cart && typeof cart === 'object') {
       if (cart?.id) {
         setCartSource('user');
         const normalizedItems = (cart.items || []).map((item) => ({ ...item, id: item.id ?? item._id }));
         setCartItems(normalizedItems);
-      } else if (userInfo) {
+      } else {
         setCartSource('user');
         setCartItems([]);
-      } else {
-        setCartSource('guest');
       }
-    } else if (!userInfo && guestCartItems.length > 0) {
-      setCartSource('guest');
     }
-  }, [cart, userInfo, guestCartItems.length, setCartItems, setCartSource, hydrated]);
+  }, [cart, userInfo, setCartItems, setCartSource, hydrated]);
 
   useEffect(() => {
     setLoadingCart(loadingCart);

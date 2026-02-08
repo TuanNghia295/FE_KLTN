@@ -30,10 +30,10 @@ const CheckOut = () => {
   const navigate = useNavigate();
   const cartItems = useStore((state) => (state.cartSource === 'user' ? state.cartItems : state.guestCartItems));
   const cartSource = useStore((state) => state.cartSource);
-  const accesstoken = useStore((state) => state.accesstoken);
   const hydrated = useStore((state) => state.hydrated);
+  const hasToken = !!localStorage.getItem('accesstoken');
   const { data: userInfo } = useGetUserInfo();
-  const { data: addressesResponse } = useGetAddresses();
+  const { data: addressesResponse, isLoading: isLoadingAddresses } = useGetAddresses();
   const loadingCart = useStore((state) => state.loadingCart);
   const clearCart = useStore((state) => state.clearCart);
 
@@ -90,16 +90,18 @@ const CheckOut = () => {
   useEffect(() => {
     if (!hydrated) return;
 
-    if (!accesstoken && cartSource === 'guest') {
+    if (!hasToken && cartSource === 'guest') {
       sessionStorage.setItem('returnTo', '/checkout');
       navigate('/login');
       return;
     }
 
-    if (userInfo && addresses.length === 0) {
+    if (userInfo && !isLoadingAddresses && addresses.length === 0) {
       setShowAddressModal(true);
+    } else {
+      setShowAddressModal(false);
     }
-  }, [userInfo, cartSource, navigate, addresses.length, hydrated, accesstoken]);
+  }, [userInfo, cartSource, navigate, addresses.length, hydrated, hasToken, isLoadingAddresses]);
 
   useEffect(() => {
     if (!selectedAddress && defaultAddress) {

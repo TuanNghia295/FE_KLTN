@@ -58,6 +58,7 @@ export function useAddToCart() {
 
   return useMutation({
     mutationFn: async (data) => {
+      console.log('[useAddToCart] userId', userId, 'userInfo', useStore.getState().userInfo);
       if (!userId) return { guest: true, data };
       return await addToCart(data);
     },

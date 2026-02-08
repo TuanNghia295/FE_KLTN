@@ -100,7 +100,7 @@ const ProductDetails = () => {
   }
 
   const data = {
-    userId: userInfo?._id,
+    userId: userInfo?.id ?? userInfo?._id,
     productId: productDetail?.id,
     product_variant_id: selectedVariantId,
     size: selectedSize,

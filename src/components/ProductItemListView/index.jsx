@@ -32,7 +32,7 @@ const ProductItemListView = ({ product, normalizeString }) => {
   };
 
   const data = {
-    userId: userInfo?._id,
+    userId: userInfo?.id ?? userInfo?._id,
     productId: productId,
     product_variant_id: selectedVariantId,
     size: selectedSize,

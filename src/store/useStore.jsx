@@ -7,15 +7,17 @@ const useStore = create(
     (set, get) => ({
       // Trạng thái người dùng
       userInfo: null,
-      accesstoken: localStorage.getItem('accesstoken'),
-      refreshtoken: localStorage.getItem('refreshtoken'),
       hydrated: false,
       loadingCart: false,
       isUploadingAvatar: false,
 
       // Hàm để cập nhật thông tin người dùng
-      getInfo: (data) => set({ userInfo: data }),
-      setTokens: (access, refresh) => set({ accesstoken: access, refreshtoken: refresh }),
+      getInfo: (data) => {
+        const resolvedUser = data?.user ?? data;
+        set({
+          userInfo: resolvedUser ? { ...resolvedUser, id: resolvedUser.id ?? resolvedUser._id } : resolvedUser,
+        });
+      },
       setHydrated: (value) => set({ hydrated: value }),
       setLoadingCart: (value) => set({ loadingCart: value }),
       setIsUploadingAvatar: (value) => set({ isUploadingAvatar: value }),
@@ -24,18 +26,22 @@ const useStore = create(
       clearInfo: () => {
         localStorage.removeItem('accesstoken');
         localStorage.removeItem('refreshtoken');
-        set({ userInfo: null, accesstoken: null, refreshtoken: null, cartSource: 'guest' });
+        set({ userInfo: null, cartSource: 'guest' });
       },
 
       // Hàm để lấy thông tin người dùng từ API
       fetchUserInfo: async (force = false) => {
         const state = get();
-        if ((force || state.userInfo === null) && state.accesstoken) {
+        const accesstoken = localStorage.getItem('accesstoken');
+        if ((force || state.userInfo === null) && accesstoken) {
           try {
             const response = await getUserInfo();
             console.log('ressssssssssssssssssssss', response);
 
-            set({ userInfo: response });
+            const resolvedUser = response?.user ?? response;
+            set({
+              userInfo: resolvedUser ? { ...resolvedUser, id: resolvedUser.id ?? resolvedUser._id } : resolvedUser,
+            });
           } catch (error) {
             console.error('Failed to fetch user info:', error);
             if (force) {
@@ -140,14 +146,16 @@ const useStore = create(
       partialize: (state) => ({
         guestCartItems: state.guestCartItems,
         userInfo: state.userInfo,
-        accesstoken: state.accesstoken,
-        refreshtoken: state.refreshtoken,
       }),
       onRehydrateStorage: () => (state, error) => {
         if (error) {
           console.error('Failed to rehydrate store:', error);
         }
         if (state) {
+          const resolvedUser = state.userInfo?.user ?? state.userInfo;
+          if (resolvedUser) {
+            state.getInfo({ ...resolvedUser, id: resolvedUser.id ?? resolvedUser._id });
+          }
           state.setHydrated(true);
         }
       },
