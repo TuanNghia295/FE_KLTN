@@ -2,17 +2,48 @@ import { toast } from 'react-toastify';
 import axiosClient from '../apis/axiosClient.js';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+const mapOrderStatus = (status) => {
+  switch (status) {
+    case 'pending':
+      return 'Pending';
+    case 'shipping':
+      return 'Processing';
+    case 'completed':
+      return 'Completed';
+    case 'cancelled':
+      return 'Cancelled';
+    default:
+      return status;
+  }
+};
+
+const normalizeOrder = (order) => ({
+  ...order,
+  status: mapOrderStatus(order?.status),
+});
+
 // user Lấy danh sách đơn hàng của mình
-const getOrder = async () => {
-  const res = await axiosClient.get('/orders/user');
-  return res;
+const getOrder = async ({ status, page = 1, perPage = 10 } = {}) => {
+  const res = await axiosClient.get('/orders', {
+    params: {
+      status,
+      page,
+      per_page: perPage,
+    },
+  });
+  const orders = Array.isArray(res?.data) ? res.data.map(normalizeOrder) : [];
+
+  return {
+    orders,
+    meta: res?.meta,
+  };
 };
 
 // user xem chi tiết đơn hàng bằng orderId
 const getOrderById = async (orderId) => {
   try {
-    const res = await axiosClient.get(`/orders/user/${orderId}`);
-    return res;
+    const res = await axiosClient.get(`/orders/${orderId}`);
+    return normalizeOrder(res.data);
   } catch (error) {
     console.error(`Error fetching order with ID: ${orderId}`, error);
     throw error;
@@ -25,11 +56,11 @@ const cancelOrder = async (id) => {
   return response.data;
 };
 
-export const useOrder = () => {
+export const useOrder = ({ status, page = 1, perPage = 10 } = {}) => {
   const queryClient = useQueryClient();
   const { data: myOrdder, isLoading: isLoadingOrder } = useQuery({
-    queryKey: ['order'],
-    queryFn: getOrder,
+    queryKey: ['order', status, page, perPage],
+    queryFn: () => getOrder({ status, page, perPage }),
   });
 
   const {

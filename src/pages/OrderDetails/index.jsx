@@ -122,7 +122,7 @@ const OrderDetails = () => {
               <div className="flex flex-col gap-4">
                 <h2 className="text-[24px] font-bold text-black">{orderDetail.items[0]?.name}</h2>
                 <p className="text-sm text-gray-600">
-                  <span className="font-bold">Order ID:</span> {orderDetail._id}
+                  <span className="font-bold">Order Code:</span> {orderDetail.order_code || orderDetail._id}
                 </p>
                 <p className="text-sm text-gray-600">
                   <span className="font-bold">Size:</span> {orderDetail.items[0]?.size || 'N/A'}

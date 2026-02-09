@@ -47,7 +47,7 @@ export const mergeCart = async (items) => {
 const clearCart = async (userId) => {
   console.log('Clearing cart for userId:', userId);
 
-  const response = await axiosClient.delete(`/cart/delete/${userId}`);
+  const response = await axiosClient.delete(`/cart/items/${userId}`);
   return response.data; // Ensure the response data is returned
 };
 

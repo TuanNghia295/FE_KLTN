@@ -4,7 +4,7 @@ import { Button, CircularProgress, Box, Typography, Snackbar, Alert, Tooltip } f
 import { useNavigate } from 'react-router-dom';
 import { FaCreditCard, FaPaypal } from 'react-icons/fa6'; // Add FaPaypal import
 import useStore from '../../store/useStore';
-import { useShippingFee, useCreateOrder } from '../../services/paymentServices.jsx'; // Chỉ cần useCreateOrder
+import { useCreateOrder, useShippingFee } from '../../services/paymentServices.jsx';
 import { useClearCart } from '../../services/cartServices.jsx';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -51,10 +51,7 @@ const CheckOut = () => {
     return parts.join(', ');
   };
 
-  const addresses = useMemo(
-    () => addressesResponse?.addresses || addressesResponse || [],
-    [addressesResponse]
-  );
+  const addresses = useMemo(() => addressesResponse?.addresses || addressesResponse || [], [addressesResponse]);
   const defaultAddress = addresses.find((address) => address.is_default) || null;
   const effectiveAddress = selectedAddress || defaultAddress || addresses[0] || null;
   const selectedAddressLabel = effectiveAddress ? formatAddress(effectiveAddress) : '';
@@ -152,7 +149,12 @@ const CheckOut = () => {
         }
       } catch (error) {
         if (canceled || error?.name === 'AbortError') return;
-        setDerivedCoords({ lat: null, lng: null, loading: false, error: error?.message || 'Failed to fetch coordinates.' });
+        setDerivedCoords({
+          lat: null,
+          lng: null,
+          loading: false,
+          error: error?.message || 'Failed to fetch coordinates.',
+        });
       }
     };
 
@@ -204,8 +206,8 @@ const CheckOut = () => {
         message: derivedCoords.loading
           ? 'Fetching address coordinates. Please wait a moment.'
           : derivedCoords.error
-          ? derivedCoords.error
-          : 'Selected address is missing coordinates. Please update or choose another address.',
+            ? derivedCoords.error
+            : 'Selected address is missing coordinates. Please update or choose another address.',
         severity: 'error',
       });
       return;
@@ -254,9 +256,18 @@ const CheckOut = () => {
 
   useEffect(() => {
     if (isOrderCreationError) {
+      const unavailableItems = orderCreationError?.unavailable_items;
+      const unavailableMessage = Array.isArray(unavailableItems)
+        ? unavailableItems
+            .map((item) => item?.message || item?.name || '')
+            .filter(Boolean)
+            .join(', ')
+        : null;
+
       setNotification({
         open: true,
         message: `Failed to process order: ${
+          unavailableMessage ||
           orderCreationError?.message ||
           orderCreationError?.details?.join(', ') ||
           orderCreationError?.error ||
@@ -334,12 +345,12 @@ const CheckOut = () => {
                     !selectedAddressLabel
                       ? 'Please select a saved address.'
                       : derivedCoords.loading
-                      ? 'Fetching address coordinates...'
-                      : derivedCoords.error
-                      ? derivedCoords.error
-                      : !hasCoordinates
-                      ? 'Selected address is missing coordinates.'
-                      : ''
+                        ? 'Fetching address coordinates...'
+                        : derivedCoords.error
+                          ? derivedCoords.error
+                          : !hasCoordinates
+                            ? 'Selected address is missing coordinates.'
+                            : ''
                   }
                 />
                 {addresses.length > 0 && (
