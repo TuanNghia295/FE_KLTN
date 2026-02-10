@@ -6,7 +6,7 @@ const mapOrderStatus = (status) => {
   switch (status) {
     case 'pending':
       return 'Pending';
-    case 'shipping':
+    case 'processing':
       return 'Processing';
     case 'completed':
       return 'Completed';

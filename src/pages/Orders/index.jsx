@@ -7,7 +7,7 @@ import LoadingComponent from '../../components/LoadingComponent';
 
 const STATUS_MAP = {
   'Chờ xử lý': 'pending',
-  'Đang giao': 'shipping',
+  'Đang giao': 'processing',
   'Hoàn thành': 'completed',
   'Đã hủy': 'cancelled',
 };

@@ -13,7 +13,7 @@ const TAB_CONFIGS = [
   {
     icon: <FaTruck className="text-yellow-500" />,
     name: 'Đang giao',
-    statusKey: 'shipping',
+    statusKey: 'processing',
   },
   {
     icon: <FaCheckCircle className="text-green-500" />,
@@ -36,7 +36,7 @@ const TabListOrders = ({ orders, meta, activeStatus, onTabChange, currentPage, o
       case 'pending':
       case 'Pending':
         return <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">Chờ xử lý</span>;
-      case 'shipping':
+      case 'processing':
       case 'Processing':
         return <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">Đang giao</span>;
       case 'completed':
@@ -81,7 +81,7 @@ const TabListOrders = ({ orders, meta, activeStatus, onTabChange, currentPage, o
             <span className="text-lg">{tab.icon}</span>
             <span>{tab.name}</span>
             <span className="bg-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-              {counts[tab.statusKey] || 0}
+              {(tab.statusKey === 'processing' ? counts.processing || counts.shipping : counts[tab.statusKey]) || 0}
             </span>
           </button>
         ))}
@@ -101,7 +101,7 @@ const TabListOrders = ({ orders, meta, activeStatus, onTabChange, currentPage, o
             <div className="flex items-center">
               <span className="text-sm xl:text-base">{tab.name}</span>
               <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
-                {counts[tab.statusKey] || 0}
+                {(tab.statusKey === 'processing' ? counts.processing || counts.shipping : counts[tab.statusKey]) || 0}
               </span>
             </div>
             {activeStatus === tab.name && <div className="absolute bottom-0 w-3/4 h-1 bg-blue-500 rounded-t"></div>}
