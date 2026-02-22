@@ -230,6 +230,8 @@ export default function App() {
 
           <Route path="/checkout/error" exact={true} element={<PaymentError />} />
           <Route path="/checkout/success" exact={true} element={<PaymentSuccess />} />
+          <Route path="/payment-error" exact={true} element={<PaymentError />} />
+          <Route path="/payment-success" exact={true} element={<PaymentSuccess />} />
         </Routes>
 
         <Drawer open={openCartPanel} onClose={toggleCartPanel(false)} anchor={'right'} className="cartPanel">

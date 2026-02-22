@@ -20,10 +20,9 @@ const formatCurrency = (value) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
 };
 
-// Restore PayPal payment method
 const paymentOptions = [
-  { value: 'Cash', label: 'Payment with cash', icon: <FaCreditCard /> },
-  { value: 'Paypal', label: 'Payment with PayPal', icon: <FaPaypal /> },
+  { value: 'cod', label: 'Payment with cash', icon: <FaCreditCard /> },
+  { value: 'stripe', label: 'Payment with Stripe', icon: <FaPaypal /> },
 ];
 
 const CheckOut = () => {
@@ -37,7 +36,7 @@ const CheckOut = () => {
   const loadingCart = useStore((state) => state.loadingCart);
   const clearCart = useStore((state) => state.clearCart);
 
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('Cash');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cod');
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' });
   const [showAddressList, setShowAddressList] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -226,15 +225,18 @@ const CheckOut = () => {
 
   useEffect(() => {
     if (isOrderCreationSuccess && orderResponseData) {
-      if (orderResponseData.paymentUrl) {
-        window.location.href = orderResponseData.paymentUrl;
+      const paymentUrl = orderResponseData?.data?.payment?.paymentUrl;
+      const successMessage = orderResponseData?.message || 'Order placed successfully!';
+
+      if (paymentUrl) {
+        window.location.href = paymentUrl;
       } else {
         setNotification({
           open: true,
-          message: orderResponseData.message || 'Order placed successfully!',
+          message: successMessage,
           severity: 'success',
         });
-        if (selectedPaymentMethod === 'Cash') {
+        if (selectedPaymentMethod === 'cod') {
           clearingCartFn();
           clearCart();
           setTimeout(() => {
@@ -568,8 +570,8 @@ const CheckOut = () => {
                 {isProcessingOrder ? (
                   <CircularProgress size={24} color="inherit" />
                 ) : // Thay đổi text tùy theo phương thức thanh toán
-                selectedPaymentMethod === 'Paypal' ? (
-                  'Proceed to Paypal'
+                selectedPaymentMethod === 'stripe' ? (
+                  'Proceed to Stripe'
                 ) : (
                   'Place Order'
                 )}

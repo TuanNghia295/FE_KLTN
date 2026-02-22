@@ -3,11 +3,10 @@ import { CiViewList } from 'react-icons/ci';
 import { FaMapLocationDot } from 'react-icons/fa6';
 import { PiMoneyWavyLight } from 'react-icons/pi';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import OrderStatus from './OrderStatusComponent';
-import HomeCartSlider from '../../components/HomeCartSlider';
 import { useOrder } from '../../services/orderServices';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
 import useStore from '../../store/useStore';
+import { formatCash } from '../../hook/formatCash';
 
 const OrderDetails = () => {
   // lấy orderId từ url
@@ -56,132 +55,169 @@ const OrderDetails = () => {
     cancelOrderMutation(orderDetail._id);
     setIsCancelModalOpen(false);
   };
-  // Hàm định dạng giá tiền
-  const formatCash = (value) => {
-    if (!value && value !== 0) return '';
-    const numValue = Number(value.toString().replace(/[^0-9]/g, ''));
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'decimal',
-      minimumFractionDigits: 0,
-    }).format(numValue);
-  };
-  const formatPrice = formatCash(orderDetail.items[0]?.price);
-
   const formattedTotalPrice = formatCash(orderDetail?.totalPrice);
-
   const shippingFee = formatCash(orderDetail.shippingAddress.shippingFee);
   const distance = orderDetail.shippingAddress.distance
     ? `${orderDetail.shippingAddress.distance.toFixed(2)} km`
     : 'N/A';
+  const subtotal = orderDetail.items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0), 0);
+  const formattedSubtotal = formatCash(subtotal);
 
   return (
     <div>
       <section className="container mx-auto py-10 px-4 lg:px-8">
-        <section className="statusOrder flex bg-red-500 p-6 items-center rounded-t-lg text-white gap-6 shadow-md">
-          <div className="icon text-[50px]">
-            <CiViewList />
-          </div>
-          <div className="details text-[16px]">
-            <p className="font-bold text-lg">Order Status: {orderDetail.status}</p>
-            <p className="text-sm">Description</p>
-          </div>
-        </section>
-        <section className="statusOrder flex bg-white p-6 items-center rounded-b-lg text-black gap-6 shadow-md">
-          <div className="icon text-[50px]">
-            <FaMapLocationDot />
-          </div>
-          <div className="details text-[16px]">
-            <p className="font-bold text-lg">Shipping Address</p>
-            <p className="text-sm">Full Name: {orderDetail.shippingAddress.fullName}</p>
-            <p className="text-sm">Phone: {orderDetail.shippingAddress.phone}</p>
-            <p className="text-sm">Address: {orderDetail.shippingAddress.address}</p>
-          </div>
-        </section>
-
-        <section className="paymentMethod bg-white my-8 rounded-lg p-6 shadow-md">
-          <span className="text-[20px] font-bold text-green-600 flex items-center gap-4">
-            <PiMoneyWavyLight className="text-[30px] text-green-600" />
-            Payment Method
-          </span>
-          <div className="pt-4">
-            <p className="text-[17px] font-medium text-green-600">{orderDetail.payment.method}</p>
-          </div>
-        </section>
-
-        <section className="bg-white p-6 rounded-lg shadow-md">
-          <OrderStatus status={orderDetail.status === 'Cancelled' ? 'Cancelled' : orderDetail.status} />
-          <div className="flex flex-col xl:flex-row gap-6">
-            <div className="leftPart w-full xl:w-1/2 flex justify-center items-center">
-              <img
-                className="rounded-xl object-cover max-w-full max-h-[300px]"
-                src={orderDetail.items[0]?.images[0]?.url || '/placeholder-image.png'}
-                alt={orderDetail.items[0]?.productName || 'Product Image'}
-              />
-            </div>
-            <div className="rightPart w-full xl:w-1/2">
-              <div className="flex flex-col gap-4">
-                <h2 className="text-[24px] font-bold text-black">{orderDetail.items[0]?.name}</h2>
-                <p className="text-sm text-gray-600">
-                  <span className="font-bold">Order Code:</span> {orderDetail.order_code || orderDetail._id}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-bold">Size:</span> {orderDetail.items[0]?.size || 'N/A'}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-bold">Color:</span> {orderDetail.items[0]?.color || 'N/A'}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-bold">Quantity:</span> {orderDetail.items[0]?.quantity}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-bold">Price:</span> {formatPrice} đ
-                </p>
-
-                <p className="text-sm text-gray-600">
-                  <span className="font-bold">Shipping Fee:</span> {shippingFee} đ
-                </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-bold">Distance:</span> {distance}
-                </p>
-
-                <p className="text-sm text-gray-600">
-                  <span className="font-bold">Date:</span> {new Date(orderDetail.createdAt).toLocaleDateString()}
-                </p>
-
-                <p className="text-sm text-gray-600">
-                  <span className="font-bold">Total Price:</span> {formattedTotalPrice} đ
-                </p>
+        <section className="flex flex-col gap-2 bg-white p-6 rounded-lg shadow-md mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="flex items-center gap-4">
+              <div className="text-[44px] text-red-500">
+                <CiViewList />
               </div>
-              <div className="flex flex-col sm:flex-row justify-end gap-4 mt-6">
-                <Link to="/my-orders">
-                  <button
-                    className="flex items-center justify-center gap-2 border border-gray-300 text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-100 active:bg-gray-200 transition font-medium min-w-full sm:min-w-[160px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    style={{ fontWeight: 500, fontSize: '1rem', letterSpacing: 0.2 }}
-                  >
-                    <span className="hidden sm:inline">Back</span>
-                    <span className="sm:hidden">Back</span>
-                  </button>
-                </Link>
-                {orderDetail.status !== 'Cancelled' && (
-                  <button
-                    className={`border px-6 py-2 rounded-lg shadow-md transition font-medium min-w-[160px] flex items-center justify-center
-                      ${
-                        orderDetail.status === 'Pending' && !orderDetail.cancelRequest
-                          ? 'border-red-500 text-red-500 hover:bg-red-100 active:bg-red-200 focus:ring-2 focus:ring-red-300'
-                          : orderDetail.cancelRequest
-                          ? 'border-yellow-500 text-yellow-700 bg-yellow-50 cursor-not-allowed'
-                          : 'border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed'
-                      }
-                    `}
-                    disabled={orderDetail.status !== 'Pending' || orderDetail.cancelRequest}
-                    onClick={() => setIsCancelModalOpen(true)}
-                    style={{ transition: 'all 0.2s', fontWeight: 500 }}
-                  >
-                    {orderDetail.cancelRequest ? <>Processing cancellation...</> : 'Cancel Order'}
-                  </button>
-                )}
+              <div>
+                <p className="text-sm text-gray-500">Order Code</p>
+                <p className="text-lg font-bold text-gray-900">{orderDetail.order_code || orderDetail._id}</p>
               </div>
             </div>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-500">Status</span>
+              <span className="px-3 py-1 rounded-full text-sm font-semibold bg-red-100 text-red-600">
+                {orderDetail.status}
+              </span>
+            </div>
+          </div>
+          <p className="text-sm text-gray-600">
+            <span className="font-semibold">Created:</span> {new Date(orderDetail.createdAt).toLocaleDateString()}
+          </p>
+        </section>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <section className="bg-white p-6 rounded-lg shadow-md">
+            <div className="flex items-center gap-3 mb-4">
+              <FaMapLocationDot className="text-[28px] text-red-500" />
+              <h2 className="text-lg font-bold text-gray-900">Shipping Information</h2>
+            </div>
+            <div className="space-y-2 text-sm text-gray-700">
+              <p>
+                <span className="font-semibold">Full Name:</span> {orderDetail.shippingAddress.fullName}
+              </p>
+              <p>
+                <span className="font-semibold">Phone:</span> {orderDetail.shippingAddress.phone}
+              </p>
+              <p>
+                <span className="font-semibold">Address:</span> {orderDetail.shippingAddress.address}
+              </p>
+              <p>
+                <span className="font-semibold">Distance:</span> {distance}
+              </p>
+            </div>
+          </section>
+
+          <section className="bg-white p-6 rounded-lg shadow-md">
+            <div className="flex items-center gap-3 mb-4">
+              <PiMoneyWavyLight className="text-[28px] text-green-600" />
+              <h2 className="text-lg font-bold text-gray-900">Payment Information</h2>
+            </div>
+            <div className="space-y-2 text-sm text-gray-700">
+              <p>
+                <span className="font-semibold">Method:</span> {orderDetail.payment.method || 'N/A'}
+              </p>
+              <p>
+                <span className="font-semibold">Status:</span> {orderDetail.payment.status || 'N/A'}
+              </p>
+              <p>
+                <span className="font-semibold">Transaction ID:</span> {orderDetail.payment.transactionId || 'N/A'}
+              </p>
+            </div>
+          </section>
+        </div>
+
+        <section className="bg-white p-6 rounded-lg shadow-md mt-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Items</h2>
+          <div className="space-y-4">
+            {orderDetail.items.map((item, index) => (
+              <div
+                key={item._id || `${item.productId || item.name || 'item'}-${index}`}
+                className="flex flex-col md:flex-row gap-4 border-b border-gray-200 pb-4 last:border-b-0 last:pb-0"
+              >
+                <div className="w-full md:w-32 flex-shrink-0">
+                  <img
+                    className="rounded-lg object-cover w-full h-32"
+                    src={item.images?.[0]?.url || '/placeholder-image.png'}
+                    alt={item.productName || item.name || 'Product Image'}
+                  />
+                </div>
+                <div className="flex-1 space-y-1 text-sm text-gray-700">
+                  <p className="text-base font-semibold text-gray-900">{item.productName || item.name}</p>
+                  <p>
+                    <span className="font-semibold">Size:</span> {item.size || 'N/A'}
+                  </p>
+                  <p>
+                    <span className="font-semibold">Color:</span> {item.color || 'N/A'}
+                  </p>
+                  <p>
+                    <span className="font-semibold">Quantity:</span> {item.quantity}
+                  </p>
+                </div>
+                <div className="text-sm text-gray-700 space-y-1 md:text-right">
+                  <p>
+                    <span className="font-semibold">Unit Price:</span> {formatCash(item.price) || 'N/A'}
+                  </p>
+                  <p>
+                    <span className="font-semibold">Line Total:</span>{' '}
+                    {formatCash(Number(item.price || 0) * Number(item.quantity || 0)) || 'N/A'}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="bg-white p-6 rounded-lg shadow-md mt-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Totals</h2>
+          <div className="space-y-2 text-sm text-gray-700">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>{formattedSubtotal}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Shipping Fee</span>
+              <span>{shippingFee}</span>
+            </div>
+            <div className="flex justify-between font-semibold text-gray-900">
+              <span>Total</span>
+              <span>{formattedTotalPrice}</span>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-white p-6 rounded-lg shadow-md mt-6">
+          <div className="flex flex-col sm:flex-row justify-end gap-4">
+            <Link to="/my-orders">
+              <button
+                className="flex items-center justify-center gap-2 border border-gray-300 text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-100 active:bg-gray-200 transition font-medium min-w-full sm:min-w-[160px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+                style={{ fontWeight: 500, fontSize: '1rem', letterSpacing: 0.2 }}
+              >
+                <span className="hidden sm:inline">Back</span>
+                <span className="sm:hidden">Back</span>
+              </button>
+            </Link>
+            {orderDetail.status !== 'Cancelled' && (
+              <button
+                className={`border px-6 py-2 rounded-lg shadow-md transition font-medium min-w-[160px] flex items-center justify-center
+                  ${
+                    orderDetail.status === 'Pending' && !orderDetail.cancelRequest
+                      ? 'border-red-500 text-red-500 hover:bg-red-100 active:bg-red-200 focus:ring-2 focus:ring-red-300'
+                      : orderDetail.cancelRequest
+                      ? 'border-yellow-500 text-yellow-700 bg-yellow-50 cursor-not-allowed'
+                      : 'border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed'
+                  }
+                `}
+                disabled={orderDetail.status !== 'Pending' || orderDetail.cancelRequest}
+                onClick={() => setIsCancelModalOpen(true)}
+                style={{ transition: 'all 0.2s', fontWeight: 500 }}
+              >
+                {orderDetail.cancelRequest ? <>Processing cancellation...</> : 'Cancel Order'}
+              </button>
+            )}
           </div>
         </section>
       </section>

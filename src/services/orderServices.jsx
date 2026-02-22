@@ -31,11 +31,21 @@ const getOrder = async ({ status, page = 1, perPage = 10 } = {}) => {
       per_page: perPage,
     },
   });
-  const orders = Array.isArray(res?.data) ? res.data.map(normalizeOrder) : [];
+  const rawOrders = Array.isArray(res?.data)
+    ? res.data
+    : Array.isArray(res?.data?.data)
+      ? res.data.data
+      : [];
+  const orders = rawOrders.map(normalizeOrder);
+  const rawMeta = res?.meta || res?.data?.meta;
+  const perPageValue = rawMeta?.per_page ?? perPage;
+  const totalPages =
+    rawMeta?.total_pages ??
+    (rawMeta?.total_count ? Math.ceil(rawMeta.total_count / perPageValue) : undefined);
 
   return {
     orders,
-    meta: res?.meta,
+    meta: rawMeta ? { ...rawMeta, total_pages: totalPages } : rawMeta,
   };
 };
 

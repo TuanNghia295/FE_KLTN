@@ -6,14 +6,14 @@ import { useOrder } from '../../services/orderServices';
 import LoadingComponent from '../../components/LoadingComponent';
 
 const STATUS_MAP = {
-  'Chờ xử lý': 'pending',
-  'Đang giao': 'processing',
-  'Hoàn thành': 'completed',
-  'Đã hủy': 'cancelled',
+  Pending: 'pending',
+  Processing: 'processing',
+  Completed: 'completed',
+  Cancelled: 'cancelled',
 };
 
 const Orders = () => {
-  const [activeStatus, setActiveStatus] = useState('Chờ xử lý');
+  const [activeStatus, setActiveStatus] = useState('Pending');
   const [currentPage, setCurrentPage] = useState(1);
   const perPage = 10;
   const statusParam = STATUS_MAP[activeStatus];

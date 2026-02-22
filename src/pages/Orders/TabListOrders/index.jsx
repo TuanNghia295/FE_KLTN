@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { IoCheckboxOutline, IoReceiptOutline } from 'react-icons/io5';
 import { FaTruck, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
@@ -7,22 +8,22 @@ import { format } from 'date-fns';
 const TAB_CONFIGS = [
   {
     icon: <IoCheckboxOutline className="text-blue-500" />,
-    name: 'Chờ xử lý',
+    name: 'Pending',
     statusKey: 'pending',
   },
   {
     icon: <FaTruck className="text-yellow-500" />,
-    name: 'Đang giao',
+    name: 'Processing',
     statusKey: 'processing',
   },
   {
     icon: <FaCheckCircle className="text-green-500" />,
-    name: 'Hoàn thành',
+    name: 'Completed',
     statusKey: 'completed',
   },
   {
     icon: <FaTimesCircle className="text-red-500" />,
-    name: 'Đã hủy',
+    name: 'Cancelled',
     statusKey: 'cancelled',
   },
 ];
@@ -35,26 +36,26 @@ const TabListOrders = ({ orders, meta, activeStatus, onTabChange, currentPage, o
     switch (status) {
       case 'pending':
       case 'Pending':
-        return <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">Chờ xử lý</span>;
+        return <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">Pending</span>;
       case 'processing':
       case 'Processing':
-        return <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">Đang giao</span>;
+        return <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">Processing</span>;
       case 'completed':
       case 'Completed':
-        return <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Hoàn thành</span>;
+        return <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Completed</span>;
       case 'cancelled':
       case 'Cancelled':
-        return <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">Đã hủy</span>;
+        return <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">Cancelled</span>;
       default:
         return <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">{status}</span>;
     }
   };
 
   const getPaymentMethod = (method) => {
-    return method === 'Paypal' ? (
-      <span className="text-blue-600">PayPal</span>
+    return method === 'stripe' ? (
+      <span className="text-blue-600">Stripe</span>
     ) : (
-      <span className="text-green-600">Tiền mặt</span>
+      <span className="text-green-600">Cash</span>
     );
   };
 
@@ -62,6 +63,37 @@ const TabListOrders = ({ orders, meta, activeStatus, onTabChange, currentPage, o
   const formatOrderCode = (order) => {
     const code = getOrderCode(order);
     return typeof code === 'string' ? code.slice(-6).toUpperCase() : '';
+  };
+
+  const getPageItems = () => {
+    if (totalPages <= 1) return [];
+    const maxNumbers = 5;
+    const pages = new Set([1, totalPages, currentPage]);
+
+    if (currentPage - 1 > 1) pages.add(currentPage - 1);
+    if (currentPage + 1 < totalPages) pages.add(currentPage + 1);
+
+    const sorted = Array.from(pages).sort((a, b) => a - b);
+    while (sorted.length < Math.min(maxNumbers, totalPages)) {
+      const first = sorted[0];
+      const last = sorted[sorted.length - 1];
+      if (first > 2) {
+        sorted.unshift(first - 1);
+      } else if (last < totalPages - 1) {
+        sorted.push(last + 1);
+      } else {
+        break;
+      }
+    }
+
+    const result = [];
+    for (let i = 0; i < sorted.length; i += 1) {
+      const page = sorted[i];
+      const prev = sorted[i - 1];
+      if (prev && page - prev > 1) result.push('...');
+      result.push(page);
+    }
+    return result;
   };
 
   return (
@@ -125,7 +157,7 @@ const TabListOrders = ({ orders, meta, activeStatus, onTabChange, currentPage, o
                 <div className="flex items-center space-x-2">
                   <IoReceiptOutline className="text-gray-400 flex-shrink-0" />
                   <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2">
-                    <span className="font-medium text-sm sm:text-base">Đơn #{formatOrderCode(order)}</span>
+                    <span className="font-medium text-sm sm:text-base">Order #{formatOrderCode(order)}</span>
                     <span className="text-gray-500 text-xs sm:text-sm">
                       {format(new Date(order.createdAt), 'dd/MM/yyyy HH:mm')}
                     </span>
@@ -137,7 +169,7 @@ const TabListOrders = ({ orders, meta, activeStatus, onTabChange, currentPage, o
                     to={`/my-orders/order/${order._id}`}
                     className="text-blue-600 hover:text-blue-800 text-sm font-medium whitespace-nowrap"
                   >
-                    Xem chi tiết
+                    View details
                   </Link>
                 </div>
               </div>
@@ -146,7 +178,7 @@ const TabListOrders = ({ orders, meta, activeStatus, onTabChange, currentPage, o
               <div className="p-3 sm:p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {/* Customer info */}
                 <div className="space-y-1 sm:space-y-2">
-                  <h3 className="font-medium text-gray-700 text-sm sm:text-base">Thông tin giao hàng</h3>
+                  <h3 className="font-medium text-gray-700 text-sm sm:text-base">Shipping info</h3>
                   <div>
                     <p className="font-medium text-sm sm:text-base">{order.shippingAddress.fullName}</p>
                     <p className="text-gray-600 text-sm">{order.shippingAddress.phone}</p>
@@ -158,12 +190,12 @@ const TabListOrders = ({ orders, meta, activeStatus, onTabChange, currentPage, o
 
                 {/* Payment info */}
                 <div className="space-y-1 sm:space-y-2">
-                  <h3 className="font-medium text-gray-700 text-sm sm:text-base">Thanh toán</h3>
+                  <h3 className="font-medium text-gray-700 text-sm sm:text-base">Payment</h3>
                   <div>
                     <p className="text-sm sm:text-base">{getPaymentMethod(order.payment.method)}</p>
                     {order.payment.transactionId && (
                       <p className="text-gray-600 text-xs sm:text-sm mt-1 line-clamp-1">
-                        Mã GD: {order.payment.transactionId}
+                        Transaction ID: {order.payment.transactionId}
                       </p>
                     )}
                   </div>
@@ -171,9 +203,9 @@ const TabListOrders = ({ orders, meta, activeStatus, onTabChange, currentPage, o
 
                 {/* Order summary */}
                 <div className="space-y-1 sm:space-y-2">
-                  <h3 className="font-medium text-gray-700 text-sm sm:text-base">Tóm tắt</h3>
+                  <h3 className="font-medium text-gray-700 text-sm sm:text-base">Summary</h3>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 text-sm">Tổng tiền:</span>
+                    <span className="text-gray-600 text-sm">Total:</span>
                     <span className="font-medium text-sm sm:text-base">
                       {new Intl.NumberFormat('vi-VN', {
                         style: 'currency',
@@ -182,9 +214,9 @@ const TabListOrders = ({ orders, meta, activeStatus, onTabChange, currentPage, o
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 text-sm">Số lượng:</span>
+                    <span className="text-gray-600 text-sm">Items:</span>
                     <span className="font-medium text-sm sm:text-base">
-                      {order.items.reduce((total, item) => total + item.quantity, 0)} sản phẩm
+                      {order.items.reduce((total, item) => total + item.quantity, 0)} items
                     </span>
                   </div>
                 </div>
@@ -196,26 +228,54 @@ const TabListOrders = ({ orders, meta, activeStatus, onTabChange, currentPage, o
             <div className="text-gray-400 mb-3 sm:mb-4">
               <IoReceiptOutline className="mx-auto text-3xl sm:text-4xl" />
             </div>
-            <h3 className="text-base sm:text-lg font-medium text-gray-700 mb-1">Không có đơn hàng nào</h3>
-            <p className="text-gray-500 text-sm sm:text-base">Không tìm thấy đơn hàng nào trong mục này</p>
+            <h3 className="text-base sm:text-lg font-medium text-gray-700 mb-1">No orders found</h3>
+            <p className="text-gray-500 text-sm sm:text-base">There are no orders in this section.</p>
           </div>
         )}
       </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center mt-4">
-          {Array.from({ length: totalPages }, (_, index) => (
-            <button
-              key={index}
-              onClick={() => onPageChange(index + 1)}
-              className={`px-3 py-1 mx-1 rounded ${
-                currentPage === index + 1 ? 'bg-black text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              {index + 1}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center justify-center mt-4 gap-1">
+          <button
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 mx-1 rounded border border-gray-200 text-sm ${
+              currentPage === 1
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-white text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            Prev
+          </button>
+          {getPageItems().map((item, index) =>
+            item === '...' ? (
+              <span key={`ellipsis-${index}`} className="px-2 text-gray-500">
+                ...
+              </span>
+            ) : (
+              <button
+                key={item}
+                onClick={() => onPageChange(item)}
+                className={`px-3 py-1 mx-1 rounded text-sm ${
+                  currentPage === item ? 'bg-black text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                {item}
+              </button>
+            )
+          )}
+          <button
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 mx-1 rounded border border-gray-200 text-sm ${
+              currentPage === totalPages
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-white text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            Next
+          </button>
         </div>
       )}
     </div>
@@ -228,7 +288,7 @@ TabListOrders.propTypes = {
       _id: PropTypes.string.isRequired,
       status: PropTypes.string.isRequired,
       payment: PropTypes.shape({
-        method: PropTypes.oneOf(['Cash', 'Paypal']).isRequired,
+        method: PropTypes.oneOf(['stripe', 'cod']).isRequired,
         transactionId: PropTypes.string,
         status: PropTypes.string,
       }).isRequired,
