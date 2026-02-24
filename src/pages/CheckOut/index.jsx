@@ -72,6 +72,7 @@ const CheckOut = () => {
   const totalItemQty = useMemo(() => {
     return cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
   }, [cartItems]);
+  const isProductCountZero = totalItemQty === 0;
 
   const {
     data: shippingData,
@@ -505,10 +506,15 @@ const CheckOut = () => {
                 </Box>
               ) : (
                 <>
-                  <div className="flex items-center justify-between text-sm">
-                    <p className="text-gray-600">Subtotal</p>
+                  <div className={`flex items-center justify-between text-sm ${isProductCountZero ? 'opacity-50' : ''}`}>
+                    <p className="text-gray-600">Products ({totalItemQty})</p>
                     <p className="text-gray-800 font-medium">{formatCurrency(subtotal)}</p>
                   </div>
+                  {isProductCountZero && (
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                      No products selected. Please add at least 1 product to continue checkout.
+                    </Typography>
+                  )}
                   <div className="flex items-center justify-between text-sm">
                     <Tooltip title={distance ? `Distance: ${distance}` : ''} placement="top">
                       <p className="text-gray-600">Shipping ({distance ?? null})</p>

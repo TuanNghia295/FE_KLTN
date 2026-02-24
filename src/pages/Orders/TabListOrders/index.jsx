@@ -166,7 +166,7 @@ const TabListOrders = ({ orders, meta, activeStatus, onTabChange, currentPage, o
                 <div className="flex justify-between items-center">
                   <div className="mr-2">{getStatusBadge(order.status)}</div>
                   <Link
-                    to={`/my-orders/order/${order._id}`}
+                    to={`/my-orders/order/${order.id || order._id}`}
                     className="text-blue-600 hover:text-blue-800 text-sm font-medium whitespace-nowrap"
                   >
                     View details

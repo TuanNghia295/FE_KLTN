@@ -52,7 +52,7 @@ const OrderDetails = () => {
       setShowBankModal(true);
       return;
     }
-    cancelOrderMutation(orderDetail._id);
+    cancelOrderMutation(orderDetail.id || orderDetail._id);
     setIsCancelModalOpen(false);
   };
   const formattedTotalPrice = formatCash(orderDetail?.totalPrice);
@@ -60,7 +60,10 @@ const OrderDetails = () => {
   const distance = orderDetail.shippingAddress.distance
     ? `${orderDetail.shippingAddress.distance.toFixed(2)} km`
     : 'N/A';
-  const subtotal = orderDetail.items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0), 0);
+  const subtotal = orderDetail.items.reduce(
+    (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0),
+    0
+  );
   const formattedSubtotal = formatCash(subtotal);
 
   return (
@@ -121,7 +124,16 @@ const OrderDetails = () => {
                 <span className="font-semibold">Method:</span> {orderDetail.payment.method || 'N/A'}
               </p>
               <p>
-                <span className="font-semibold">Status:</span> {orderDetail.payment.status || 'N/A'}
+                <span className="font-semibold">Status:</span>
+                {orderDetail.payment.status === 'succeeded' ? (
+                  <span className="mx-1 px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-600">
+                    {orderDetail.payment.status || 'N/A'}
+                  </span>
+                ) : (
+                  <span className="mx-1 px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-600">
+                    {orderDetail.payment.status || 'N/A'}
+                  </span>
+                )}
               </p>
               <p>
                 <span className="font-semibold">Transaction ID:</span> {orderDetail.payment.transactionId || 'N/A'}
@@ -207,8 +219,8 @@ const OrderDetails = () => {
                     orderDetail.status === 'Pending' && !orderDetail.cancelRequest
                       ? 'border-red-500 text-red-500 hover:bg-red-100 active:bg-red-200 focus:ring-2 focus:ring-red-300'
                       : orderDetail.cancelRequest
-                      ? 'border-yellow-500 text-yellow-700 bg-yellow-50 cursor-not-allowed'
-                      : 'border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed'
+                        ? 'border-yellow-500 text-yellow-700 bg-yellow-50 cursor-not-allowed'
+                        : 'border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed'
                   }
                 `}
                 disabled={orderDetail.status !== 'Pending' || orderDetail.cancelRequest}

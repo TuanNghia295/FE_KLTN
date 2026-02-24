@@ -53,7 +53,8 @@ const getOrder = async ({ status, page = 1, perPage = 10 } = {}) => {
 const getOrderById = async (orderId) => {
   try {
     const res = await axiosClient.get(`/orders/${orderId}`);
-    return normalizeOrder(res.data);
+    const payload = res?.data ?? res;
+    return normalizeOrder(payload);
   } catch (error) {
     console.error(`Error fetching order with ID: ${orderId}`, error);
     throw error;
