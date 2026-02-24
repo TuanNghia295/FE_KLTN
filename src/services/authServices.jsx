@@ -52,7 +52,7 @@ export function useRegister() {
   return useMutation({
     mutationFn: register,
     onMutate: () => {
-      console.log('Đang đăng ký...');
+      // console.log('Đang đăng ký...');
     },
     onSuccess: () => {
       toast.success('Tạo tài khoản thành công', {
@@ -62,7 +62,7 @@ export function useRegister() {
       navigate('/login');
     },
     onError: (error) => {
-      console.log('register error', error.response?.data?.error);
+      // console.log('register error', error.response?.data?.error);
 
       toast.error('Email or Phone numbers used another account', {
         position: 'top-center',

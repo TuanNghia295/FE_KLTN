@@ -18,9 +18,9 @@ const fetchShippingFee = async ({ lat, lng, total_item_qty }) => {
 // 2. Tạo đơn hàng
 const createOrderApi = async (orderPayload) => {
   try {
-    console.log('Payload being sent to backend:', orderPayload);
+    // console.log('Payload being sent to backend:', orderPayload);
     const response = await axiosClient.post('/orders', orderPayload);
-    console.log('Order creation response:', response);
+    // console.log('Order creation response:', response);
 
     return response;
   } catch (error) {
@@ -59,7 +59,7 @@ export const useCreateOrder = () => {
     mutationFn: createOrderApi,
     onSuccess: (data) => {
       // data có thể là { message, order } hoặc { message, order, paymentUrl }
-      console.log('Order creation/payment initiation successful:', data);
+      // console.log('Order creation/payment initiation successful:', data);
       // Không invalidate cart ở đây ngay nếu là PayPal, chờ thanh toán thành công
       // queryClient.invalidateQueries(['cart']);
 

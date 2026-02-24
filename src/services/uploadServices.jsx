@@ -25,7 +25,7 @@ export const useUploadAvatar = () => {
       setIsUploadingAvatar(true);
     },
     onSuccess: (data) => {
-      console.log('✅ Upload Avatar Success', data);
+      // console.log('✅ Upload Avatar Success', data);
 
       // 🔥 Update Zustand → UI đổi NGAY
       getInfo({

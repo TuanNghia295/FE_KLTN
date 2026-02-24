@@ -9,7 +9,7 @@ export const userInfo = async () => {
 };
 
 export const updateUser = async (values) => {
-  console.log('valuies', values);
+  // console.log('valuies', values);
 
   const response = await axiosClient.patch('/users/userInfo', { user: values });
   return response;
@@ -19,7 +19,7 @@ export function useUpdateUser() {
   return useMutation({
     mutationFn: updateUser,
     onSuccess: (data) => {
-      console.log('Cập nhật thành công', data);
+      // console.log('Cập nhật thành công', data);
       if (data?.data?.address.length === 0) {
         return;
       }

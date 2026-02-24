@@ -36,8 +36,6 @@ const useStore = create(
         if ((force || state.userInfo === null) && accesstoken) {
           try {
             const response = await getUserInfo();
-            console.log('ressssssssssssssssssssss', response);
-
             const resolvedUser = response?.user ?? response;
             set({
               userInfo: resolvedUser ? { ...resolvedUser, id: resolvedUser.id ?? resolvedUser._id } : resolvedUser,

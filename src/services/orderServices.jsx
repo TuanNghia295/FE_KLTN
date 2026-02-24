@@ -31,17 +31,12 @@ const getOrder = async ({ status, page = 1, perPage = 10 } = {}) => {
       per_page: perPage,
     },
   });
-  const rawOrders = Array.isArray(res?.data)
-    ? res.data
-    : Array.isArray(res?.data?.data)
-      ? res.data.data
-      : [];
+  const rawOrders = Array.isArray(res?.data) ? res.data : Array.isArray(res?.data?.data) ? res.data.data : [];
   const orders = rawOrders.map(normalizeOrder);
   const rawMeta = res?.meta || res?.data?.meta;
   const perPageValue = rawMeta?.per_page ?? perPage;
   const totalPages =
-    rawMeta?.total_pages ??
-    (rawMeta?.total_count ? Math.ceil(rawMeta.total_count / perPageValue) : undefined);
+    rawMeta?.total_pages ?? (rawMeta?.total_count ? Math.ceil(rawMeta.total_count / perPageValue) : undefined);
 
   return {
     orders,
@@ -87,7 +82,7 @@ export const useOrder = ({ status, page = 1, perPage = 10 } = {}) => {
       // console.log('Detail order fetched successfully:', data);
     },
     onError: (error) => {
-      console.error('Error fetching order detail:', error);
+      // console.error('Error fetching order detail:', error);
     },
   });
 
@@ -95,7 +90,7 @@ export const useOrder = ({ status, page = 1, perPage = 10 } = {}) => {
     mutationFn: (id) => cancelOrder(id),
     onSuccess: () => {
       queryClient.invalidateQueries(['orderDetail']);
-      console.log('Order cancelled successfully');
+      // console.log('Order cancelled successfully');
       toast.success('Request cancel order successfully', {
         position: 'top-center',
         autoClose: 3000,

@@ -28,7 +28,7 @@ const ChooseProvinces = ({ userInfo, editAddress = null, hasDefaultAddress = fal
 
   // Load data from editAddress if editing
   useEffect(() => {
-    if (editAddress && listProvinces.length > 0) {
+    if (editAddress && listProvinces?.length > 0) {
       setNumberAddress(editAddress.street_address || '');
       setSelectedWard(editAddress.ward || '');
       setRecipientName(editAddress.recipient_name || userInfo?.full_name || userInfo?.fullName || '');
@@ -103,7 +103,7 @@ const ChooseProvinces = ({ userInfo, editAddress = null, hasDefaultAddress = fal
   return (
     <Fragment>
       <div className="grid grid-cols-2 gap-4 mb-6">
-        <input
+        {/* <input
           onChange={(event) => setRecipientName(event.target.value)}
           value={recipientName}
           placeholder="Recipient name"
@@ -114,7 +114,7 @@ const ChooseProvinces = ({ userInfo, editAddress = null, hasDefaultAddress = fal
           value={phone}
           placeholder="Phone"
           className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        /> */}
         <select
           name="city"
           onChange={handleChange}

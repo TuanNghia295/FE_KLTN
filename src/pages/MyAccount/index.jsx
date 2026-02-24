@@ -10,6 +10,7 @@ import axios from 'axios';
 import Autocomplete from '@mui/material/Autocomplete';
 import Page404 from '../Page404/index';
 import { toast } from 'react-toastify';
+import { useGetAddresses } from '../../services/addressServices';
 
 const MyAccount = () => {
   const [banks, setBanks] = useState([]);
@@ -31,6 +32,8 @@ const MyAccount = () => {
 
   // Sử dụng selector để chỉ lấy các trạng thái cần thiết
   const { data: userInfo } = useGetUserInfo();
+  const { data: listAddress } = useGetAddresses();
+
   const getInfo = useStore((state) => state.getInfo);
   const { mutate: updateUserInfo } = useUpdateUser(); // Sử dụng hook để cập nhật thông tin người dùng
 
@@ -130,7 +133,7 @@ const MyAccount = () => {
     return parts.join(', ');
   };
 
-  const defaultAddress = userInfo?.addresses?.find((address) => address.is_default);
+  const defaultAddress = listAddress?.find((address) => address.is_default);
   const defaultAddressLabel = defaultAddress ? formatAddress(defaultAddress) : '';
 
   // Lấy object ngân hàng ban đầu nếu có

@@ -8,7 +8,7 @@ const getBanners = async () => {
     // Backend trả về { data: [...] }
     return res.data;
   } catch (error) {
-    console.log('Error fetching banners:', error);
+    // console.log('Error fetching banners:', error);
     return [];
   }
 };

@@ -31,8 +31,6 @@ const Register = () => {
         .required('Confirm password is required'),
     }),
     onSubmit: (values) => {
-      console.log('values', values);
-
       mutate({ auth: values });
     },
   });

@@ -39,7 +39,7 @@ const OrderDetails = () => {
   const slidesPerView = window.innerWidth > 1024 ? 4 : window.innerWidth > 600 ? 4 : 3;
 
   const handleCancelOrder = async () => {
-    console.log('userInfo', userInfo.bankInfo);
+    // console.log('userInfo', userInfo.bankInfo);
 
     // Kiểm tra thông tin ngân hàng trong userInfo
     if (
