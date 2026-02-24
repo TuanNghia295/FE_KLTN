@@ -67,7 +67,7 @@ export default function App() {
   }, [categoryList]);
 
   useEffect(() => {
-    console.log('[App] hydrated', hydrated, 'userInfo', userInfo);
+    // console.log('[App] hydrated', hydrated, 'userInfo', userInfo);
     if (!hydrated) return;
     fetchUserInfo();
   }, [fetchUserInfo, hydrated, userInfo]);

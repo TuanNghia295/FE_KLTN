@@ -6,12 +6,15 @@ import { useState } from 'react';
 import '../Navigation/style.css';
 import useStore from '../../../store/useStore';
 import { normalizeString } from '../../../hook/normalizeString';
+import { useGetCategory } from '../../../services/categoryServices';
 
 const Navigation = () => {
   const [isOpenCategory, setIsOpenCategory] = useState(false);
+  const { categoryList } = useGetCategory();
   const toogleCategory = () => setIsOpenCategory(!isOpenCategory);
   // Lấy list Category tu Zustand
   const categoryListZustand = useStore((state) => state.categoryListZustand);
+
   // const params = normalizeString(categoryListZustand[3]?.type);
   const navigate = useNavigate();
   return (
@@ -30,8 +33,8 @@ const Navigation = () => {
           {/* Điều hướng chính */}
           <div className="col_2 w-[65%]">
             <ul className="flex items-center justify-center gap nav">
-              {['Men', 'Women', 'Children'].map((label) => {
-                const normalizedLabel = normalizeString(label);
+              {categoryList?.map((label) => {
+                const normalizedLabel = normalizeString(label?.name);
                 const matchedCategory = Array.isArray(categoryListZustand)
                   ? categoryListZustand.find((category) => {
                       const normalizedName = normalizeString(category?.name);
@@ -39,13 +42,13 @@ const Navigation = () => {
                       return normalizedName === normalizedLabel || normalizedType === normalizedLabel;
                     })
                   : null;
-                const categorySlug = normalizeString(matchedCategory?.type || matchedCategory?.name || label);
+                const categorySlug = normalizeString(matchedCategory?.type || matchedCategory?.name || label?.name);
                 const subcategories = Array.isArray(matchedCategory?.children) ? matchedCategory.children : [];
 
                 return (
-                  <li key={label} className="list-none relative">
+                  <li key={label?.name} className="list-none relative">
                     <Link to={`/listing/${categorySlug}`} className="link transition text-[16px] font-[500]">
-                      <Button className="link transition font-[500] hover:!text-primary !py-4">{label}</Button>
+                      <Button className="link transition font-[500] hover:!text-primary !py-4">{label?.name}</Button>
                     </Link>
 
                     {subcategories.length > 0 && (

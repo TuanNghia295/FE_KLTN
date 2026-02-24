@@ -25,7 +25,7 @@ const AccountSlidebar = () => {
   const menuItems = [
     { path: '/my-account', label: 'My Profile', icon: <CgProfile /> },
     { path: '/my-address', label: 'My Address', icon: <FaMapLocationDot /> },
-    { path: '/my-list', label: 'My List', icon: <MdFavorite /> },
+    // { path: '/my-list', label: 'My List', icon: <MdFavorite /> },
     { path: '/my-orders', label: 'My Orders', icon: <FaClipboardList /> },
   ];
 
@@ -91,7 +91,7 @@ const AccountSlidebar = () => {
             <span className="block xl:hidden text-[20px] p-2">
               <IoIosLogOut />
             </span>
-            <span className="hidden xl:block">Logout</span>
+            <span className="hidden xl:block">Log out</span>
           </Button>
         </li>
       </ul>
