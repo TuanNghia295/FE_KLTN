@@ -22,6 +22,18 @@ const normalizeOrder = (order) => ({
   status: mapOrderStatus(order?.status),
 });
 
+export const parseCancelOrderError = (error) => {
+  const payload = error?.response?.data || error;
+  const code = payload?.error || payload?.code || null;
+  const message = payload?.message || error?.message || 'Failed to cancel order';
+
+  return {
+    code,
+    message,
+    raw: payload,
+  };
+};
+
 // user Lấy danh sách đơn hàng của mình
 const getOrder = async ({ status, page = 1, perPage = 10 } = {}) => {
   const res = await axiosClient.get('/orders', {
@@ -56,10 +68,23 @@ const getOrderById = async (orderId) => {
   }
 };
 
-// user gửi uy cầu hủy đơn hàng
-const cancelOrder = async (id) => {
-  const response = await axiosClient.patch(`/orders/user/cancelRequest/${id}`);
-  return response.data;
+const getCancellationReasons = async () => {
+  const res = await axiosClient.get('/cancellation_reasons');
+  return Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
+};
+
+// user gửi yêu cầu hủy đơn hàng
+const cancelOrder = async ({ id, payload }) => {
+  const response = await axiosClient.post(`/orders/${id}/cancel`, payload);
+  return response?.data ?? response;
+};
+
+export const useCancellationReasons = () => {
+  return useQuery({
+    queryKey: ['cancellation-reasons'],
+    queryFn: getCancellationReasons,
+    staleTime: 5 * 60 * 1000,
+  });
 };
 
 export const useOrder = ({ status, page = 1, perPage = 10 } = {}) => {
@@ -86,11 +111,11 @@ export const useOrder = ({ status, page = 1, perPage = 10 } = {}) => {
     },
   });
 
-  const { mutate: cancelOrderMutation } = useMutation({
-    mutationFn: (id) => cancelOrder(id),
+  const { mutate: cancelOrderMutation, mutateAsync: cancelOrderMutationAsync, isPending: isCancellingOrder } = useMutation({
+    mutationFn: cancelOrder,
     onSuccess: () => {
-      queryClient.invalidateQueries(['orderDetail']);
-      // console.log('Order cancelled successfully');
+      queryClient.invalidateQueries({ queryKey: ['orderDetail'] });
+      queryClient.invalidateQueries({ queryKey: ['order'] });
       toast.success('Request cancel order successfully', {
         position: 'top-center',
         autoClose: 3000,
@@ -100,7 +125,8 @@ export const useOrder = ({ status, page = 1, perPage = 10 } = {}) => {
       }, 1000);
     },
     onError: (error) => {
-      console.error('Error cancelling order:', error.message);
+      const parsedError = parseCancelOrderError(error);
+      console.error('Error cancelling order:', parsedError.message);
     },
   });
 
@@ -109,6 +135,8 @@ export const useOrder = ({ status, page = 1, perPage = 10 } = {}) => {
     isLoadingOrder,
     getOrderDetail,
     cancelOrderMutation,
+    cancelOrderMutationAsync,
+    isCancellingOrder,
     orderDetail,
     isLoadingDetail,
     isError,

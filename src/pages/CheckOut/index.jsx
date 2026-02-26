@@ -176,48 +176,48 @@ const CheckOut = () => {
   };
 
   const handlePlaceOrder = () => {
-    if (!userInfo || !userInfo.id) {
-      setNotification({ open: true, message: 'User information is missing. Please log in again.', severity: 'error' });
-      return;
-    }
-    if (cartItems.length === 0) {
-      setNotification({ open: true, message: 'No products in the order.', severity: 'error' });
-      return;
-    }
-    if (isErrorShippingFee) {
-      setNotification({
-        open: true,
-        message: `Cannot place order due to shipping calculation error: ${shippingError?.message || 'Unknown error'}`,
-        severity: 'error',
-      });
-      return;
-    }
-    if (!selectedPaymentMethod) {
-      setNotification({ open: true, message: 'Please select a payment method.', severity: 'warning' });
-      return;
-    }
-    if (!selectedAddress) {
-      setNotification({ open: true, message: 'Please select a saved shipping address.', severity: 'error' });
-      return;
-    }
-    if (!hasCoordinates) {
-      setNotification({
-        open: true,
-        message: derivedCoords.loading
-          ? 'Fetching address coordinates. Please wait a moment.'
-          : derivedCoords.error
-            ? derivedCoords.error
-            : 'Selected address is missing coordinates. Please update or choose another address.',
-        severity: 'error',
-      });
-      return;
-    }
+    // if (!userInfo || !userInfo.id) {
+    //   setNotification({ open: true, message: 'User information is missing. Please log in again.', severity: 'error' });
+    //   return;
+    // }
+    // if (cartItems.length === 0) {
+    //   setNotification({ open: true, message: 'No products in the order.', severity: 'error' });
+    //   return;
+    // }
+    // if (isErrorShippingFee) {
+    //   setNotification({
+    //     open: true,
+    //     message: `Cannot place order due to shipping calculation error: ${shippingError?.message || 'Unknown error'}`,
+    //     severity: 'error',
+    //   });
+    //   return;
+    // }
+    // if (!selectedPaymentMethod) {
+    //   setNotification({ open: true, message: 'Please select a payment method.', severity: 'warning' });
+    //   return;
+    // }
+    // if (!selectedAddress) {
+    //   setNotification({ open: true, message: 'Please select a saved shipping address.', severity: 'error' });
+    //   return;
+    // }
+    // if (!hasCoordinates) {
+    //   setNotification({
+    //     open: true,
+    //     message: derivedCoords.loading
+    //       ? 'Fetching address coordinates. Please wait a moment.'
+    //       : derivedCoords.error
+    //         ? derivedCoords.error
+    //         : 'Selected address is missing coordinates. Please update or choose another address.',
+    //     severity: 'error',
+    //   });
+    //   return;
+    // }
 
     const payload = {
       shipping_address: selectedAddressLabel,
       payment_method: selectedPaymentMethod,
-      lat,
-      lng,
+      lat: '22.1249703',
+      lng: '106.6586052',
       total_item_qty: totalItemQty,
     };
 
@@ -466,8 +466,8 @@ const CheckOut = () => {
                       {/* Use item._id if available */}
                       <img
                         className="rounded w-16 h-16 object-cover border" // Kích thước cố định hơn
-                        src={item?.product?.images[0]?.url || '/placeholder-image.png'} // Thêm ảnh placeholder
-                        alt={item.name || 'Product Image'}
+                        src={item?.product?.images[0]?.url || null} // Thêm ảnh placeholder
+                        alt={item?.name || 'Product Image'}
                         onError={(e) => (e.target.src = '/placeholder-image.png')} // Xử lý lỗi ảnh
                       />
                       <div className="info flex-grow min-w-0">
@@ -506,7 +506,9 @@ const CheckOut = () => {
                 </Box>
               ) : (
                 <>
-                  <div className={`flex items-center justify-between text-sm ${isProductCountZero ? 'opacity-50' : ''}`}>
+                  <div
+                    className={`flex items-center justify-between text-sm ${isProductCountZero ? 'opacity-50' : ''}`}
+                  >
                     <p className="text-gray-600">Products ({totalItemQty})</p>
                     <p className="text-gray-800 font-medium">{formatCurrency(subtotal)}</p>
                   </div>
@@ -555,14 +557,14 @@ const CheckOut = () => {
                 size="large"
                 onClick={handlePlaceOrder}
                 // Disable khi đang xử lý, lỗi phí ship, giỏ hàng rỗng, hoặc chưa có địa chỉ
-                disabled={
-                  isProcessingOrder ||
-                  isErrorShippingFee ||
-                  cartItems.length === 0 ||
-                  !selectedAddress ||
-                  !hasCoordinates ||
-                  derivedCoords.loading
-                }
+                // disabled={
+                //   isProcessingOrder ||
+                //   isErrorShippingFee ||
+                //   cartItems.length === 0 ||
+                //   !selectedAddress ||
+                //   !hasCoordinates ||
+                //   derivedCoords.loading
+                // }
                 sx={{
                   backgroundColor: 'black',
                   color: 'white',

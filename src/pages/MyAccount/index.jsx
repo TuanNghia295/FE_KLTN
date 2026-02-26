@@ -11,6 +11,11 @@ import Autocomplete from '@mui/material/Autocomplete';
 import Page404 from '../Page404/index';
 import { toast } from 'react-toastify';
 import { useGetAddresses } from '../../services/addressServices';
+import {
+  useCreateBankAccountInfo,
+  useGetBankAccountInfos,
+  useUpdateBankAccountInfo,
+} from '../../services/bankAccountInfoServices';
 
 const MyAccount = () => {
   const [banks, setBanks] = useState([]);
@@ -33,11 +38,16 @@ const MyAccount = () => {
   // Sử dụng selector để chỉ lấy các trạng thái cần thiết
   const { data: userInfo } = useGetUserInfo();
   const { data: listAddress } = useGetAddresses();
+  const { data: bankAccountInfos = [] } = useGetBankAccountInfos();
 
   const getInfo = useStore((state) => state.getInfo);
-  const { mutate: updateUserInfo } = useUpdateUser(); // Sử dụng hook để cập nhật thông tin người dùng
+  const { mutateAsync: updateUserInfo } = useUpdateUser(); // Sử dụng hook để cập nhật thông tin người dùng
+  const { mutateAsync: createBankAccountInfo } = useCreateBankAccountInfo();
+  const { mutateAsync: updateBankAccountInfo } = useUpdateBankAccountInfo();
 
   // Memo hóa initialValues để tránh vòng lặp render
+  const primaryBankAccountInfo = bankAccountInfos?.[0] || null;
+
   const initialValues = useMemo(
     () => ({
       full_name: userInfo?.full_name || '',
@@ -45,14 +55,14 @@ const MyAccount = () => {
       phone: userInfo?.phone || '',
       address: userInfo?.addresses || [],
       bankInfo: {
-        bankName: userInfo?.bankInfo?.bankName || '',
-        accountNumber: userInfo?.bankInfo?.accountNumber || '',
-        accountHolderName: userInfo?.bankInfo?.accountHolderName || '',
+        bankName: primaryBankAccountInfo?.bank_name || '',
+        accountNumber: primaryBankAccountInfo?.bank_account_num || '',
+        accountHolderName: primaryBankAccountInfo?.holder_name || '',
       },
       password: '',
       current_password: '',
     }),
-    [userInfo]
+    [userInfo, primaryBankAccountInfo]
   );
 
   const formik = useFormik({
@@ -81,7 +91,7 @@ const MyAccount = () => {
         otherwise: (schema) => schema,
       }),
     }),
-    onSubmit: (values, { resetForm }) => {
+    onSubmit: async (values, { resetForm }) => {
       const payload = {
         full_name: values.full_name,
         email: values.email,
@@ -101,27 +111,52 @@ const MyAccount = () => {
         delete payload.current_password;
       }
 
-      const hasChanges = values.password
+      const bankPayload = {
+        bank_name: values.bankInfo.bankName,
+        bank_account_num: values.bankInfo.accountNumber,
+        holder_name: values.bankInfo.accountHolderName,
+      };
+
+      const originalBankPayload = {
+        bank_name: primaryBankAccountInfo?.bank_name || '',
+        bank_account_num: primaryBankAccountInfo?.bank_account_num || '',
+        holder_name: primaryBankAccountInfo?.holder_name || '',
+      };
+
+      const hasUserChanges = values.password
         ? true
         : Object.keys(originalPayload).some((key) => payload[key] !== originalPayload[key]);
 
-      if (!hasChanges) {
+      const hasBankChanges = Object.keys(bankPayload).some((key) => bankPayload[key] !== originalBankPayload[key]);
+
+      if (!hasUserChanges && !hasBankChanges) {
         toast.warning('No changes to save', { position: 'top-center', autoClose: 3000 });
         return;
       }
 
-      updateUserInfo(payload, {
-        onSuccess: (response) => {
-          getInfo(response); // Cập nhật Zustand state với dữ liệu từ API
-          resetForm({
-            values: {
-              ...values,
-              password: '',
-              current_password: '',
-            },
-          });
-        },
-      });
+      try {
+        if (hasUserChanges) {
+          const response = await updateUserInfo(payload);
+          getInfo(response);
+        }
+
+        if (hasBankChanges) {
+          if (primaryBankAccountInfo?.id) {
+            await updateBankAccountInfo({ id: primaryBankAccountInfo.id, payload: bankPayload });
+          } else {
+            await createBankAccountInfo(bankPayload);
+          }
+        }
+
+        resetForm({
+          values: {
+            ...values,
+            password: '',
+            current_password: '',
+          },
+        });
+      } catch (_error) {
+      }
     },
   });
 
@@ -138,8 +173,12 @@ const MyAccount = () => {
 
   // Lấy object ngân hàng ban đầu nếu có
   const initialBank = useMemo(() => {
-    return userInfo?.bankInfo?.bankName ? banks.find((b) => b.name === userInfo.bankInfo.bankName) || null : null;
-  }, [banks, userInfo]);
+    return primaryBankAccountInfo?.bank_name ? banks.find((b) => b.name === primaryBankAccountInfo.bank_name) || null : null;
+  }, [banks, primaryBankAccountInfo]);
+
+  useEffect(() => {
+    setSelectedBank(initialBank);
+  }, [initialBank]);
 
   // Nếu userInfo chưa có, hiển thị loading trong JSX
   if (!userInfo) {

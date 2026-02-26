@@ -3,26 +3,65 @@ import { CiViewList } from 'react-icons/ci';
 import { FaMapLocationDot } from 'react-icons/fa6';
 import { PiMoneyWavyLight } from 'react-icons/pi';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { useOrder } from '../../services/orderServices';
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
+import { toast } from 'react-toastify';
+import { useCancellationReasons, parseCancelOrderError, useOrder } from '../../services/orderServices';
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  FormHelperText,
+} from '@mui/material';
 import useStore from '../../store/useStore';
 import { formatCash } from '../../hook/formatCash';
+import { useGetBankAccountInfos } from '../../services/bankAccountInfoServices';
 
 const OrderDetails = () => {
   // lấy orderId từ url
   const { id } = useParams();
 
-  const { getOrderDetail, orderDetail, isLoadingDetail, isError, error, cancelOrderMutation } = useOrder();
+  const {
+    getOrderDetail,
+    orderDetail,
+    isLoadingDetail,
+    isError,
+    error,
+    cancelOrderMutationAsync,
+    isCancellingOrder,
+  } = useOrder();
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [showBankModal, setShowBankModal] = useState(false);
+  const [selectedCancellationReasonId, setSelectedCancellationReasonId] = useState('');
+  const [cancellationNote, setCancellationNote] = useState('');
+  const [cancelValidationError, setCancelValidationError] = useState('');
   const navigate = useNavigate();
   const userInfo = useStore((state) => state.userInfo);
+  const { data: bankAccountInfo } = useGetBankAccountInfos();
+  const { data: cancellationReasons = [], isLoading: isLoadingCancellationReasons } = useCancellationReasons();
 
   useEffect(() => {
     if (id) {
       getOrderDetail(id);
     }
   }, [id, getOrderDetail]);
+
+  const resetCancelForm = () => {
+    setSelectedCancellationReasonId('');
+    setCancellationNote('');
+    setCancelValidationError('');
+  };
+
+  const closeCancelDialog = () => {
+    setIsCancelModalOpen(false);
+    resetCancelForm();
+  };
 
   if (isLoadingDetail) {
     return <div>Loading...</div>;
@@ -36,25 +75,71 @@ const OrderDetails = () => {
     return <div>No order details found.</div>;
   }
 
-  const slidesPerView = window.innerWidth > 1024 ? 4 : window.innerWidth > 600 ? 4 : 3;
+  const bankAccounts = Array.isArray(bankAccountInfo?.data)
+    ? bankAccountInfo.data
+    : Array.isArray(bankAccountInfo)
+      ? bankAccountInfo
+      : [];
+
+  const primaryBankAccount = bankAccounts[0];
+  const hasCompleteBankAccount =
+    !!primaryBankAccount?.holder_name && !!primaryBankAccount?.bank_account_num && !!primaryBankAccount?.bank_name;
+  const isPendingOrder = String(orderDetail?.status || '')?.toLowerCase() === 'pending';
+  const hasPendingCancelRequest = Boolean(orderDetail?.cancelRequest);
 
   const handleCancelOrder = async () => {
-    // console.log('userInfo', userInfo.bankInfo);
+    if (!selectedCancellationReasonId) {
+      setCancelValidationError('Please select a cancellation reason.');
+      return;
+    }
 
-    // Kiểm tra thông tin ngân hàng trong userInfo
-    if (
-      !userInfo ||
-      !userInfo.bankInfo ||
-      !userInfo.bankInfo.accountHolderName ||
-      !userInfo.bankInfo.accountNumber ||
-      !userInfo.bankInfo.bankName
-    ) {
+    if (!userInfo || !hasCompleteBankAccount) {
       setShowBankModal(true);
       return;
     }
-    cancelOrderMutation(orderDetail.id || orderDetail._id);
-    setIsCancelModalOpen(false);
+
+    try {
+      await cancelOrderMutationAsync({
+        id: orderDetail.id || orderDetail._id,
+        payload: {
+          cancellation_reason_id: Number(selectedCancellationReasonId),
+          ...(cancellationNote?.trim() ? { cancellation_note: cancellationNote.trim() } : {}),
+        },
+      });
+      closeCancelDialog();
+    } catch (cancelError) {
+      const parsedError = parseCancelOrderError(cancelError);
+
+      if (parsedError.code === 'bank_account_required_for_refund') {
+        setShowBankModal(true);
+        toast.error(parsedError.message || 'Please update bank account information before requesting a refund.', {
+          position: 'top-center',
+          autoClose: 3000,
+        });
+        return;
+      }
+
+      if (parsedError.code === 'invalid_cancellation_reason') {
+        setCancelValidationError(parsedError.message || 'Please select a valid cancellation reason.');
+        return;
+      }
+
+      if (parsedError.code === 'invalid_status') {
+        toast.error(parsedError.message || 'Order status changed and cannot be cancelled.', {
+          position: 'top-center',
+          autoClose: 3000,
+        });
+        if (id) getOrderDetail(id);
+        return;
+      }
+
+      toast.error(parsedError.message || 'Failed to cancel order', {
+        position: 'top-center',
+        autoClose: 3000,
+      });
+    }
   };
+
   const formattedTotalPrice = formatCash(orderDetail?.totalPrice);
   const shippingFee = formatCash(orderDetail.shippingAddress.shippingFee);
   const distance = orderDetail.shippingAddress.distance
@@ -216,18 +301,21 @@ const OrderDetails = () => {
               <button
                 className={`border px-6 py-2 rounded-lg shadow-md transition font-medium min-w-[160px] flex items-center justify-center
                   ${
-                    orderDetail.status === 'Pending' && !orderDetail.cancelRequest
+                    isPendingOrder && !hasPendingCancelRequest
                       ? 'border-red-500 text-red-500 hover:bg-red-100 active:bg-red-200 focus:ring-2 focus:ring-red-300'
-                      : orderDetail.cancelRequest
+                      : hasPendingCancelRequest
                         ? 'border-yellow-500 text-yellow-700 bg-yellow-50 cursor-not-allowed'
                         : 'border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed'
                   }
                 `}
-                disabled={orderDetail.status !== 'Pending' || orderDetail.cancelRequest}
-                onClick={() => setIsCancelModalOpen(true)}
+                disabled={!isPendingOrder || hasPendingCancelRequest}
+                onClick={() => {
+                  setCancelValidationError('');
+                  setIsCancelModalOpen(true);
+                }}
                 style={{ transition: 'all 0.2s', fontWeight: 500 }}
               >
-                {orderDetail.cancelRequest ? <>Processing cancellation...</> : 'Cancel Order'}
+                {hasPendingCancelRequest ? <>Processing cancellation...</> : 'Cancel Order'}
               </button>
             )}
           </div>
@@ -236,22 +324,59 @@ const OrderDetails = () => {
 
       <Dialog
         open={isCancelModalOpen}
-        onClose={() => setIsCancelModalOpen(false)}
+        onClose={closeCancelDialog}
         aria-labelledby="cancel-order-dialog-title"
         aria-describedby="cancel-order-dialog-description"
       >
         <DialogTitle id="cancel-order-dialog-title">Confirm Cancellation</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="cancel-order-dialog-description">
+        <DialogContent sx={{ minWidth: { xs: 300, sm: 420 } }}>
+          <DialogContentText id="cancel-order-dialog-description" sx={{ mb: 2 }}>
             Are you sure you want to cancel this order?
           </DialogContentText>
+
+          <FormControl fullWidth error={!!cancelValidationError} sx={{ mb: 2 }}>
+            <InputLabel id="cancellation-reason-label">Cancellation reason</InputLabel>
+            <Select
+              labelId="cancellation-reason-label"
+              value={selectedCancellationReasonId}
+              label="Cancellation reason"
+              onChange={(event) => {
+                setSelectedCancellationReasonId(event.target.value);
+                setCancelValidationError('');
+              }}
+              disabled={isLoadingCancellationReasons || isCancellingOrder}
+            >
+              {cancellationReasons.map((reason) => (
+                <MenuItem key={reason.id} value={String(reason.id)}>
+                  {reason.title}
+                </MenuItem>
+              ))}
+            </Select>
+            {!!cancelValidationError && <FormHelperText>{cancelValidationError}</FormHelperText>}
+          </FormControl>
+
+          <TextField
+            label="Note (optional)"
+            fullWidth
+            multiline
+            minRows={3}
+            value={cancellationNote}
+            onChange={(event) => setCancellationNote(event.target.value)}
+            disabled={isCancellingOrder}
+            placeholder="Add more details for your cancellation request"
+          />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setIsCancelModalOpen(false)} color="primary">
+          <Button onClick={closeCancelDialog} color="primary" disabled={isCancellingOrder}>
             Cancel
           </Button>
-          <Button onClick={handleCancelOrder} color="secondary" autoFocus>
-            Ok
+          <Button
+            onClick={handleCancelOrder}
+            color="secondary"
+            autoFocus
+            disabled={isCancellingOrder || isLoadingCancellationReasons}
+          >
+            {isCancellingOrder ? 'Submitting...' : 'Ok'}
           </Button>
         </DialogActions>
       </Dialog>
